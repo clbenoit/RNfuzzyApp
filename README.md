@@ -1,8 +1,8 @@
-# RNA-seq Analysis App
+# RNApp
 
 ---
 
-The application is made to analyse aligned RNA-seq data.</br>
+RNApp is an application to analyse aligned RNA-seq data.</br>
 </br>
 - First proceed to a quality control, an alignment and a count (FeatureCounts for example).</br>
 - Upload a count csv or tsv table where the first column is composed of genes' names.

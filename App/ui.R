@@ -32,19 +32,19 @@ tagList(dashboardPage(
       menuItem(
         "DE Analysis",
         tabName = "normalizationTab",
-        icon = icon("calculator")),
-      menuItem(
+        icon = icon("calculator"),
+      menuSubItem(
         "MA Plot",
         tabName = "maplotTab",
         icon = icon("line-chart")),
-      menuItem(
+      menuSubItem(
         "Volcano Plot",
         tabName = "volcanoplotTab",
         icon = icon("area-chart")),
-      menuItem(
+      menuSubItem(
         "Heatmap",
         tabName = "heatmapTab",
-        icon = icon("delicious")),
+        icon = icon("delicious"))),
       menuItem(
         "Enrichment Analysis",
         tabName = "enrichTab",

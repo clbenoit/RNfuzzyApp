@@ -32,7 +32,7 @@ tagList(dashboardPage(
         icon = icon("flask"),
       menuSubItem(
         "Normalization",
-        tabName = "normalizationTab",
+        tabName = "deanalysisTab",
         icon = icon("calculator")),
       menuSubItem(
         "MA Plot",
@@ -61,8 +61,8 @@ tagList(dashboardPage(
         local = TRUE,
         encoding = "UTF-8"
       )$value),
-      tabItem(tabName = "normalizationTab", source(
-        file = "ui-normalization.R",
+      tabItem(tabName = "deanalysisTab", source(
+        file = "ui-deanalysis.R",
         local = TRUE,
         encoding = "UTF-8"
       )$value),

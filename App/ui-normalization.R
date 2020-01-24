@@ -12,7 +12,7 @@
 fluidPage(useSweetAlert(), fluidRow(column(
   3,
   box(
-    title = tagList(icon("cogs"), "Normalization Parameters"),
+    title = tagList(icon("cogs"), "Parameters"),
     width = NULL,
     solidHeader = TRUE,
     status = "primary",
@@ -51,7 +51,7 @@ fluidPage(useSweetAlert(), fluidRow(column(
       do.call(actionBttn, c(
         list(
           inputId = "TCC",
-          label = "Run Normalization",
+          label = "Run Analysis",
           icon = icon("play")
         )))
     ))),
@@ -73,12 +73,5 @@ column(
     solidHeader = TRUE,
     status = "primary",
     uiOutput("mainResultTable")
-  ),
-  tabPanel(
-    title = tagList(icon("table"), "Summary of Normalization"),
-    width = NULL,
-    solidHeader = TRUE,
-    status = "info",
-    uiOutput("tccSummationUI")
   )
 ))))

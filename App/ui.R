@@ -1,0 +1,90 @@
+library(shiny)
+library(shinydashboard)
+library(shinycssloaders)
+library(shinyWidgets)
+library(shinyBS)
+library(rmarkdown)
+library(plotly)
+library(dplyr)
+library(DT)
+library(TCC)
+library(heatmaply)
+library(data.table)
+library(RColorBrewer)
+library(utils)
+library(tidyr)
+library(cluster)
+library(pheatmap)
+
+tagList(dashboardPage(
+  dashboardHeader(
+    title = "RNA-seq Analysis",
+    titleWidth = 500),
+  dashboardSidebar(
+    sidebarMenu(
+      id = "sider",
+      
+      
+      menuItem(
+        "Data visualization",
+        tabName = "dateImport",
+        icon = icon("receipt")),
+      menuItem(
+        "Normalization",
+        tabName = "normalizationTab",
+        icon = icon("calculator")),
+      menuItem(
+        "MA Plot",
+        tabName = "maplotTab",
+        icon = icon("line-chart")),
+      menuItem(
+        "Volcano Plot",
+        tabName = "volcanoplotTab",
+        icon = icon("area-chart")),
+      menuItem(
+        "Heatmap",
+        tabName = "heatmapTab",
+        icon = icon("delicious")),
+      menuItem(
+        "Enrichment Analysis",
+        tabName = "enrichTab",
+        icon = icon("flask"))
+    )
+  ),
+  
+  
+  dashboardBody(
+    tabItems(
+      tabItem(tabName = "dateImport", source(
+        file = "ui-data-import.R",
+        local = TRUE,
+        encoding = "UTF-8"
+      )$value),
+      tabItem(tabName = "normalizationTab", source(
+        file = "ui-normalization.R",
+        local = TRUE,
+        encoding = "UTF-8"
+      )$value),
+      tabItem(tabName = "maplotTab", source(
+        file = "ui-ma-plot.R",
+        local = TRUE,
+        encoding = "UTF-8"
+      )$value),
+      tabItem(tabName = "volcanoplotTab", source(
+        file = "ui-volcano-plot.R",
+        local = TRUE,
+        encoding = "UTF-8"
+      )$value),
+      tabItem(tabName = "heatmapTab", source(
+        file = "ui-heatmap.R",
+        local = TRUE,
+        encoding = "UTF-8"
+      )$value),
+      tabItem(tabName = "enrichTab", source(
+        file = "ui-enrichment.R",
+        local = TRUE,
+        encoding = "UTF-8"
+      )$value)
+    )
+  )
+))

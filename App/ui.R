@@ -14,16 +14,14 @@ library(RColorBrewer)
 library(utils)
 library(tidyr)
 library(cluster)
-library(pheatmap)
 
 tagList(dashboardPage(
   dashboardHeader(
-    title = "RNA-seq Analysis",
+    title = "RNApp : a RNA-seq Analysis App",
     titleWidth = 500),
   dashboardSidebar(
     sidebarMenu(
       id = "sider",
-      
       
       menuItem(
         "Data visualization",
@@ -31,8 +29,11 @@ tagList(dashboardPage(
         icon = icon("receipt")),
       menuItem(
         "DE Analysis",
+        icon = icon("flask"),
+      menuSubItem(
+        "Normalization",
         tabName = "normalizationTab",
-        icon = icon("calculator"),
+        icon = icon("calculator")),
       menuSubItem(
         "MA Plot",
         tabName = "maplotTab",

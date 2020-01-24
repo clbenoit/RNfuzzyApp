@@ -30,7 +30,7 @@ tagList(dashboardPage(
         tabName = "dateImport",
         icon = icon("receipt")),
       menuItem(
-        "Normalization",
+        "DE Analysis",
         tabName = "normalizationTab",
         icon = icon("calculator")),
       menuItem(

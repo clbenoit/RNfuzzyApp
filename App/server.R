@@ -32,7 +32,7 @@ shinyServer(function(input, output, session) {
   source(file = "server-data-import.R",
          local = TRUE,
          encoding = "UTF-8")
-  source(file = "server-normalization.R",
+  source(file = "server-deanalysis.R",
          local = TRUE,
          encoding = "UTF-8")
   source(file = "server-ma-plot.R",

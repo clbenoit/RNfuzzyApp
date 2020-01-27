@@ -1,5 +1,5 @@
 # ui-data-import.R
-navbarPage("Data Visualization",
+navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
   tabPanel(
     title = tagList(icon("table"), "Data"),
     fluidPage(

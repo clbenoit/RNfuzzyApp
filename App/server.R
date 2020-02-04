@@ -13,14 +13,12 @@ shinyServer(function(input, output, session) {
     MAPlotObject = "",
     VolcanoPlotObject = "",
     runVolcanoPlot = "",
-
-      
+    runHeatmap = "",
+    pcRun = "",
     data.pca = NULL,
     pcaParameter = NULL,
     pca2d = NULL,
     pca3d = NULL,
-
-    
     logList = data.frame(
       "Time" = vector(),
       "Type" = vector(),
@@ -41,15 +39,11 @@ shinyServer(function(input, output, session) {
   source(file = "server-volcano-plot.R",
          local = TRUE,
          encoding = "UTF-8")
-  source(file = "server-pca.R",
-         local = TRUE,
-         encoding = "UTF-8")
   source(file = "server-heatmap.R",
          local = TRUE,
          encoding = "UTF-8")
-  source(file = "server-enrichment.R",
+  source(file = "server-pca.R",
          local = TRUE,
          encoding = "UTF-8")
-  
   
 })

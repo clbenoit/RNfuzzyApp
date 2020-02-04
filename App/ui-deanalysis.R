@@ -1,12 +1,6 @@
 # ui-normalization.R
 
 
-### The normalization is made using TCC. 
-### TCC is a package for comparing tag count data 
-### with robust normalization strategies
-#https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-219
-#https://bioconductor.org/packages/release/bioc/vignettes/TCC/inst/doc/TCC.pdf
-
 # parameters
 
 fluidPage(useSweetAlert(), fluidRow(column(

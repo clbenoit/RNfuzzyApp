@@ -2,8 +2,7 @@
 
 runVolcano <- reactiveValues(runVolcanoValue = FALSE)
 
-# This function render a series UI of Volcano Plot parameters ----
-
+# This function render a series UI of Volcano Plot parameters 
 observeEvent(input$sider, {
   if (input$sider == "volcanoplotTab") {
       output$valcanoParameter <- renderUI({
@@ -84,7 +83,7 @@ observeEvent(input$sider, {
   }
 })
 
-# Preview up and down regulated genes under Color selection ----
+# Preview up and down regulated genes under Color selection 
 observeEvent({
   input$CutFC
   input$Cutpvalue
@@ -115,7 +114,7 @@ observeEvent({
   })
 })
 
-# Check the `Generate` button, if the botton has been clicked, generate volcano plot ----
+# Check the `Generate` button, if the botton has been clicked, generate volcano plot 
 
 observeEvent(input$makeVolcanoPlot, {
   yaxis <- "p.value"
@@ -152,7 +151,7 @@ observeEvent(input$makeVolcanoPlot, {
                         "None" = 1,
                         "Up" = 2)
       
-      # Add annotation
+      # link to bar plot
       key <- resultTable()$gene_id
       
       if (is.null(input$resultTableInVolcanalPlot_rows_selected)) {
@@ -245,7 +244,7 @@ observeEvent(input$makeVolcanoPlot, {
   runVolcano$runVolcanoValue <- input$makeVolcanoPlot
 })
 
-# Render volcanoUI ----
+# Render volcanoUI 
 output$volcanoUI <- renderUI({
   if(runVolcano$runVolcanoValue){
     tagList(
@@ -259,7 +258,7 @@ output$volcanoUI <- renderUI({
   }
 })
 
-# Render table under volcano plot ----
+# Render table result
 
 output$resultTableInVolcanalPlot <- DT::renderDataTable({
   if (nrow(resultTable()) == 0) {
@@ -335,21 +334,20 @@ output$resultTableInVolcanalPlot <- DT::renderDataTable({
 })
 
 
-# render barplot next to volcanoplot----
+# render barplot next to volcanoplot
 
 output$VolcanoBarPlot <- renderPlotly({
-  # Read in hover data
   eventdata <- event_data("plotly_hover", source = "volcano")
   validate(need(
     !is.null(eventdata),
     "Hover over the point to show gene's expression level of interest."
   ))
-  # Get point number
+
   gene_id <- eventdata$key
-  # Get expression level (Original)
+
   expression <-
     variables$CountData[row.names(variables$CountData) == gene_id,]
-  # Get expression level (Normalized)
+
   expressionNor <-
     t(t(variables$norData[row.names(variables$norData) == gene_id,]))
   

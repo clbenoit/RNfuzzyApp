@@ -81,12 +81,12 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
       "Input your group info",
       rows = 6,
       placeholder = paste(
-        "1,Group1",
-        "2,Group1",
-        "3,Group1",
-        "1,Group2",
-        "2,Group2",
-        "3,Group2",
+        "rep1,Group1",
+        "rep2,Group1",
+        "rep1,Group2",
+        "rep2,Group2",
+        "rep1,Group3",
+        "rep2,Group3",
         sep = '\n'
       )
     ),

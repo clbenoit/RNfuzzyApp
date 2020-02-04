@@ -2,30 +2,22 @@
 
 runHeatmap <- reactiveValues(runHeatmapValue = FALSE, height = 300)
 
-# Generate heatmap parameters panel ---------------------------------------
+# parameters
 
 
 observeEvent(input$sider, {
   if (input$sider == "heatmapTab") {
     output$heatmapParameter <- renderUI({
-      "By FDR" = tagList(
-        tagList(
-          sliderInput(
-            "heatmapFDR",
-            "Select genes by FDR Cut-off",
-            min = 0.01,
-            max = 1,
-            value = 0.01
-          )),
-        
+      tagList(
         radioGroupButtons(
-          inputId = "heatmapData",
-          label = "Source",
-          choices = c("Original" = "o",
-                      "Normalized" = "n"),
+          inputId = "heatmapGeneSelectType",
+          label = "Select Genes",
+          choices = c("By List" = "By list",
+                      "By FDR" = "By FDR"),
           justified = TRUE,
           status = "primary"
         ),
+        uiOutput("heatmapSelectGene"),
         selectInput(
           "heatmapDist",
           "Distance Measure",
@@ -43,41 +35,12 @@ observeEvent(input$sider, {
           "heatmapCluster",
           "Agglomeration Method",
           choices = list(
-            "ward.D" = "ward.D",
             "ward.D2" = "ward.D2",
             "Single" = "single",
             "Complete" = "complete",
-            "UPGMA" = "average",
-            "WPGMA" = "mcquitty",
-            "WOGMC" = "median",
-            "UPGMC" = "centroid"
+            "UPGMA" = "average"
           ),
           selected = "complete"
-        ),
-        materialSwitch(
-          inputId = "heatmapLogTrans",
-          label = "log(1+x) transform",
-          value = TRUE,
-          right = TRUE,
-          status = "primary"
-        ),
-        materialSwitch(
-          inputId = "heatmapNor",
-          label = "Normalization",
-          value = FALSE,
-          right = TRUE,
-          status = "primary"
-        ),
-        radioGroupButtons(
-          inputId = "heatmapScale",
-          label = "Scale",
-          choices = list(
-            "None" = "none",
-            "Row" = "row",
-            "Column" = "column"
-          ),
-          justified = TRUE,
-          status = "primary"
         ),
         selectInput(
           inputId = "colorSelectionMethod",
@@ -102,7 +65,7 @@ observeEvent(input$sider, {
         )))
     })}})
 
-# According to color selection method, render color selection part --------
+# color selection method
 
 
 observeEvent(input$colorSelectionMethod, {
@@ -197,12 +160,36 @@ observeEvent(input$colorSelectionMethod, {
   }
 })
 
-# Color palette reactive value --------------------------------------------
+# Render gene list selection part in parameters panel 
+
+
+output$heatmapSelectGene <- renderUI({
+  switch(
+    input$heatmapGeneSelectType,
+    "By list" = textAreaInput(
+      "heatmapTextList",
+      "Paste Gene List",
+      rows = 5,
+      placeholder = "Input gene's name (first column in the dataset), one gene per line."
+    ),
+    "By FDR" = 
+      tagList(
+        sliderInput(
+          "heatmapFDR",
+          "FDR Cut-off",
+          min = 0.01,
+          max = 1,
+          value = 0.01
+        ),
+        textOutput("heatmapGeneCountPreview")
+      )
+  )
+})
+# Color palette 
 
 
 colorPanel <- reactive({
   colorPal <- c("white")
-  # Create color palette
   if (input$colorSelectionMethod == "Color map" && length(input$heatmapColor) > 0) {
     colorPal <- switch(
       input$heatmapColor,
@@ -238,7 +225,7 @@ colorPanel <- reactive({
   colorPal
 })
 
-# Render a plot of color preview 
+# color palette preview
 
 
 output$colorPreview <- renderPlot({
@@ -261,91 +248,72 @@ output$colorPreview <- renderPlot({
 })
 
 
-
 # Create heatmaply object and DataTable object 
 
 observeEvent(input$heatmapRun, {
   data.cl <- variables$groupListConvert
   
-  # Using Original Dataset or Normalized Dataset.
-  if (input$heatmapData == "o") {
-    data <- variables$CountData[data.cl != 0]
-  } else {
+  # normalized data as input
+
     data <- variables$norData
-  }
   data.cl <- data.cl[data.cl != 0]
   
   # Select DEGs (Row)
-      selectedListForHeatmap <-
-        row.names(data) %in% resultTable()[resultTable()$q.value <= input$heatmapFDR,]$gene_id
+  selectedListForHeatmap <-
+    row.names(data) %in% resultTable()[resultTable()$q.value <= input$heatmapFDR,]$gene_id
+  
+  heatmapTitle <-
+    paste0("Heatmap of gene expression (q.value < ",
+           input$heatmapFDR,
+           ", ",
+           sum(selectedListForHeatmap),
+           "DEGs)")
+  
+  
+  data <- data[selectedListForHeatmap, ]
+  
+  
+  colorPal <- colorPanel()
+  
+  dataBackup <- t(data)
+  
+  # Create Plotly object
+  output$heatmap <- renderPlotly({
+    isolate({
+      runHeatmap$height <- input$heatmapHeight
+      dataBackup <-  log1p(dataBackup)
+      dataBackup <- heatmaply::normalize(dataBackup)
+      p <- heatmaply(
+        dataBackup,
+        k_row = length(variables$groupList),
+        colors = colorPal,
+        dist_method = input$heatmapDist,
+        hclust_method = input$heatmapCluster,
+        xlab = "Gene",
+        ylab = "Sample",
+        main = heatmapTitle,
+        margins = c(150, 100, 40, 20),
+        scale = "none",
+        labCol = colnames(dataBackup),
+        labRow = row.names(dataBackup)
+      )
       
-      heatmapTitle <-
-        paste0("Heatmap of gene expression (q.value < ",
-               input$heatmapFDR,
-               ", ",
-               sum(selectedListForHeatmap),
-               "DEGs)")
-
-    
-    data <- data[selectedListForHeatmap, ]
-    
-    
-    colorPal <- colorPanel()
-    
-    dataBackup <- t(data)
-    
-    # Create Plotly object
-    output$heatmap <- renderPlotly({
-      isolate({
-        runHeatmap$height <- input$heatmapHeight
-        # Log transform and normalization
-        if (input$heatmapLogTrans == TRUE) {
-          dataBackup <-  log1p(dataBackup)
-        }
-        if (input$heatmapNor == TRUE) {
-          dataBackup <- heatmaply::normalize(dataBackup)
-        }
-        
-        p <- heatmaply(
-          dataBackup,
-          k_row = length(variables$groupList),
-          colors = colorPal,
-          dist_method = input$heatmapDist,
-          hclust_method = input$heatmapCluster,
-          xlab = "Gene",
-          ylab = "Sample",
-          main = heatmapTitle,
-          margins = c(150, 100, 40, 20),
-          scale = input$heatmapScale,
-          labCol = colnames(dataBackup),
-          labRow = row.names(dataBackup)
-        )
-        
-        variables$heatmapObject <- p
-        p
-        
-      })
+      variables$heatmapObject <- p
+      p
+      
     })
-    
-    
-    updateProgressBar(
-      session = session,
-      id = "heatmapProgress",
-      title = "All done",
-      value = 100
-    )
-    
-    runHeatmap$runHeatmapValue <- input$heatmapRun
-    
-    closeSweetAlert(session = session)
-    sendSweetAlert(session = session,
-                   title = "Completed!",
-                   type = "success")
+  })
+
+  runHeatmap$runHeatmapValue <- input$heatmapRun
+  
+  closeSweetAlert(session = session)
+  sendSweetAlert(session = session,
+                 title = "Completed! Wait patiently",
+                 type = "success")
   
 })
 
-# Render interactive heatmap plot -----------------------------------------
-
+# remder final heatmap (little time consuming)
 
 output$heatmapPlot <- renderUI({
   if (runHeatmap$runHeatmapValue) {

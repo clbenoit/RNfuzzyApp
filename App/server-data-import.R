@@ -6,10 +6,9 @@
 convertion <- function(x, df) {
   grep(x, colnames(df))
 }
-# load the data via upload ----
+
 
 observeEvent(input$uploadCountData, {
-  showNotification("Start uploading file...", type = "message")
   tryCatch({
     variables$CountData <-
       data.frame(fread(input$uploadCountData$datapath), row.names = 1)
@@ -30,7 +29,7 @@ observeEvent(input$uploadCountData, {
     sendSweetAlert(
       session = session,
       title = "Input data warning!",
-      text = "Some error is in your dataset, it maybe cause some problem we cannot expected.",
+      text = "Error in dataset",
       type = "warning"
     )
     return()
@@ -42,11 +41,10 @@ datasetInput <- reactive({
 })
 
 
-# Render a table of raw count data, adding color ----
+# Render a table of raw count data, adding color
 
 output$table <- DT::renderDataTable({
   df <- datasetInput()
-  # Create 19 breaks and 20 rgb color values ranging from white to blue
   brks <-
     quantile(df %>% select_if(is.numeric),
              probs = seq(.05, .95, .05),
@@ -70,7 +68,7 @@ output$table <- DT::renderDataTable({
 })
 
 
-# Render DataTable of row data count ----
+# Render DataTable of row data count
 
 output$showTable <- renderUI({
   if (nrow(datasetInput()) == 0) {
@@ -388,7 +386,7 @@ output$pcaPlotObject3d <- renderPlotly({
 })
 
 
-# render UI 
+# render pca
 output$pcaUI <- renderUI({
   if (v$importActionValue) {
     tagList(fluidRow(

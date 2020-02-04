@@ -1,19 +1,22 @@
 library(shiny)
 library(shinydashboard)
 library(shinycssloaders)
+library(shinythemes)
 library(shinyWidgets)
 library(shinyBS)
 library(rmarkdown)
 library(plotly)
 library(dplyr)
 library(DT)
-library(TCC)
-library(heatmaply)
 library(data.table)
 library(RColorBrewer)
 library(utils)
 library(tidyr)
 library(cluster)
+library(TCC)
+library(heatmaply)
+
+
 
 tagList(dashboardPage(
   dashboardHeader(
@@ -22,7 +25,6 @@ tagList(dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       id = "sider",
-      
       menuItem(
         "Data visualization",
         tabName = "dateImport",
@@ -45,11 +47,11 @@ tagList(dashboardPage(
       menuSubItem(
         "Heatmap",
         tabName = "heatmapTab",
-        icon = icon("delicious"))),
-      menuItem(
-        "Enrichment Analysis",
-        tabName = "enrichTab",
-        icon = icon("flask"))
+        icon = icon("delicious")),
+      menuSubItem(
+        "PCA",
+        tabName = "pcaTab",
+        icon = icon("bar-chart")))
     )
   ),
   
@@ -81,8 +83,8 @@ tagList(dashboardPage(
         local = TRUE,
         encoding = "UTF-8"
       )$value),
-      tabItem(tabName = "enrichTab", source(
-        file = "ui-enrichment.R",
+      tabItem(tabName = "pcaTab", source(
+        file = "ui-pca.R",
         local = TRUE,
         encoding = "UTF-8"
       )$value)

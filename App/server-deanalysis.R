@@ -1,7 +1,15 @@
 # server-normalization.R
 
-# If the run normalization botton has been clicked, execute normalization ---------
 
+
+### The normalization is made using TCC. 
+### TCC is a package for comparing tag count data 
+### with robust normalization strategies
+#https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-219
+#https://bioconductor.org/packages/release/bioc/vignettes/TCC/inst/doc/TCC.pdf
+
+
+# If the run normalization botton has been clicked, execute normalization
 tccRun <- reactiveValues(tccRunValue = FALSE)
 
 observeEvent(input$TCC, {
@@ -43,7 +51,7 @@ observeEvent(input$TCC, {
   # Estimate DEGs
   tcc <- estimateDE(tcc,
                     test.method = input$testMethod,
-                    iteration = 1,
+                    iteration = 3,
                     FDR = input$fdr)
   variables$tccObject <- tcc
   

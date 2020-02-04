@@ -2,12 +2,8 @@
 
 runMA <- reactiveValues(runMAValues = FALSE)
 
-#function :
-# Input: Normalization Result Table (data frame)
-# Output: FDR vs Cutoff Table (data frame)
 
 summary_for_norm_result <- function(df){
-  # Make some function for create new column
   sum_gene <- function(x, df){
     sum(df$q.value<=x)
   }
@@ -79,7 +75,7 @@ observeEvent(input$sider, {
   }
 })
 
-# Check the `Generate` button, if the botton has been clicked, generate MA Plot. ----
+# generating maplot after parameters set
 
 observeEvent(input$makeMAPlot, {
   output$maploty <- renderPlotly({
@@ -87,8 +83,7 @@ observeEvent(input$makeMAPlot, {
     
     req(input$makeMAPlot)
     isolate({
-      # key for connecting MA Plot and Barplot
-      key <- resultTable()$gene_id
+      key <- resultTable()$gene_id #link to bar plot
       
       if (is.null(input$resultTableInPlot_rows_selected)) {
         annotation <- list()
@@ -187,11 +182,7 @@ output$MAPlotUI <- renderUI({
 })
 
 
-
-# When hover on the point, show a expresion plot of specific gene.
-
 output$geneBarPlot <- renderPlotly({
-  # Read in hover data
   eventdata <- event_data("plotly_hover", source = "ma")
   validate(need(
     !is.null(eventdata),
@@ -304,16 +295,13 @@ output$resultTableInPlot <- DT::renderDataTable({
 })
 
 
-# Render a table of different gene count under specific FDR cutoff condition.
+# Render final table
 
 output$fdrCutoffTableInMAPage <- DT::renderDataTable({
-  # Create Table
   df <- summary_for_norm_result(resultTable())
   
   df <- df[, c("Cutoff", "Count", "Percentage")]
   colnames(df) <- c("Cut-off", "DEGs(#)", "DEGs(%)")
-  
-  # Render Table
   DT::datatable(
     df,
     caption = "Number (#) and Percentage (%) of DEGs satisfying different FDR cut-off.",

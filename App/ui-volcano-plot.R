@@ -24,6 +24,6 @@ column(
         solidHeader = TRUE,
         status = "info",
         width = NULL,
-        DT::dataTableOutput('resultTableInVolcanalPlot')
+        DT::dataTableOutput('resultTableVolc')
       )
 ))))

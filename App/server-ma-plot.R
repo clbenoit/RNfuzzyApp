@@ -3,25 +3,7 @@
 runMA <- reactiveValues(runMAValues = FALSE)
 
 
-summary_for_norm_result <- function(df){
-  sum_gene <- function(x, df){
-    sum(df$q.value<=x)
-  }
-  # Set cut-offs
-  span <- c(0, seq(0.05, 1, 0.05))
-  deg_in_cutoff <- sapply(span, sum_gene, df)
-  total_gene <- nrow(df)
-  
-  # Create table
-  df <- data.frame(
-    "Cutoff" = sprintf('%#.2f', span),
-    "Under_Count" = deg_in_cutoff,
-    "Percentage" = paste(round(deg_in_cutoff / total_gene, 4) * 100, "%")
-  )
-  df <- tbl_df(df) %>% mutate(Between_Count = Under_Count - lag(Under_Count)) %>%
-    mutate(Count = paste0(Under_Count, "(+", Between_Count, ")"))
-  return(df)
-}
+
 
 #parameters
 observeEvent(input$sider, {
@@ -75,7 +57,7 @@ observeEvent(input$sider, {
   }
 })
 
-# generating maplot after parameters set
+# MAplot generation
 
 observeEvent(input$makeMAPlot, {
   output$maploty <- renderPlotly({
@@ -85,11 +67,11 @@ observeEvent(input$makeMAPlot, {
     isolate({
       key <- resultTable()$gene_id #link to bar plot
       
-      if (is.null(input$resultTableInPlot_rows_selected)) {
+      if (is.null(input$resultTableMA_rows_selected)) {
         annotation <- list()
       } else {
         markerSelect <-
-          resultTable()[input$resultTableInPlot_rows_selected, ]
+          resultTable()[input$resultTableMA_rows_selected, ]
         
         annotation <- list(
           x = markerSelect$a.value,
@@ -159,7 +141,7 @@ observeEvent(input$makeMAPlot, {
   runMA$runMAValues <- input$makeMAPlot
 })
 
-# Under FDR cutoff, preview the gene number 
+# Under FDR cutoff, gene colored 
 output$maFDRpreview <- renderText({
   count <- nrow(resultTable()[resultTable()$q.value <= input$maFDR,])
   paste0("<font color=\"",
@@ -188,12 +170,9 @@ output$geneBarPlot <- renderPlotly({
     !is.null(eventdata),
     "Hover over the point to show gene's expression level of interest."
   ))
-  # Get point number
   gene_id <- eventdata$key
-  # Get expression level (Original)
   expression <-
     variables$CountData[row.names(variables$CountData) == gene_id, ]
-  # Get expression level (Normalized)
   expressionNor <-
     t(t(variables$norData[row.names(variables$norData) == gene_id, ]))
   
@@ -228,9 +207,9 @@ output$geneBarPlot <- renderPlotly({
 })
 
 
-# This function render a table of Result table.
+# result table
 
-output$resultTableInPlot <- DT::renderDataTable({
+output$resultTableMA <- DT::renderDataTable({
   if (nrow(resultTable()) == 0) {
     DT::datatable(resultTable())
   } else {
@@ -294,10 +273,25 @@ output$resultTableInPlot <- DT::renderDataTable({
   }
 })
 
-
+summary_for_norm_result <- function(df){
+  sum_gene <- function(x, df){
+    sum(df$q.value<=x)
+  }
+  span <- c(0, seq(0.05, 1, 0.05))
+  deg_in_cutoff <- sapply(span, sum_gene, df)
+  total_gene <- nrow(df)
+  df <- data.frame(
+    "Cutoff" = sprintf('%#.2f', span),
+    "Under_Count" = deg_in_cutoff,
+    "Percentage" = paste(round(deg_in_cutoff / total_gene, 4) * 100, "%")
+  )
+  df <- tbl_df(df) %>% mutate(Between_Count = Under_Count - lag(Under_Count)) %>%
+    mutate(Count = paste0(Under_Count, "(+", Between_Count, ")"))
+  return(df)
+}
 # Render final table
 
-output$fdrCutoffTableInMAPage <- DT::renderDataTable({
+output$fdrCutoffTable <- DT::renderDataTable({
   df <- summary_for_norm_result(resultTable())
   
   df <- df[, c("Cutoff", "Count", "Percentage")]

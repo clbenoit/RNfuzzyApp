@@ -23,18 +23,14 @@ observeEvent(input$TCC, {
 
   data <- variables$CountData
   data.list <- variables$groupListConvert
-  
-
   tcc <- variables$tccObject
-  
   updateProgressBar(
     session = session,
     id = "DEAnalysisProgress",
     title = "DE Analysis in progress...",
     value = 50
   )
-  # Run Normalization and calculate normalized factor
-  tcc <- calcNormFactors(
+  tcc <- calcNormFactors( #function to norm
     tcc,
     norm.method = input$normMethod,
     test.method = input$testMethod,
@@ -48,21 +44,15 @@ observeEvent(input$TCC, {
     title = "DE Analysis in progress...",
     value = 70
   )
-  # Estimate DEGs
-  tcc <- estimateDE(tcc,
+  tcc <- estimateDE(tcc, #function to estime DEG
                     test.method = input$testMethod,
                     iteration = 3,
                     FDR = input$fdr)
   variables$tccObject <- tcc
-  
-
-  # Get final result of analysis
   variables$result <- getResult(tcc, sort = FALSE) %>% mutate_if(is.factor, as.character)
   variables$norData <- tcc$getNormalizedData()
 
-  
-
-  # Render Noramalization result table on the right top 
+#result table
   output$resultTable <- DT::renderDataTable({
     if (nrow(variables$result) == 0) {
       DT::datatable(variables$result)
@@ -97,9 +87,7 @@ observeEvent(input$TCC, {
     }
   }, server = FALSE)
   
-
-  
-  # Download Noramlization Result Table function 
+#download all part
   output$downLoadResultTable <- downloadHandler(
     filename = function() {
       paste(
@@ -117,7 +105,7 @@ observeEvent(input$TCC, {
     }
   )
   
-  # Download Normalized Table function
+  # download normalized part
   output$downLoadNormalized <- downloadHandler(
     filename = function() {
       paste(
@@ -128,12 +116,10 @@ observeEvent(input$TCC, {
         input$floorpdeg,
         "normalized_data_analysis.csv",
         sep = "_"
-      )
-    },
+      )},
     content = function(file) {
       write.csv(variables$norData, file)
-    }
-  )
+    })
   closeSweetAlert(session = session)
   sendSweetAlert(session = session,
                  title = "DONE",
@@ -142,7 +128,6 @@ observeEvent(input$TCC, {
   
   tccRun$tccRunValue <- input$TCC
 })
-
 resultTable <- reactive({
   variables$result
 })

@@ -65,9 +65,8 @@ observeEvent(input$sider, {
         )))
     })}})
 
+
 # color selection method
-
-
 observeEvent(input$colorSelectionMethod, {
   if (input$colorSelectionMethod == "Color map") {
     output$heatmapColorSelectionPanel <- renderUI({
@@ -160,9 +159,8 @@ observeEvent(input$colorSelectionMethod, {
   }
 })
 
-# Render gene list selection part in parameters panel 
 
-
+# gene list in param
 output$heatmapSelectGene <- renderUI({
   switch(
     input$heatmapGeneSelectType,
@@ -185,10 +183,9 @@ output$heatmapSelectGene <- renderUI({
       )
   )
 })
-# Color palette 
 
 
-colorPanel <- reactive({
+colorPanel <- reactive({  # Color palette 
   colorPal <- c("white")
   if (input$colorSelectionMethod == "Color map" && length(input$heatmapColor) > 0) {
     colorPal <- switch(
@@ -225,9 +222,7 @@ colorPanel <- reactive({
   colorPal
 })
 
-# color palette preview
-
-
+#palette preview
 output$colorPreview <- renderPlot({
   colorPal <- colorPanel()
   op <- par(mar = c(0.5, 0, 0, 0))
@@ -248,36 +243,24 @@ output$colorPreview <- renderPlot({
 })
 
 
-# Create heatmaply object and DataTable object 
-
+# heatmaply obj
 observeEvent(input$heatmapRun, {
   data.cl <- variables$groupListConvert
-  
-  # normalized data as input
-
-    data <- variables$norData
+  data <- variables$norData
   data.cl <- data.cl[data.cl != 0]
-  
-  # Select DEGs (Row)
-  selectedListForHeatmap <-
-    row.names(data) %in% resultTable()[resultTable()$q.value <= input$heatmapFDR,]$gene_id
-  
+  selectedListForHeatmap <- #deg select
+  row.names(data) %in% resultTable()[resultTable()$q.value <= input$heatmapFDR,]$gene_id
   heatmapTitle <-
     paste0("Heatmap of gene expression (q.value < ",
            input$heatmapFDR,
            ", ",
            sum(selectedListForHeatmap),
            "DEGs)")
-  
-  
   data <- data[selectedListForHeatmap, ]
-  
-  
   colorPal <- colorPanel()
-  
   dataBackup <- t(data)
   
-  # Create Plotly object
+  # Plotly obj
   output$heatmap <- renderPlotly({
     isolate({
       runHeatmap$height <- input$heatmapHeight
@@ -303,9 +286,7 @@ observeEvent(input$heatmapRun, {
       
     })
   })
-
   runHeatmap$runHeatmapValue <- input$heatmapRun
-  
   closeSweetAlert(session = session)
   sendSweetAlert(session = session,
                  title = "Completed! Wait patiently",

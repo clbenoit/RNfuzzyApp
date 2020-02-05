@@ -29,7 +29,7 @@ observeEvent(input$sider, {
 
 
 
-# [Run PCA] button has been clicked, then run the whole PCA Analysis
+# launch
 
 observeEvent(input$pcRun, {
   runPCA$runPCAValue <- input$pcRun
@@ -39,19 +39,10 @@ observeEvent(input$pcRun, {
                                  "pcCenter" = T,
                                  "pcScale" = T)
   tcc <- variables$tccObject
-  
-  # Using Original Dataset or Normalized Dataset.
-
   data <- getNormalizedData(tcc)
-  
   result <- getResult(tcc)
-  
-  # Select DEGs (Row)
-
-    data <- data[result$q.value <= input$pcFDR,]
-  
-  # PCA processing
-    data <- t(log1p(data))
+  data <- data[result$q.value <= input$pcFDR,] #DEG selection
+  data <- t(log1p(data)) #pca process
   data.pca <- prcomp(data[, apply(data, 2, var) != 0],
                      center = T,
                      scale. = T)

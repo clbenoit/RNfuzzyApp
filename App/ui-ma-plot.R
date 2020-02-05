@@ -25,7 +25,7 @@ column(
       width = NULL,
       tabPanel(
         tagList(icon("table"), "Table"),
-        DT::dataTableOutput("fdrCutoffTableInMAPage")
+        DT::dataTableOutput("fdrCutoffTable")
       )
     ),
       tabPanel(
@@ -33,6 +33,6 @@ column(
         solidHeader = TRUE,
         status = "info",
         width = NULL,
-        tagList(DT::dataTableOutput('resultTableInPlot'))
+        tagList(DT::dataTableOutput('resultTableMA'))
       ))
 )))

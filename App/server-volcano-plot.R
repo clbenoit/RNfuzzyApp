@@ -260,7 +260,7 @@ output$volcanoUI <- renderUI({
 
 # Render table result
 
-output$resultTableInVolcanalPlot <- DT::renderDataTable({
+output$resultTableVolc <- DT::renderDataTable({
   if (nrow(resultTable()) == 0) {
     DT::datatable(resultTable())
   } else {

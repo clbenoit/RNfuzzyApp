@@ -41,7 +41,3 @@ For each result, downloading png images and results is available.</br>
 - Heatmap </br>
 
 
-<b>PART III : Enrichment Analysis</b>
----
-
-To be continued...</br>

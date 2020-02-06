@@ -248,15 +248,45 @@ observeEvent(input$heatmapRun, {
   data.cl <- variables$groupListConvert
   data <- variables$norData
   data.cl <- data.cl[data.cl != 0]
-  selectedListForHeatmap <- #deg select
-  row.names(data) %in% resultTable()[resultTable()$q.value <= input$heatmapFDR,]$gene_id
-  heatmapTitle <-
-    paste0("Heatmap of gene expression (q.value < ",
-           input$heatmapFDR,
-           ", ",
-           sum(selectedListForHeatmap),
-           "DEGs)")
+  if (input$heatmapGeneSelectType == "By list") {
+    selectedListForHeatmap <-
+      row.names(data) %in% unlist(strsplit(x = input$heatmapTextList, split = '[\r\n]'))
+    heatmapTitle <- "Heatmap of specific genes"
+  }
+  
+  if (input$heatmapGeneSelectType == "By FDR") {
+    if (input$testMethod == 'wad') {
+      selectedListForHeatmap <-
+        row.names(data) %in% resultTable()[resultTable()$rank <= input$heatmapFDRTop,]$gene_id
+      
+      heatmapTitle <- "Heatmap of specific genes"
+    } else {
+      selectedListForHeatmap <-
+        row.names(data) %in% resultTable()[resultTable()$q.value <= input$heatmapFDR,]$gene_id
+      
+      heatmapTitle <-
+        paste0("Heatmap of gene expression (q.value < ",
+               input$heatmapFDR,
+               ", ",
+               sum(selectedListForHeatmap),
+               "DEGs)")
+    }
+  }
+  
   data <- data[selectedListForHeatmap, ]
+  
+  if (nrow(data) == 0) {
+    sendSweetAlert(
+      session = session,
+      title = "ERROR",
+      text = "Genes list is empty!",
+      type = "error"
+    )
+    return()
+  } else {
+    showNotification(paste0(dim(data)[1], " DEGs, ", dim(data)[2], " sample will be used."))
+    showNotification("Generating, please be patient...", type = "message")
+  }
   colorPal <- colorPanel()
   dataBackup <- t(data)
   

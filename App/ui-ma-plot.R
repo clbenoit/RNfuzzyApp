@@ -20,14 +20,6 @@ column(
         width = NULL,
         uiOutput("MAPlotUI")
       ),
-    tabPanel(
-      title = "FDR vs DEGs",
-      width = NULL,
-      tabPanel(
-        tagList(icon("table"), "Table"),
-        DT::dataTableOutput("fdrCutoffTable")
-      )
-    ),
       tabPanel(
         title = tagList(icon("table"), "Result Table"),
         solidHeader = TRUE,

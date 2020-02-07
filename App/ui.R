@@ -52,7 +52,7 @@ tagList(dashboardPage(
         "PCA",
         tabName = "pcaTab",
         icon = icon("bar-chart")))
-    )
+      )
   ),
   
   

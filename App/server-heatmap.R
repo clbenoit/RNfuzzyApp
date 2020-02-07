@@ -42,20 +42,29 @@ observeEvent(input$sider, {
           ),
           selected = "complete"
         ),
-        selectInput(
-          inputId = "colorSelectionMethod",
-          label = "Color Selection Method",
-          choices = c("Color map", "Two colors", "Three colors")
+        tagList(
+          selectInput(
+            "heatmapColor",
+            "Choose Colormap",
+            choices = list(
+              "PiYG",
+              "PRGn",
+              "BrBG",
+              "PuOr",
+              "OrRd",
+              "Oranges",
+              "RdGy",
+              "RdBu",
+              "RdYlBu",
+              "RdYlGn",
+              "Spectral",
+              "coolwarm"
+            ),
+            selected = "RdYlGn"
+          )
         ),
-        uiOutput("heatmapColorSelectionPanel"),
         tags$b("Color Preview"),
         plotOutput("colorPreview", height = "20px"),
-        numericInput(
-          inputId = "heatmapHeight",
-          label = "Height of Heatmap",
-          value = 500,
-          min = 100
-        ),
         do.call(actionBttn, c(
           list(
             inputId = "heatmapRun",
@@ -65,99 +74,6 @@ observeEvent(input$sider, {
         )))
     })}})
 
-
-# color selection method
-observeEvent(input$colorSelectionMethod, {
-  if (input$colorSelectionMethod == "Color map") {
-    output$heatmapColorSelectionPanel <- renderUI({
-      tagList(
-        selectInput(
-          "heatmapColor",
-          "Choose Colormap",
-          choices = list(
-            "PiYG",
-            "PRGn",
-            "BrBG",
-            "PuOr",
-            "OrRd",
-            "Oranges",
-            "RdGy",
-            "RdBu",
-            "RdYlBu",
-            "RdYlGn",
-            "Spectral",
-            "coolwarm"
-          ),
-          selected = "RdYlGn"
-        )
-      )
-    })
-  }
-  if (input$colorSelectionMethod %in% c("Two colors", "Three colors")) {
-    output$heatmapColorSelectionPanel <- renderUI({
-      tagList(
-        spectrumInput(
-          inputId = "heatmapTwoColorLow",
-          label = "Low",
-          choices = list(
-            list(
-              "blue",
-              'black',
-              'white',
-              'blanchedalmond',
-              'steelblue',
-              'forestgreen'
-            ),
-            as.list(brewer.pal(n = 9, name = "Blues")),
-            as.list(brewer.pal(n = 9, name = "Greens")),
-            as.list(brewer.pal(n = 11, name = "Spectral")),
-            as.list(brewer.pal(n = 8, name = "Dark2"))
-          ),
-          options = list(`toggle-palette-more-text` = "Show more")
-        ),
-        if (input$colorSelectionMethod == "Three colors") {
-          spectrumInput(
-            inputId = "heatmapTwoColorMiddle",
-            label = "Middle",
-            choices = list(
-              list(
-                "white",
-                'black',
-                'blanchedalmond',
-                'steelblue',
-                'forestgreen'
-              ),
-              as.list(brewer.pal(n = 9, name = "Blues")),
-              as.list(brewer.pal(n = 9, name = "Greens")),
-              as.list(brewer.pal(n = 11, name = "Spectral")),
-              as.list(brewer.pal(n = 8, name = "Dark2"))
-            ),
-            options = list(`toggle-palette-more-text` = "Show more")
-          )
-        },
-        spectrumInput(
-          inputId = "heatmapTwoColorHigh",
-          label = "High",
-          choices = list(
-            list(
-              "red",
-              'black',
-              'white',
-              'blanchedalmond',
-              'steelblue',
-              'forestgreen'
-            ),
-            as.list(brewer.pal(n = 9, name = "Blues")),
-            as.list(brewer.pal(n = 9, name = "Greens")),
-            as.list(brewer.pal(n = 11, name = "Spectral")),
-            as.list(brewer.pal(n = 8, name = "Dark2"))
-          ),
-          options = list(`toggle-palette-more-text` = "Show more")
-        )
-      )
-    })
-  }
-})
 
 
 # gene list in param
@@ -187,7 +103,7 @@ output$heatmapSelectGene <- renderUI({
 
 colorPanel <- reactive({  # Color palette 
   colorPal <- c("white")
-  if (input$colorSelectionMethod == "Color map" && length(input$heatmapColor) > 0) {
+  if (length(input$heatmapColor) > 0) {
     colorPal <- switch(
       input$heatmapColor,
       "PiYG" = PiYG(20),
@@ -204,21 +120,6 @@ colorPanel <- reactive({  # Color palette
       "coolwarm" = cool_warm(20)
     )
   }
-  if (input$colorSelectionMethod == "Two colors" && length(input$heatmapTwoColorLow) > 0) {
-    colorPal <-
-      colorRampPalette(c(input$heatmapTwoColorLow, input$heatmapTwoColorHigh))(20)
-  }
-  if (input$colorSelectionMethod == "Three colors" && length(input$heatmapTwoColorLow) > 0) {
-    colorPal <-
-      colorRampPalette(
-        c(
-          input$heatmapTwoColorLow,
-          input$heatmapTwoColorMiddle,
-          input$heatmapTwoColorHigh
-        )
-      )(20)
-  }
-  
   colorPal
 })
 
@@ -255,12 +156,6 @@ observeEvent(input$heatmapRun, {
   }
   
   if (input$heatmapGeneSelectType == "By FDR") {
-    if (input$testMethod == 'wad') {
-      selectedListForHeatmap <-
-        row.names(data) %in% resultTable()[resultTable()$rank <= input$heatmapFDRTop,]$gene_id
-      
-      heatmapTitle <- "Heatmap of specific genes"
-    } else {
       selectedListForHeatmap <-
         row.names(data) %in% resultTable()[resultTable()$q.value <= input$heatmapFDR,]$gene_id
       
@@ -270,7 +165,6 @@ observeEvent(input$heatmapRun, {
                ", ",
                sum(selectedListForHeatmap),
                "DEGs)")
-    }
   }
   
   data <- data[selectedListForHeatmap, ]
@@ -293,7 +187,7 @@ observeEvent(input$heatmapRun, {
   # Plotly obj
   output$heatmap <- renderPlotly({
     isolate({
-      runHeatmap$height <- input$heatmapHeight
+      runHeatmap$height <- 600
       dataBackup <-  log1p(dataBackup)
       dataBackup <- heatmaply::normalize(dataBackup)
       p <- heatmaply(
@@ -331,6 +225,6 @@ output$heatmapPlot <- renderUI({
     plotlyOutput("heatmap", height = runHeatmap$height) %>% withSpinner()
   }
   else{
-    helpText("Click [Generate Heatmap] to plot the heatmap first.")
+    helpText("Enter parameters to plot the heatmap first.")
   }
 })

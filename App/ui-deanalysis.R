@@ -62,6 +62,14 @@ column(
     includeMarkdown("documents/tccinfo.Rmd")
      ),
   tabPanel(
+    title = "FDR vs DEGs",
+    width = NULL,
+    tabPanel(
+      tagList(icon("table"), "Table"),
+      DT::dataTableOutput("fdrCutoffTable")
+    )
+  ),
+  tabPanel(
     title = tagList(icon("table"), "Result Table"),
     width = NULL,
     solidHeader = TRUE,

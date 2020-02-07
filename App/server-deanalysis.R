@@ -52,6 +52,45 @@ observeEvent(input$TCC, {
   variables$result <- getResult(tcc, sort = FALSE) %>% mutate_if(is.factor, as.character)
   variables$norData <- tcc$getNormalizedData()
 
+  
+  
+  summary_for_norm_result <- function(df){
+    sum_gene <- function(x, df){
+      sum(df$q.value<=x)
+    }
+    span <- c(0, seq(0.05, 1, 0.05))
+    deg_in_cutoff <- sapply(span, sum_gene, df)
+    total_gene <- nrow(df)
+    df <- data.frame(
+      "Cutoff" = sprintf('%#.2f', span),
+      "Under_Count" = deg_in_cutoff,
+      "Percentage" = paste(round(deg_in_cutoff / total_gene, 4) * 100, "%")
+    )
+    df <- tbl_df(df) %>% mutate(Between_Count = Under_Count - lag(Under_Count)) %>%
+      mutate(Count = paste0(Under_Count, "(+", Between_Count, ")"))
+    return(df)
+  }
+  # Render final table
+  
+  output$fdrCutoffTable <- DT::renderDataTable({
+    df <- summary_for_norm_result(resultTable())
+    
+    df <- df[, c("Cutoff", "Count", "Percentage")]
+    colnames(df) <- c("Cut-off", "DEGs(#)", "DEGs(%)")
+    DT::datatable(
+      df,
+      caption = "Number (#) and Percentage (%) of DEGs under different FDR cut-off.",
+      option = list(
+        pageLength = 10,
+        columnDefs = list(list(
+          className = 'dt-right', targets = "_all"
+        )),
+        dom = "tp"
+      ),
+      rownames = FALSE
+    )
+  })
+  
 #result table
   output$resultTable <- DT::renderDataTable({
     if (nrow(variables$result) == 0) {

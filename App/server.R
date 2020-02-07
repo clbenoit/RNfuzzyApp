@@ -45,5 +45,5 @@ shinyServer(function(input, output, session) {
   source(file = "server-pca.R",
          local = TRUE,
          encoding = "UTF-8")
-  
+
 })

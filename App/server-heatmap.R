@@ -86,7 +86,7 @@ output$heatmapSelectGene <- renderUI({
       rows = 5,
       placeholder = "Input gene's name (first column in the dataset), one gene per line."
     ),
-    "By FDR" = 
+    "By FDR" =
       tagList(
         sliderInput(
           "heatmapFDR",
@@ -101,7 +101,7 @@ output$heatmapSelectGene <- renderUI({
 })
 
 
-colorPanel <- reactive({  # Color palette 
+colorPanel <- reactive({  # Color palette
   colorPal <- c("white")
   if (length(input$heatmapColor) > 0) {
     colorPal <- switch(
@@ -154,21 +154,24 @@ observeEvent(input$heatmapRun, {
       row.names(data) %in% unlist(strsplit(x = input$heatmapTextList, split = '[\r\n]'))
     heatmapTitle <- "Heatmap of specific genes"
   }
-  
+
   if (input$heatmapGeneSelectType == "By FDR") {
+
       selectedListForHeatmap <-
         row.names(data) %in% resultTable()[resultTable()$q.value <= input$heatmapFDR,]$gene_id
-      
+
       heatmapTitle <-
         paste0("Heatmap of gene expression (q.value < ",
                input$heatmapFDR,
                ", ",
                sum(selectedListForHeatmap),
                "DEGs)")
+
+    }
   }
-  
+
   data <- data[selectedListForHeatmap, ]
-  
+
   if (nrow(data) == 0) {
     sendSweetAlert(
       session = session,
@@ -183,7 +186,7 @@ observeEvent(input$heatmapRun, {
   }
   colorPal <- colorPanel()
   dataBackup <- t(data)
-  
+
   # Plotly obj
   output$heatmap <- renderPlotly({
     isolate({
@@ -204,10 +207,10 @@ observeEvent(input$heatmapRun, {
         labCol = colnames(dataBackup),
         labRow = row.names(dataBackup)
       )
-      
+
       variables$heatmapObject <- p
       p
-      
+
     })
   })
   runHeatmap$runHeatmapValue <- input$heatmapRun
@@ -215,7 +218,7 @@ observeEvent(input$heatmapRun, {
   sendSweetAlert(session = session,
                  title = "Completed! Wait patiently",
                  type = "success")
-  
+
 })
 
 # remder final heatmap (little time consuming)

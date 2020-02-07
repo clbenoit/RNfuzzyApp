@@ -39,5 +39,6 @@ For each result, downloading png images and results is available.</br>
 - MA plot</br>
 - Volcano plot</br>
 - Heatmap </br>
+- PCA ( 2D and 3D plots)</br>
 
 

@@ -159,14 +159,12 @@ observeEvent(input$heatmapRun, {
 
       selectedListForHeatmap <-
         row.names(data) %in% resultTable()[resultTable()$q.value <= input$heatmapFDR,]$gene_id
-
       heatmapTitle <-
         paste0("Heatmap of gene expression (q.value < ",
                input$heatmapFDR,
                ", ",
                sum(selectedListForHeatmap),
                "DEGs)")
-
     }
   }
 

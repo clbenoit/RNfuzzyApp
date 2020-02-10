@@ -32,7 +32,7 @@ fluidPage(useSweetAlert(), fluidRow(column(
         min = 0,
         max = 1,
         value = 0.1,
-        step = 0.05
+        step = 0.005
       ),
       sliderInput(
         "floorpdeg",

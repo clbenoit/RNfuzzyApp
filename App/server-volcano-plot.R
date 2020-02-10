@@ -21,10 +21,10 @@ observeEvent(input$sider, {
           sliderInput(
             inputId = "Cutpvalue",
             label = "P-value Cut-off",
-            min = 0.01,
+            min = 0.001,
             value = 0.05,
             max = 1,
-            step = 0.01
+            step = 0.001
           ),
           sliderInput(
             "volcanoPointSize",
@@ -288,29 +288,27 @@ output$resultTableVolc <- DT::renderDataTable({
           "Gene Name was colored according to Fold Changeand set bold according to P-value cut-off."
         )
       ),
-      extensions = c("Scroller", "Buttons"),
+      extensions = 'Buttons',
       option = list(
+        paging = TRUE,
+        searching = TRUE,
+        fixedColumns = TRUE,
+        autoWidth = TRUE,
+        ordering = TRUE,
         dom = 'Bfrtip',
-        buttons =
-          list(
-            'copy',
-            'print',
-            list(
-              extend = 'collection',
-              buttons = c('csv', 'excel', 'pdf'),
-              text = 'Download'
-            )
-          ),
-        deferRender = TRUE,
-        scrollY = 400,
-        scroller = TRUE,
-        searchHighlight = TRUE,
-        orderClasses = TRUE,
+        buttons = list('colvis', list(
+          extend = 'collection',
+          buttons = list(extend='csv',
+                         filename = "result_volcanoplot"),
+          text = 'Download')),
         scrollX = TRUE,
-        columnDefs = list(list(
-          visible = FALSE, targets = -1
-        ))
-      )
+        pageLength = 1000,
+        searchHighlight = TRUE,
+        orderClasses = TRUE
+        
+      ),
+      
+      class = "display"
     ) %>% formatRound(
       columns = c("a.value",
                   "m.value",

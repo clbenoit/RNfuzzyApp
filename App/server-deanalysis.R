@@ -128,17 +128,7 @@ observeEvent(input$TCC, {
   
 #download all part
   output$downLoadResultTable <- downloadHandler(
-    filename = function() {
-      paste(
-        Sys.Date(),
-        input$normMethod,
-        input$testMethod,
-        input$fdr,
-        input$floorpdeg,
-        "result_table_analysis.csv",
-        sep = "_"
-      )
-    },
+    filename = "result_table_analysis.csv",
     content = function(file) {
       write.csv(resultTable(), file, row.names = FALSE)
     }
@@ -146,16 +136,7 @@ observeEvent(input$TCC, {
   
   # download normalized part
   output$downLoadNormalized <- downloadHandler(
-    filename = function() {
-      paste(
-        Sys.Date(),
-        input$normMethod,
-        input$testMethod,
-        input$fdr,
-        input$floorpdeg,
-        "normalized_data_analysis.csv",
-        sep = "_"
-      )},
+    filename =  "normalized_data_analysis.csv",
     content = function(file) {
       write.csv(variables$norData, file)
     })

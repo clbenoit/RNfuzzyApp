@@ -91,8 +91,9 @@ output$heatmapSelectGene <- renderUI({
         sliderInput(
           "heatmapFDR",
           "FDR Cut-off",
-          min = 0.01,
+          min = 0.001,
           max = 1,
+          step = 0.005,
           value = 0.01
         ),
         textOutput("heatmapGeneCountPreview")
@@ -166,8 +167,7 @@ observeEvent(input$heatmapRun, {
                sum(selectedListForHeatmap),
                "DEGs)")
     }
-  }
-
+  
   data <- data[selectedListForHeatmap, ]
 
   if (nrow(data) == 0) {
@@ -211,12 +211,62 @@ observeEvent(input$heatmapRun, {
 
     })
   })
+  
+  
+  #result table 
+  output$resultTableInHeatmap <- DT::renderDataTable({
+    gene_id <- row.names(data)
+    data <- cbind(data, gene_id = gene_id)
+    
+    resultTable <- merge(variables$result, data, by = "gene_id")
+    
+    DT::datatable(
+      resultTable,        
+      extensions = 'Buttons',
+      option = list(
+        paging = TRUE,
+        searching = TRUE,
+        fixedColumns = TRUE,
+        autoWidth = TRUE,
+        ordering = TRUE,
+        dom = 'Bfrtip',
+        buttons = list('colvis', list(
+          extend = 'collection',
+          buttons = list(extend='csv',
+                              filename = "result_heatmap"),
+          text = 'Download')),
+        scrollX = TRUE,
+        pageLength = 1000,
+        searchHighlight = TRUE,
+        orderClasses = TRUE
+
+        ),
+        
+        class = "display"
+      )%>% formatRound(
+      columns = c(
+        "a.value",
+        "m.value",
+        "p.value",
+        "q.value",
+        colnames(data)
+      ),
+      digits = 5
+    ) %>% formatStyle(
+      "estimatedDEG",
+      target = 'row',
+      backgroundColor = styleEqual(1, "lightblue")
+    )
+  })
+  
   runHeatmap$runHeatmapValue <- input$heatmapRun
   closeSweetAlert(session = session)
   sendSweetAlert(session = session,
                  title = "Completed! Wait patiently",
                  type = "success")
+  
 
+  
 })
 
 # remder final heatmap (little time consuming)

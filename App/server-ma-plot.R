@@ -21,10 +21,10 @@ observeEvent(input$sider, {
         sliderInput(
           "maFDR",
           "FDR Cut-off",
-          min = 0.01,
+          min = 0.001,
           max = 1,
           value = input$fdr,
-          step = 0.01
+          step = 0.001
         ),
         spectrumInput(
           inputId = "fdrColor",
@@ -238,29 +238,27 @@ output$resultTableMA <- DT::renderDataTable({
           HTML("<font color=\"#B22222\">Gene Name</font> is colored when under FDR cut-off.")
         )
       ),
-      extensions = c("Scroller", "Buttons"),
+      extensions = 'Buttons',
       option = list(
+        paging = TRUE,
+        searching = TRUE,
+        fixedColumns = TRUE,
+        autoWidth = TRUE,
+        ordering = TRUE,
         dom = 'Bfrtip',
-        buttons =
-          list(
-            'copy',
-            'print',
-            list(
-              extend = 'collection',
-              buttons = c('csv', 'excel', 'pdf'),
-              text = 'Download'
-            )
-          ),
-        deferRender = TRUE,
-        scrollY = 400,
-        scroller = TRUE,
-        searchHighlight = TRUE,
-        orderClasses = TRUE,
+        buttons = list('colvis', list(
+          extend = 'collection',
+          buttons = list(extend='csv',
+                         filename = "result_maplot"),
+          text = 'Download')),
         scrollX = TRUE,
-        columnDefs = list(list(
-          visible = FALSE, targets = -1
-        ))
-      )
+        pageLength = 1000,
+        searchHighlight = TRUE,
+        orderClasses = TRUE
+        
+      ),
+      
+      class = "display"
     ) %>% formatRound(
       columns = c("a.value",
                   "m.value",

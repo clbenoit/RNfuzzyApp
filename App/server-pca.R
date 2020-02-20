@@ -33,30 +33,25 @@ observeEvent(input$sider, {
 
 observeEvent(input$pcRun, {
   runPCA$runPCAValue <- input$pcRun
-  variables$pcaParameter <- list("pcData" = input$pcData,
-                                 "pcFDR" = input$pcFDR,
-                                 "pcTransform" = T,
-                                 "pcCenter" = T,
-                                 "pcScale" = T)
-  tcc <- variables$tccObject
+  tcc <- var$tccObject
   data <- getNormalizedData(tcc)
   result <- getResult(tcc)
-  data <- data[result$q.value <= input$pcFDR,] #DEG selection
-  data <- t(log1p(data)) #pca process
+  data <- data[result$q.value <= input$pcFDR,] 
+  data <- t(log1p(data)) 
   data.pca <- prcomp(data[, apply(data, 2, var) != 0],
                      center = T,
                      scale. = T)
   
-  variables$data.pca <- data.pca
+  var$data.pca <- data.pca
   })
 
 
 
-# Render PCA 2d Plot
-output$pca2d <- renderPlotly({
-  if (length(variables$data.pca) > 0) {
-    tcc <- variables$tccObject
-    data.pca <- variables$data.pca
+# 2D plotly object
+output$D2pca <- renderPlotly({
+  if (length(var$data.pca) > 0) {
+    tcc <- var$tccObject
+    data.pca <- var$data.pca
     data <- data.frame(data.pca$x)
     data$name <- rownames(data)
     group <- tcc$group
@@ -73,27 +68,17 @@ output$pca2d <- renderPlotly({
       mode = "markers+text"
     ) %>%
       layout(title = "PCA Plot (2D)")
-    variables$pca2d <- p
     p
   } else {
     return()
   }
 })
 
-# Render 2D Plot UI 
-output$pca2dPlotUI <- renderUI({
-  if (runPCA$runPCAValue) {
-    plotlyOutput("pca2d") %>% withSpinner()
-  } else {
-    helpText("Click [Run PCA] to compute first.")
-  }
-})
-
-# Scatter Plot 3D plotly object 
-output$pca3d <- renderPlotly({
-  if (length(variables$data.pca) > 0) {
-    tcc <- variables$tccObject
-    data.pca <- variables$data.pca
+#  3D plotly object 
+output$D3pca <- renderPlotly({
+  if (length(var$data.pca) > 0) {
+    tcc <- var$tccObject
+    data.pca <- var$data.pca
     data <- data.frame(data.pca$x)
     data$name <- rownames(data)
     group <- tcc$group
@@ -111,17 +96,26 @@ output$pca3d <- renderPlotly({
       mode = "markers+text"
     ) %>%
       layout(title = "PCA Plot (3D)")
-    variables$pca3d <- p
     p
   } else {
     return()
   }
 })
 
-# Render 3D Plot UI 
-output$pca3dPlotUI <- renderUI({
+
+# Render 2D Plot UI 
+output$D2PlotUI <- renderUI({
   if (runPCA$runPCAValue) {
-    plotlyOutput("pca3d") %>% withSpinner()
+    plotlyOutput("D2pca") %>% withSpinner()
+  } else {
+    helpText("Click [Run PCA] to compute first.")
+  }
+})
+
+# Render 3D Plot UI 
+output$D3PlotUI <- renderUI({
+  if (runPCA$runPCAValue) {
+    plotlyOutput("D3pca") %>% withSpinner()
   } else {
     helpText("Click [Run PCA] to compute first.")
   }

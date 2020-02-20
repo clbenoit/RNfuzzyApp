@@ -25,14 +25,18 @@ fluidPage(useSweetAlert(), fluidRow(column(
           "DESeq2" = "deseq2",
           "baySeq" = "bayseq"
       )),
-  
+        sliderTextInput(
+          inputId = "filterLowCount",
+          label = "Filtering Low Count Genes",
+          choices = c(0:100)
+        ),
       sliderInput(
         "fdr",
         "FDR Cut-off",
         min = 0,
         max = 1,
         value = 0.1,
-        step = 0.005
+        step = 0.000001
       ),
       sliderInput(
         "floorpdeg",
@@ -54,6 +58,7 @@ fluidPage(useSweetAlert(), fluidRow(column(
 column(
   9,
   navbarPage("Results",
+             id = "tabs",
   tabPanel(
     title = tagList(icon("question"), "TCC info"),
     width = NULL,
@@ -62,15 +67,8 @@ column(
     includeMarkdown("documents/tccinfo.Rmd")
      ),
   tabPanel(
-    title = "FDR vs DEGs",
-    width = NULL,
-    tabPanel(
-      tagList(icon("table"), "Table"),
-      DT::dataTableOutput("fdrCutoffTable")
-    )
-  ),
-  tabPanel(
     title = tagList(icon("table"), "Result Table"),
+    value = 'redirectres',
     width = NULL,
     solidHeader = TRUE,
     status = "primary",

@@ -10,9 +10,9 @@ convertion <- function(x, df) {
 
 observeEvent(input$uploadCountData, {
   tryCatch({
-    variables$CountData <-
+    var$CountData <-
       data.frame(fread(input$uploadCountData$datapath), row.names = 1)
-    variables$tccObject <- NULL
+    var$tccObject <- NULL
     v$importActionValue <- FALSE
     showNotification("Received uploaded file.", type = "message")
   },
@@ -37,9 +37,8 @@ observeEvent(input$uploadCountData, {
 })
 
 datasetInput <- reactive({
-  variables$CountData
+  var$CountData
 })
-
 
 # Render a table of raw count data, adding color
 
@@ -64,7 +63,7 @@ output$table <- DT::renderDataTable({
       orderClasses = TRUE
     )
   ) %>%
-    formatStyle(names(df %>% select_if(is.numeric)), backgroundColor = styleInterval(brks, head(Blues(40), n = length(brks) + 1)))
+    formatStyle(names(df %>% select_if(is.numeric)), backgroundColor = styleInterval(brks, head(Greys(40), n = length(brks) + 1)))
 })
 
 
@@ -101,26 +100,26 @@ observeEvent(input$confirmedGroupList, {
   tryCatch({
 
     group <- fread(input$groupSelect, header = FALSE)
-    variables$groupList <-
+    var$groupList <-
       lapply(unique(group$V2), function(x) {
         group[group$V2 == x, ]$V1
       })
-    names(variables$groupList) <- unique(group$V2)
+    names(var$groupList) <- unique(group$V2)
     
-    data.list <- rep(0, ncol(variables$CountData))
+    data.list <- rep(0, ncol(var$CountData))
     
-    for (i in 1:length(variables$groupList)) {
-      data.list[unlist(lapply(variables$groupList[[i]], convertion, df = variables$CountData))] = names(variables$groupList[i])
+    for (i in 1:length(var$groupList)) {
+      data.list[unlist(lapply(var$groupList[[i]], convertion, df = var$CountData))] = names(var$groupList[i])
     }
     
     # Storage convert group list to local
-    variables$groupListConvert <- data.list
+    var$groupListConvert <- data.list
     
     # Create TCC Object 
     tcc <-
-      new("TCC", variables$CountData[data.list != 0], data.list[data.list != 0])
-    variables$tccObject <- tcc
-    variables$count.data <- tcc$count
+      new("TCC", var$CountData[data.list != 0], data.list[data.list != 0])
+    var$tccObject <- tcc
+    var$count.data <- tcc$count
     
     closeSweetAlert(session = session)
     sendSweetAlert(
@@ -156,17 +155,16 @@ output$DataSummary <- renderUI({
   dt <- datasetInput()
   
   rowCount <- nrow(dt)
-  groupCount <- length(variables$groupList)
-  groupText <- sapply(variables$groupList, length)
+  groupCount <- length(var$groupList)
+  groupText <- sapply(var$groupList, length)
   if (length(groupText) > 0) {
-    gText <- paste0(names(groupText), ": ", groupText, collapse = "\n")
+    gText <- paste0(names(groupText), ": ", groupText, ';', collapse = "\n")
   } else {
     gText <- NULL
   }
   
-  data <- variables$CountData
-  data.list <- variables$groupListConvert
-  cName <- unlist(variables$groupList)
+  data <- var$CountData
+  data.list <- var$groupListConvert
   
   tagList(
     tipify(
@@ -191,13 +189,9 @@ v <- reactiveValues(importActionValue = FALSE)
 
 ################### BOXPLOT  #####################
 output$sampleDistributionBox <- renderPlotly({
-  if (length(variables$tccObject) > 0) {
-    tcc <- variables$tccObject
+  if (length(var$tccObject) > 0) {
+    tcc <- var$tccObject
     data <- tcc$count
-    
-    if (input$sampleDistributionFilterLow != -1) {
-      data <- data[rowSums(data) > input$sampleDistributionFilterLow,]
-    }
     
     cpm <- log2(data + 1)
     cpm_stack <- data.frame(stack(cpm))
@@ -222,7 +216,7 @@ output$sampleDistributionBox <- renderPlotly({
       xaxis = list(title = input$sampleDistributionXlab, categoryarray = "array", categoryarray = ~col),
       yaxis = list(title = input$sampleDistributionYlab)
     )
-    variables$sampleDistributionBar <- p
+    var$sampleDistributionBar <- p
     p
   } else {
     return()
@@ -238,11 +232,6 @@ output$sampleDistributionBoxPanel <- renderUI({
     tagList(fluidRow(
       column(
         3,
-        sliderInput(inputId = "sampleDistributionFilterLow", 
-                    label = "Filter low genes",
-                    min = -1, 
-                    max = 20, 
-                    value = 0),
         textInput(
           inputId = "sampleDistributionTitle",
           label = "Title",
@@ -274,8 +263,8 @@ output$sampleDistributionBoxPanel <- renderUI({
 
 ################### HEATMAP #####################
 output$clustPlotObject <- renderPlotly({
-  if (length(variables$tccObject) > 0) {
-    tcc <- variables$tccObject
+  if (length(var$tccObject) > 0) {
+    tcc <- var$tccObject
     data <- tcc$count[rowSums(tcc$count) > 0,]
     data <- data.frame(1 - cor(data, method = input$clustCor))
     data.list.count <- length(unique(tcc$group$group))
@@ -286,7 +275,7 @@ output$clustPlotObject <- renderPlotly({
       hclust_method = "complete",
       labRow = rownames(data),
       labCol = colnames(data),
-      colors = rev(GnBu(500))
+      colors = rev(RdYlGn(500))
     )
   } else {
     return()
@@ -319,8 +308,8 @@ output$clustUI <- renderUI({
 
 # 2D Plot 
 output$pcaPlotObject2d <- renderPlotly({
-  if (length(variables$tccObject) > 0) {
-    tcc <- variables$tccObject
+  if (length(var$tccObject) > 0) {
+    tcc <- var$tccObject
     data <- log1p(tcc$count)
     data <- data[apply(data, 1, var) != 0, ]
     if(!is.na(input$pcaTopGene) & input$pcaTopGene < nrow(data)){
@@ -343,7 +332,6 @@ output$pcaPlotObject2d <- renderPlotly({
       mode = "markers+text"
     ) %>%
       layout(title = "PCA 2D Plot")
-    variables$pca2d <- p
     p
   } else {
     return(0)
@@ -352,8 +340,8 @@ output$pcaPlotObject2d <- renderPlotly({
 
 # 3D Plot
 output$pcaPlotObject3d <- renderPlotly({
-  if (length(variables$tccObject) > 0) {
-    tcc <- variables$tccObject
+  if (length(var$tccObject) > 0) {
+    tcc <- var$tccObject
     data <- log1p(tcc$count)
     data <- data[apply(data, 1, var) != 0, ]
     if(!is.na(input$pcaTopGene) & input$pcaTopGene < nrow(data)){
@@ -378,7 +366,6 @@ output$pcaPlotObject3d <- renderPlotly({
       mode = "markers+text"
     ) %>%
       layout(title = "PCA 3D Plot")
-    variables$pca3d <- p
     p
   } else {
     return(0)
@@ -414,3 +401,4 @@ output$pcaUI <- renderUI({
   }
 })
 
+########################################################################

@@ -1,26 +1,8 @@
-library(shiny)
-library(shinydashboard)
-library(shinycssloaders)
-library(shinythemes)
-library(shinyWidgets)
-library(shinyBS)
-library(rmarkdown)
-library(plotly)
-library(dplyr)
-library(DT)
-library(data.table)
-library(RColorBrewer)
-library(utils)
-library(tidyr)
-library(cluster)
-library(TCC)
-library(heatmaply)
-
-
+# ui.R
 
 tagList(dashboardPage(
   dashboardHeader(
-    title = "RNApp : a RNA-seq Analysis App",
+    title = span(tagList(icon("react"),"RNApp : a RNA-seq Analysis App")),
     titleWidth = 500),
   dashboardSidebar(
     sidebarMenu(
@@ -28,35 +10,33 @@ tagList(dashboardPage(
       menuItem(
         "Data visualization",
         tabName = "dateImport",
-        icon = icon("receipt")),
+        icon = icon("eye")),
       menuItem(
         "DE Analysis",
         icon = icon("flask"),
-      menuSubItem(
-        "Normalization",
-        tabName = "deanalysisTab",
-        icon = icon("calculator")),
-      menuSubItem(
-        "MA Plot",
-        tabName = "maplotTab",
-        icon = icon("line-chart")),
-      menuSubItem(
-        "Volcano Plot",
-        tabName = "volcanoplotTab",
-        icon = icon("area-chart")),
-      menuSubItem(
-        "Heatmap",
-        tabName = "heatmapTab",
-        icon = icon("delicious")),
-      menuSubItem(
-        "PCA",
-        tabName = "pcaTab",
-        icon = icon("bar-chart")))
-      )
+        menuSubItem(
+          "Normalization",
+          tabName = "deanalysisTab",
+          icon = icon("calculator")),
+        menuSubItem(
+          "Volcano Plot",
+          tabName = "volcanoplotTab",
+          icon = icon("area-chart")),
+        menuSubItem(
+          "Heatmap",
+          tabName = "heatmapTab",
+          icon = icon("delicious")),
+        menuSubItem(
+          "PCA",
+          tabName = "pcaTab",
+          icon = icon("bar-chart")))
+    )
   ),
   
   
   dashboardBody(
+    shinyDashboardThemes(
+      theme = "blue_gradient"),
     tabItems(
       tabItem(tabName = "dateImport", source(
         file = "ui-data-import.R",
@@ -65,11 +45,6 @@ tagList(dashboardPage(
       )$value),
       tabItem(tabName = "deanalysisTab", source(
         file = "ui-deanalysis.R",
-        local = TRUE,
-        encoding = "UTF-8"
-      )$value),
-      tabItem(tabName = "maplotTab", source(
-        file = "ui-ma-plot.R",
         local = TRUE,
         encoding = "UTF-8"
       )$value),

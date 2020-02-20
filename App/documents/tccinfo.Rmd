@@ -36,7 +36,7 @@ g-table-intro h4 {
 
 
 
-TCC package provides functions to perform differential expression analysis from RNA-seq count data. The normalization strategy called DEGES is essential for noramlization accuracy.
+[TCC](https://www.ncbi.nlm.nih.gov/pubmed/23837715) package provides functions to perform differential expression analysis from RNA-seq count data. The normalization strategy called DEGES is essential for noramlization accuracy.
 DEGES is based on the idea that potential differentially expressed genes (DEGs) should be removed before normalization of the data. 
 The goal is to obtain a ranked gene list where true DEGs are top-ranked. 
 
@@ -44,17 +44,17 @@ The goal is to obtain a ranked gene list where true DEGs are top-ranked.
 <br/>
 ### Normalization Methods
 ---
-- [TMM](doi:10.1186/gb-2010-11-3-r25) : Trimmed Mean of M values is an empirical strategy that equates the overall expression levels of genes between samples under the assumption that the majority of them are not DE. 
+- [TMM](https://www.ncbi.nlm.nih.gov/pubmed/20196867) : Trimmed Mean of M values is an empirical strategy that equates the overall expression levels of genes between samples under the assumption that the majority of them are not DE. 
 
-- [DESeq2](doi:10.1186/s13059-014-0550-8) : uses the median of ratios method, and negative binomial generalized linear models; the estimates of dispersion and logarithmic fold changes incorporate data-driven prior distributions.
+- [DESeq2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4302049/) : uses the median of ratios method, and negative binomial generalized linear models; the estimates of dispersion and logarithmic fold changes incorporate data-driven prior distributions.
 
 ### DEG Identification Methods
 ---
-Identifying DEGs by using the estimateDE function with test.method = "edger" or "deseq2".
+Identifying DEGs by using the estimateDE function with test.method = "edger", "deseq2" or "bayseq".
 
 - [EdgeR](https://doi.org/10.1093/bioinformatics/btp616) : overdispersed Poisson model is used to account for both biological and technical variability. Empirical Bayes methods are used to moderate the degree of overdispersion across transcripts, improving the reliability of inference.
 
-- [DESeq2](doi:10.1186/s13059-014-0550-8) : uses shrinkage estimation for dispersions and fold changes to improve stability and interpretability of estimates. This enables a more quantitative analysis focused on the strength rather than the mere presence of differential expression. 
+- [DESeq2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4302049/) : uses shrinkage estimation for dispersions and fold changes to improve stability and interpretability of estimates. This enables a more quantitative analysis focused on the strength rather than the mere presence of differential expression. 
 
 - [baySeq](https://doi.org/10.1186/1471-2105-11-422) : uses an empirical Bayesian approach to define patterns of differential expression and detect these patterns within a set of sequencing samples.
 The method assumes a negative binomial distribution for the data and derives an empirically determined prior distribution from the entire dataset.

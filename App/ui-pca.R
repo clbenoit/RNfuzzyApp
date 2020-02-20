@@ -14,9 +14,9 @@ column(
   9,
   navbarPage("Results",
     tabPanel(tagList(icon("square-o"), "PCA Plot (2D)"),
-             uiOutput("pca2dPlotUI")),
+             uiOutput("D2PlotUI")),
     tabPanel(tagList(icon("cube"), "PCA Plot (3D)"),
-             uiOutput("pca3dPlotUI"))
+             uiOutput("D3PlotUI"))
 
   )
 ))

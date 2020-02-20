@@ -100,15 +100,14 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
   box(
     title = tagList(icon("table"), "Read Count Table"),
     solidHeader = TRUE,
-    status = "info",
+    status = "primary",
     width = NULL,
     uiOutput("DataSummary"),
     uiOutput("showTable")
   )
   )),
-tabPanel(
-  title = tagList(icon("bar-chart"), "Count Distribution"),
-  uiOutput("sampleDistributionBoxPanel")),
+tabPanel(title = tagList(icon("bar-chart"), "Count Distribution"),
+         uiOutput("sampleDistributionBoxPanel")),
 tabPanel(title = tagList(icon("sitemap"), "Hierarchical Clustering"),
          uiOutput("clustUI")),
 tabPanel(title = tagList(icon("object-group"), "PCA"),

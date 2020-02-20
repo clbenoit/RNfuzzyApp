@@ -2,7 +2,9 @@
 
 runVolcano <- reactiveValues(runVolcanoValue = FALSE)
 
-# This function render a series UI of Volcano Plot parameters 
+
+
+
 observeEvent(input$sider, {
   if (input$sider == "volcanoplotTab") {
       output$valcanoParameter <- renderUI({
@@ -21,10 +23,10 @@ observeEvent(input$sider, {
           sliderInput(
             inputId = "Cutpvalue",
             label = "P-value Cut-off",
-            min = 0.001,
+            min = 0.00001,
             value = 0.05,
             max = 1,
-            step = 0.001
+            step = 0.00001
           ),
           sliderInput(
             "volcanoPointSize",
@@ -37,6 +39,24 @@ observeEvent(input$sider, {
           spectrumInput(
             inputId = "downColor",
             label = tagList("Down-regulated in G2", htmlOutput("downPreview")),
+          choices = list(
+            list(
+              "red",
+              'black',
+              'white',
+              'blanchedalmond',
+              'steelblue',
+              'forestgreen'
+            ),
+            as.list(brewer.pal(n = 9, name = "Oranges")),
+            as.list(brewer.pal(n = 9, name = "Reds")),
+            as.list(brewer.pal(n = 11, name = "Spectral"))
+          ),
+          options = list(`toggle-palette-more-text` = "Show more")
+        ),
+          spectrumInput(
+            inputId = "upColor",
+            label = tagList("Up-regulated in G2", htmlOutput("upPreview")),
             choices = list(
               list(
                 "green",
@@ -52,24 +72,6 @@ observeEvent(input$sider, {
             ),
             options = list(`toggle-palette-more-text` = "Show more")
             
-          ),
-          spectrumInput(
-            inputId = "upColor",
-            label = tagList("Up-regulated in G2", htmlOutput("upPreview")),
-            choices = list(
-              list(
-                "red",
-                'black',
-                'white',
-                'blanchedalmond',
-                'steelblue',
-                'forestgreen'
-              ),
-              as.list(brewer.pal(n = 9, name = "Oranges")),
-              as.list(brewer.pal(n = 9, name = "Reds")),
-              as.list(brewer.pal(n = 11, name = "Spectral"))
-            ),
-            options = list(`toggle-palette-more-text` = "Show more")
           ),
           do.call(actionBttn, c(
             list(
@@ -120,15 +122,6 @@ observeEvent(input$makeVolcanoPlot, {
   yaxis <- "p.value"
   output$volcanoPloty <- renderPlotly({
     validate(need(resultTable()[[yaxis]] != "", "No p-values for ploting."))
-    if (length(variables$groupList) > 2) {
-      sendSweetAlert(
-        session = session,
-        title = "ERROR",
-        text = "Volcano Plot is unavailable for multiple comparison now.",
-        type = "info"
-      )
-    }
-    
     req(input$makeVolcanoPlot)
     isolate({
       dt <- resultTable()
@@ -185,9 +178,7 @@ observeEvent(input$makeVolcanoPlot, {
         text = ~ paste(
           "</br>Gene:",
           resultTable()$gene_id,
-          "</br>A value:",
-          round(a.value, 4),
-          "</br>M value:",
+          "</br>Log2FC:",
           round(m.value, 4),
           "</br>p-value:",
           round(p.value, 4),
@@ -237,26 +228,14 @@ observeEvent(input$makeVolcanoPlot, {
             )
           )
         )
-      variables$VolcanoPlotObject <- p
+      var$VolcanoPlotObject <- p
       p
     })
   })
   runVolcano$runVolcanoValue <- input$makeVolcanoPlot
 })
 
-# Render volcanoUI 
-output$volcanoUI <- renderUI({
-  if(runVolcano$runVolcanoValue){
-    tagList(
-      fluidRow(
-        column(8, plotlyOutput("volcanoPloty") %>% withSpinner()),
-        column(4, plotlyOutput("VolcanoBarPlot") %>% withSpinner())
-      )
-    )
-  } else {
-    helpText("Please click [Generate Volcano Plot] first.")
-  }
-})
+
 
 # Render table result
 
@@ -275,8 +254,7 @@ output$resultTableVolc <- DT::renderDataTable({
       resultTable(),
       colnames = c(
         "Gene Name",
-        "A Value",
-        "M Value",
+        "Log2FC",
         "P Value",
         "Q Value (FDR)",
         "Rank",
@@ -285,7 +263,7 @@ output$resultTableVolc <- DT::renderDataTable({
       filter = "bottom",
       caption = tags$caption(
         tags$li(
-          "Gene Name was colored according to Fold Changeand set bold according to P-value cut-off."
+          "Gene Name was colored according to Fold Change and set bold according to P-value cut-off."
         )
       ),
       extensions = 'Buttons',
@@ -302,7 +280,7 @@ output$resultTableVolc <- DT::renderDataTable({
                          filename = "result_volcanoplot"),
           text = 'Download')),
         scrollX = TRUE,
-        pageLength = 1000,
+        pageLength = 10000,
         searchHighlight = TRUE,
         orderClasses = TRUE
         
@@ -310,11 +288,10 @@ output$resultTableVolc <- DT::renderDataTable({
       
       class = "display"
     ) %>% formatRound(
-      columns = c("a.value",
-                  "m.value",
+      columns = c("m.value",
                   "p.value",
                   "q.value"),
-      digits = 3
+      digits = 5
     )
     
     if (!is.na(sum(resultTable()$m.value))) {
@@ -344,19 +321,19 @@ output$VolcanoBarPlot <- renderPlotly({
   gene_id <- eventdata$key
 
   expression <-
-    variables$CountData[row.names(variables$CountData) == gene_id,]
+    var$CountData[row.names(var$CountData) == gene_id,]
 
   expressionNor <-
-    t(t(variables$norData[row.names(variables$norData) == gene_id,]))
+    t(t(var$norData[row.names(var$norData) == gene_id,]))
   
-  data <- variables$CountData
-  data.cl <- variables$groupListConvert
+  data <- var$CountData
+  data.list <- var$groupListConvert
   
-  expression <- t(expression[data.cl != 0])
-  data.cl <- data.cl[data.cl != 0]
+  expression <- t(expression[data.list != 0])
+  data.list <- data.list[data.list != 0]
   
   xOrder <-
-    data.frame("name" = row.names(expression), "group" = data.cl)
+    data.frame("name" = row.names(expression), "group" = data.list)
   xOrderVector <- unique(xOrder[order(xOrder$group),]$name)
   xform <- list(categoryorder = "array",
                 categoryarray = xOrderVector,
@@ -365,7 +342,7 @@ output$VolcanoBarPlot <- renderPlotly({
   plot_ly(
     x = ~ row.names(expression),
     y = ~ expression[, 1],
-    color = as.factor(data.cl),
+    color = as.factor(data.list),
     text = expression[, 1],
     textposition = 'outside',
     showlegend = FALSE,
@@ -377,4 +354,28 @@ output$VolcanoBarPlot <- renderPlotly({
     yaxis = list(title = "Raw Count"),
     title = colnames(expression)
   )
+})
+
+# volcanoUI 
+output$volcanoUI <- renderUI({
+  if (length(var$groupList) > 2) {
+    sendSweetAlert(
+      session = session,
+      title = "ERROR",
+      text = "Volcano Plot is unavailable for multiple comparison now.",
+      type = "info"
+    )
+    helpText("Volcano Plot is unavailable for multiple comparison now.")
+  }else{
+  
+  if(runVolcano$runVolcanoValue){
+    tagList(
+      fluidRow(
+        column(8, plotlyOutput("volcanoPloty") %>% withSpinner()),
+        column(4, plotlyOutput("VolcanoBarPlot") %>% withSpinner())
+      )
+    )
+  } else {
+    helpText("Please click [Generate Volcano Plot] first.")
+  }}
 })

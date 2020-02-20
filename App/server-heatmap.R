@@ -91,12 +91,11 @@ output$heatmapSelectGene <- renderUI({
         sliderInput(
           "heatmapFDR",
           "FDR Cut-off",
-          min = 0.001,
-          max = 1,
-          step = 0.005,
+          min = 0.00000001,
+          max = 0.1,
+          step = 0.000001,
           value = 0.01
-        ),
-        textOutput("heatmapGeneCountPreview")
+        )
       )
   )
 })
@@ -147,9 +146,9 @@ output$colorPreview <- renderPlot({
 
 # heatmaply obj
 observeEvent(input$heatmapRun, {
-  data.cl <- variables$groupListConvert
-  data <- variables$norData
-  data.cl <- data.cl[data.cl != 0]
+  data.list <- var$groupListConvert
+  data <- var$norData
+  data.list <- data.list[data.list != 0]
   if (input$heatmapGeneSelectType == "By list") {
     selectedListForHeatmap <-
       row.names(data) %in% unlist(strsplit(x = input$heatmapTextList, split = '[\r\n]'))
@@ -169,7 +168,8 @@ observeEvent(input$heatmapRun, {
     }
   
   data <- data[selectedListForHeatmap, ]
-
+  
+  
   if (nrow(data) == 0) {
     sendSweetAlert(
       session = session,
@@ -193,7 +193,7 @@ observeEvent(input$heatmapRun, {
       dataBackup <- heatmaply::normalize(dataBackup)
       p <- heatmaply(
         dataBackup,
-        k_row = length(variables$groupList),
+        k_row = length(var$groupList),
         colors = colorPal,
         dist_method = input$heatmapDist,
         hclust_method = input$heatmapCluster,
@@ -205,12 +205,11 @@ observeEvent(input$heatmapRun, {
         labCol = colnames(dataBackup),
         labRow = row.names(dataBackup)
       )
-
-      variables$heatmapObject <- p
       p
-
     })
   })
+  
+
   
   
   #result table 
@@ -218,7 +217,7 @@ observeEvent(input$heatmapRun, {
     gene_id <- row.names(data)
     data <- cbind(data, gene_id = gene_id)
     
-    resultTable <- merge(variables$result, data, by = "gene_id")
+    resultTable <- merge(var$result, data, by = "gene_id")
     
     DT::datatable(
       resultTable,        
@@ -230,13 +229,13 @@ observeEvent(input$heatmapRun, {
         autoWidth = TRUE,
         ordering = TRUE,
         dom = 'Bfrtip',
-        buttons = list('colvis', list(
+        buttons = list(list(
           extend = 'collection',
           buttons = list(extend='csv',
                               filename = "result_heatmap"),
           text = 'Download')),
         scrollX = TRUE,
-        pageLength = 1000,
+        pageLength = 10000,
         searchHighlight = TRUE,
         orderClasses = TRUE
 
@@ -245,13 +244,12 @@ observeEvent(input$heatmapRun, {
         class = "display"
       )%>% formatRound(
       columns = c(
-        "a.value",
         "m.value",
         "p.value",
         "q.value",
         colnames(data)
       ),
-      digits = 5
+      digits = 10
     ) %>% formatStyle(
       "estimatedDEG",
       target = 'row',
@@ -262,14 +260,14 @@ observeEvent(input$heatmapRun, {
   runHeatmap$runHeatmapValue <- input$heatmapRun
   closeSweetAlert(session = session)
   sendSweetAlert(session = session,
-                 title = "Completed! Wait patiently",
+                 title = "Completed!",
                  type = "success")
   
 
   
 })
 
-# remder final heatmap (little time consuming)
+# remder final heatmap 
 
 output$heatmapPlot <- renderUI({
   if (runHeatmap$runHeatmapValue) {
@@ -279,3 +277,5 @@ output$heatmapPlot <- renderUI({
     helpText("Enter parameters to plot the heatmap first.")
   }
 })
+
+

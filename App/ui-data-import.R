@@ -90,6 +90,8 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
         sep = '\n'
       )
     ),
+
+
     do.call(actionBttn, c(
       list(
         inputId = "confirmedGroupList",

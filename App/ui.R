@@ -1,5 +1,6 @@
 # ui.R
 
+
 tagList(dashboardPage(
   dashboardHeader(
     title = span(tagList(icon("react"),"RNApp : a RNA-seq Analysis App")),

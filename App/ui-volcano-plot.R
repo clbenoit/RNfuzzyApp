@@ -24,6 +24,20 @@ column(
         solidHeader = TRUE,
         status = "info",
         width = NULL,
-        DT::dataTableOutput('resultTableVolc')
+        uiOutput('MainResultTableVolc')
+      ),
+      tabPanel(
+        title = tagList(icon("table"), "Downregulated Table"),
+        solidHeader = TRUE,
+        status = "info",
+        width = NULL,
+        DT::dataTableOutput('resultTabledown')
+      ),
+      tabPanel(
+        title = tagList(icon("table"), "Upregulated Table"),
+        solidHeader = TRUE,
+        status = "info",
+        width = NULL,
+        DT::dataTableOutput('resultTableup')
       )
 ))))

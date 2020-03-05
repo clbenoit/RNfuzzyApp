@@ -1,4 +1,4 @@
-# Define server
+  # Define server 
 shinyServer(function(input, output, session) {
   
   source(file = "server-data-import.R",
@@ -18,13 +18,13 @@ shinyServer(function(input, output, session) {
          encoding = "UTF-8")
   
   var = reactiveValues(
+    count = NULL,
     count.data = NULL,
     CountData = data.frame(),
     groupList = NULL,
     groupListConvert = NULL,
     result = data.frame("Results will show here." = character(0)),
     tccObject = NULL,
-    data.pca = NULL
-    )
+    data.pca = NULL)
 
 })

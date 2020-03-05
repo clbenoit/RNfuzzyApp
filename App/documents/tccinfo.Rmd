@@ -36,10 +36,15 @@ g-table-intro h4 {
 
 
 
-[TCC](https://www.ncbi.nlm.nih.gov/pubmed/23837715) package provides functions to perform differential expression analysis from RNA-seq count data. The normalization strategy called DEGES is essential for noramlization accuracy.
+[TCC](https://www.ncbi.nlm.nih.gov/pubmed/23837715) (Tag Count Comparison) package provides functions to perform differential expression analysis from RNA-seq count data. The normalization strategy called DEGES is essential for noramlization accuracy.
 DEGES is based on the idea that potential differentially expressed genes (DEGs) should be removed before normalization of the data. 
 The goal is to obtain a ranked gene list where true DEGs are top-ranked. 
 
+<p align="center">
+    <img src="tcc_expl.png" width="900" height="400">  
+</p>
+
+In our case, the iteration value is set to default value 3.
 
 <br/>
 ### Normalization Methods
@@ -52,9 +57,9 @@ The goal is to obtain a ranked gene list where true DEGs are top-ranked.
 ---
 Identifying DEGs by using the estimateDE function with test.method = "edger", "deseq2" or "bayseq".
 
-- [EdgeR](https://doi.org/10.1093/bioinformatics/btp616) : overdispersed Poisson model is used to account for both biological and technical variability. Empirical Bayes methods are used to moderate the degree of overdispersion across transcripts, improving the reliability of inference.
+- [EdgeR](https://doi.org/10.1093/bioinformatics/btp616) <b>Recommended when analyzing count data with replicates </b> : overdispersed Poisson model is used to account for both biological and technical variability. Empirical Bayes methods are used to moderate the degree of overdispersion across transcripts, improving the reliability of inference.
 
-- [DESeq2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4302049/) : uses shrinkage estimation for dispersions and fold changes to improve stability and interpretability of estimates. This enables a more quantitative analysis focused on the strength rather than the mere presence of differential expression. 
+- [DESeq2](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4302049/) <b>Recommended when analyzing count data without replicates </b> : uses shrinkage estimation for dispersions and fold changes to improve stability and interpretability of estimates. This enables a more quantitative analysis focused on the strength rather than the mere presence of differential expression. 
 
 - [baySeq](https://doi.org/10.1186/1471-2105-11-422) : uses an empirical Bayesian approach to define patterns of differential expression and detect these patterns within a set of sequencing samples.
 The method assumes a negative binomial distribution for the data and derives an empirically determined prior distribution from the entire dataset.

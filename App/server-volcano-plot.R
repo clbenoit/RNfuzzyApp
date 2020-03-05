@@ -17,7 +17,7 @@ observeEvent(input$sider, {
             "Fold Change (X-axis) Cut-off",
             min = ceiling(min(resultTable()$m.value)),
             max = floor(max(resultTable()$m.value)),
-            value = c(-1, 1),
+            value = c(-2, 2),
             step = 0.5
           ),
           sliderInput(
@@ -125,7 +125,6 @@ observeEvent(input$makeVolcanoPlot, {
     req(input$makeVolcanoPlot)
     isolate({
       dt <- resultTable()
-      
       downCut <- input$CutFC[1]
       upCut <- input$CutFC[2]
       
@@ -179,11 +178,11 @@ observeEvent(input$makeVolcanoPlot, {
           "</br>Gene:",
           resultTable()$gene_id,
           "</br>Log2FC:",
-          round(m.value, 4),
+          m.value,
           "</br>p-value:",
-          round(p.value, 4),
+          p.value,
           "</br>q-value:",
-          round(q.value, 4),
+          q.value,
           "</br>Rank:",
           rank
         ),
@@ -236,79 +235,6 @@ observeEvent(input$makeVolcanoPlot, {
 })
 
 
-
-# Render table result
-
-output$resultTableVolc <- DT::renderDataTable({
-  if (nrow(resultTable()) == 0) {
-    DT::datatable(resultTable())
-  } else {
-    if (length(input$Cutpvalue) > 0) {
-      fdrCut <- input$Cutpvalue
-      
-    } else {
-      fdrCut <- 0
-    }
-    
-    t <- DT::datatable(
-      resultTable(),
-      colnames = c(
-        "Gene Name",
-        "Log2FC",
-        "P Value",
-        "Q Value (FDR)",
-        "Rank",
-        "estimated DEG"
-      ),
-      filter = "bottom",
-      caption = tags$caption(
-        tags$li(
-          "Gene Name was colored according to Fold Change and set bold according to P-value cut-off."
-        )
-      ),
-      extensions = 'Buttons',
-      option = list(
-        paging = TRUE,
-        searching = TRUE,
-        fixedColumns = TRUE,
-        autoWidth = TRUE,
-        ordering = TRUE,
-        dom = 'Bfrtip',
-        buttons = list('colvis', list(
-          extend = 'collection',
-          buttons = list(extend='csv',
-                         filename = "result_volcanoplot"),
-          text = 'Download')),
-        scrollX = TRUE,
-        pageLength = 10000,
-        searchHighlight = TRUE,
-        orderClasses = TRUE
-        
-      ),
-      
-      class = "display"
-    ) %>% formatRound(
-      columns = c("m.value",
-                  "p.value",
-                  "q.value"),
-      digits = 5
-    )
-    
-    if (!is.na(sum(resultTable()$m.value))) {
-      t   %>% formatStyle("gene_id", "m.value",
-                          color = styleInterval(input$CutFC,
-                                                c(
-                                                  input$downColor, "black", input$upColor
-                                                ))) %>% formatStyle("gene_id",
-                                                                    "p.value",
-                                                                    fontWeight = styleInterval(fdrCut, c("bold", "normal")))
-    } else {
-      t
-    }
-  }
-})
-
-
 # render barplot next to volcanoplot
 
 output$VolcanoBarPlot <- renderPlotly({
@@ -356,6 +282,7 @@ output$VolcanoBarPlot <- renderPlotly({
   )
 })
 
+
 # volcanoUI 
 output$volcanoUI <- renderUI({
   if (length(var$groupList) > 2) {
@@ -379,3 +306,209 @@ output$volcanoUI <- renderUI({
     helpText("Please click [Generate Volcano Plot] first.")
   }}
 })
+# Render table result
+
+output$resultTableVolc <- DT::renderDataTable({
+  if (nrow(resultTable()) == 0) {
+    DT::datatable(resultTable())
+  } else {
+    if (length(input$Cutpvalue) > 0) {
+      fdrCut <- input$Cutpvalue
+      
+    } else {
+      fdrCut <- 0
+    }
+    
+    data <- var$norData
+    gene_id <- row.names(data)
+    data <- cbind(data, gene_id = gene_id)
+    
+    resultTable <- merge(resultTable(), data, by = "gene_id")
+    
+    t <- DT::datatable(
+      resultTable,
+      filter = "bottom",
+      extensions = 'Buttons',
+      option = list(
+        paging = TRUE,
+        searching = TRUE,
+        fixedColumns = TRUE,
+        autoWidth = TRUE,
+        ordering = TRUE,
+        dom = 'Bfrtip',
+        buttons = list(list(
+          extend = 'collection',
+          buttons = list(extend='csv',
+                         filename = "volcano_results"),
+          text = 'Download')),
+        scrollX = TRUE,
+        pageLength = 10,
+        searchHighlight = TRUE,
+        orderClasses = TRUE
+        
+      ),
+      class = "display",
+      caption = tags$caption(
+        tags$li(
+          "Gene Name was colored according to Fold Change and set bold according to P-value cut-off."
+        )
+      ))
+    
+    if (!is.na(sum(resultTable()$m.value))) {
+      t   %>% formatStyle("gene_id", "m.value",
+                          color = styleInterval(input$CutFC,
+                                                c(
+                                                  input$downColor, "black", input$upColor
+                                                ))) %>% formatStyle("gene_id",
+                                                                    "p.value",
+                                                                    fontWeight = styleInterval(fdrCut, c("bold", "normal")))
+    } else {
+      t
+    }
+  }
+},server = F)
+
+
+# final render 
+output$MainResultTableVolc <- renderUI({
+  if(runVolcano$runVolcanoValue){
+    tagList(fluidRow(column(
+      12, DT::dataTableOutput('resultTableVolc') %>% withSpinner()
+    )))} else {
+      helpText("Run Volcano to obtain Result Table.")
+    }
+})
+
+############################################################DOWN REGULATED##################################
+
+output$resultTabledown <- DT::renderDataTable({
+  sortedvolc <- var$result
+  if (nrow(sortedvolc) == 0) {
+    DT::datatable(sortedvolc)
+  } else {
+    if (length(input$Cutpvalue) > 0) {
+      downCut <- input$CutFC[1]
+      upCut <- input$CutFC[2]
+      fdrCut <- input$Cutpvalue
+      sortedvolc <- sortedvolc[sortedvolc$p.value < fdrCut,]
+      sortedvolc <- sortedvolc[sortedvolc$m.value < downCut,]
+      
+    } else {
+      fdrCut <- 0
+    }
+    data <- var$norData
+    gene_id <- row.names(data)
+    data <- cbind(data, gene_id = gene_id)
+    
+    downresultTable <- merge(sortedvolc, data, by = "gene_id")
+    
+    t <- DT::datatable(
+      downresultTable,
+      filter = "bottom",
+      extensions = 'Buttons',
+      option = list(
+        paging = TRUE,
+        searching = TRUE,
+        fixedColumns = TRUE,
+        autoWidth = TRUE,
+        ordering = TRUE,
+        dom = 'Bfrtip',
+        buttons = list(list(
+          extend = 'collection',
+          buttons = list(extend='csv',
+                         filename = "downregulated_genes"),
+          text = 'Download')),
+        scrollX = TRUE,
+        pageLength = 10,
+        searchHighlight = TRUE,
+        orderClasses = TRUE
+        
+      ),
+      
+      class = "display",
+    caption = tags$caption(
+      tags$li(
+        "Please verify your Log2FC if changed from the default one."
+      )
+    ))
+    
+    if (!is.na(sum(resultTable()$m.value))) {
+      t   %>% formatStyle("gene_id", "m.value",
+                          color = styleInterval(input$CutFC,
+                                                c(
+                                                  input$downColor, "black", input$upColor
+                                                ))) %>% formatStyle("gene_id",
+                                                                    "p.value",
+                                                                    fontWeight = styleInterval(fdrCut, c("bold", "normal")))
+    } else {
+      t
+    }
+  }
+},server = F)
+
+
+##########################################################UPREGULATED######################################
+
+output$resultTableup <- DT::renderDataTable({
+  sortedvolc <- var$result
+  if (nrow(sortedvolc) == 0) {
+    DT::datatable(sortedvolc)
+  } else {
+    if (length(input$Cutpvalue) > 0) {
+      downCut <- input$CutFC[1]
+      upCut <- input$CutFC[2]
+      fdrCut <- input$Cutpvalue
+      sortedvolc <- sortedvolc[sortedvolc$p.value < fdrCut,]
+      sortedvolc <- sortedvolc[sortedvolc$m.value > upCut,]
+      
+    } else {
+      fdrCut <- 0
+    }
+    data <- var$norData
+    gene_id <- row.names(data)
+    data <- cbind(data, gene_id = gene_id)
+    
+    upresultTable <- merge(sortedvolc, data, by = "gene_id")
+    
+    t <- DT::datatable(
+      upresultTable,
+      filter = "bottom",
+      extensions = 'Buttons',
+      option = list(
+        paging = TRUE,
+        searching = TRUE,
+        fixedColumns = TRUE,
+        autoWidth = TRUE,
+        ordering = TRUE,
+        dom = 'Bfrtip',
+        buttons = list(list(
+          extend = 'collection',
+          buttons = list(extend='csv',
+                         filename = "upregulated_genes"),
+          text = 'Download')),
+        scrollX = TRUE,
+        pageLength = 10,
+        searchHighlight = TRUE,
+        orderClasses = TRUE
+        
+      ),
+      
+      class = "display",
+    caption = tags$caption(
+      tags$li(
+        "Please verify your Log2FC if changed from the default one."
+      )))
+    
+    if (!is.na(sum(resultTable()$m.value))) {
+      t   %>% formatStyle("gene_id", "m.value",
+                          color = styleInterval(input$CutFC,
+                                                c(
+                                                  input$downColor, "black", input$upColor
+                                                ))) %>% formatStyle("gene_id",
+                                                                    "p.value",
+                                                                    fontWeight = styleInterval(fdrCut, c("bold", "normal")))
+    } else {
+      t
+    }
+  }
+},server = F)

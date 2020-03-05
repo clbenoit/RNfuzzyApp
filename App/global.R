@@ -22,3 +22,4 @@ library(heatmaply)
 
 #theme
 #install_github("nik01010/dashboardthemes")
+

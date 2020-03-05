@@ -42,6 +42,14 @@ observeEvent(input$sider, {
           ),
           selected = "complete"
         ),
+        sliderInput(
+          "cutclus",
+          "Clusters wanted",
+          min = 0,
+          max = 5,
+          value = 3,
+          step = 1
+        ),
         tagList(
           selectInput(
             "heatmapColor",
@@ -183,17 +191,14 @@ observeEvent(input$heatmapRun, {
     showNotification("Generating, please be patient...", type = "message")
   }
   colorPal <- colorPanel()
-  dataBackup <- t(data)
-
-  # Plotly obj
+  datat <- t(data)
   output$heatmap <- renderPlotly({
     isolate({
       runHeatmap$height <- 600
-      dataBackup <-  log1p(dataBackup)
-      dataBackup <- heatmaply::normalize(dataBackup)
+      datat <-  log1p(datat)
+      datat <- heatmaply::normalize(datat)
       p <- heatmaply(
-        dataBackup,
-        k_row = length(var$groupList),
+        datat,
         colors = colorPal,
         dist_method = input$heatmapDist,
         hclust_method = input$heatmapCluster,
@@ -202,13 +207,13 @@ observeEvent(input$heatmapRun, {
         main = heatmapTitle,
         margins = c(150, 100, 40, 20),
         scale = "none",
-        labCol = colnames(dataBackup),
-        labRow = row.names(dataBackup)
+        labCol = colnames(datat),
+        labRow = row.names(datat)
       )
       p
+
     })
   })
-  
 
   
   
@@ -232,16 +237,16 @@ observeEvent(input$heatmapRun, {
         buttons = list(list(
           extend = 'collection',
           buttons = list(extend='csv',
-                              filename = "result_heatmap"),
+                         filename = "result_heatmap"),
           text = 'Download')),
         scrollX = TRUE,
-        pageLength = 10000,
+        pageLength = 10,
         searchHighlight = TRUE,
         orderClasses = TRUE
-
-        ),
         
-        class = "display"
+      ),
+      
+      class = "display"
       )%>% formatRound(
       columns = c(
         "m.value",
@@ -255,7 +260,7 @@ observeEvent(input$heatmapRun, {
       target = 'row',
       backgroundColor = styleEqual(1, "lightblue")
     )
-  })
+  }, server = FALSE)
   
   runHeatmap$runHeatmapValue <- input$heatmapRun
   closeSweetAlert(session = session)

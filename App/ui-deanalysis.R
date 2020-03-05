@@ -25,18 +25,21 @@ fluidPage(useSweetAlert(), fluidRow(column(
           "DESeq2" = "deseq2",
           "baySeq" = "bayseq"
       )),
-        sliderTextInput(
-          inputId = "filterLowCount",
-          label = "Filtering Low Count Genes",
-          choices = c(0:100)
-        ),
       sliderInput(
         "fdr",
         "FDR Cut-off",
         min = 0,
-        max = 1,
-        value = 0.1,
-        step = 0.000001
+        max = 0.1,
+        value = 0.01,
+        step = 0.001
+      ),
+      sliderInput(
+        "filterLowCount",
+        "Filtering Low Count Genes",
+        min = 0,
+        max = 100,
+        value = 100,
+        step = 1
       ),
       sliderInput(
         "floorpdeg",

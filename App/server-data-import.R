@@ -8,7 +8,7 @@ convertion <- function(x, df) {
 }
 
 
-observeEvent(input$uploadCountData, {
+observeEvent(input$confirmedGroupList, {
   tryCatch({
     var$CountData <-
       data.frame(fread(input$uploadCountData$datapath), row.names = 1)
@@ -34,7 +34,9 @@ observeEvent(input$uploadCountData, {
     )
     return()
   })
+
 })
+
 
 datasetInput <- reactive({
   var$CountData
@@ -44,11 +46,6 @@ datasetInput <- reactive({
 
 output$table <- DT::renderDataTable({
   df <- datasetInput()
-  brks <-
-    quantile(df %>% select_if(is.numeric),
-             probs = seq(.05, .95, .05),
-             na.rm = TRUE)
-  
   DT::datatable(
     df,
     colnames = c("Gene Name" = 1),
@@ -62,8 +59,7 @@ output$table <- DT::renderDataTable({
       searchHighlight = TRUE,
       orderClasses = TRUE
     )
-  ) %>%
-    formatStyle(names(df %>% select_if(is.numeric)), backgroundColor = styleInterval(brks, head(Greys(40), n = length(brks) + 1)))
+  )
 })
 
 
@@ -266,18 +262,17 @@ output$clustPlotObject <- renderPlotly({
   if (length(var$tccObject) > 0) {
     tcc <- var$tccObject
     data <- tcc$count[rowSums(tcc$count) > 0,]
-    data <- data.frame(1 - cor(data, method = input$clustCor))
+    data <- data.frame(1 - cor(data, method = input$clustdist))
     data.list.count <- length(unique(tcc$group$group))
     heatmaply(
       data,
-      k_col = data.list.count,
-      k_row = data.list.count,
       hclust_method = "complete",
       labRow = rownames(data),
       labCol = colnames(data),
       colors = rev(RdYlGn(500))
     )
-  } else {
+    
+  }else {
     return()
   }
 })
@@ -289,15 +284,49 @@ output$clustUI <- renderUI({
       column(
         3,
         selectInput(
-          inputId = "clustCor",
+          inputId = "clustdist",
           label = "Distance Measure",
           choices = c("Spearman" = "spearman",
                       "Pearson" = "pearson")
-        ), tags$div(
-          HTML("- Spearman distance is a square of Euclidean distance between two rank vectors.</br></br>
-                - Pearson correlation measures the degree of a linear relationship between two profiles."))
+        ),
+        tags$div(
+          HTML('<div class="panel panel-primary">
+                    <div class="panel-heading"> <span style="padding-left:10px"><b> Distance measures </b> </span></div>
+                  <div class="panel-body">
+                  <style type="text/css">
+                  .tg {
+                  border-collapse: collapse;
+                  border-spacing: 0;
+                  border: none;
+                  }
+                  .tg td {
+                  font-family: Arial, sans-serif;
+                  font-size: 14px;
+                  padding: 10px 5px;
+                  border-style: solid;
+                  border-width: 0px;
+                  overflow: hidden;
+                  word-break: normal;
+                  }
+                  .tg .tg-s6z2 {
+                  text-align: center
+                  }
+                  </style>
+                  <table class="tg">
+                  <tr>
+                  <th class="tg-031e"> <span class="label label-primary"> Spearman </span></th>
+                  <th class="tg-031e"> Spearman distance is a square of Euclidean distance between two rank vectors.
+                  </tr>
+                  <tr>
+                  <th class="tg-031e"> <span class="label label-primary"> Pearson</span></th>
+                  <th class="tg-031e"> Pearson correlation measures the degree of a linear relationship between two profiles.
+                  </tr>
+                  <tr>
+                  </table>
+                  </div>
+                  </div>'))
       ),
-      column(9, plotlyOutput("clustPlotObject") %>% withSpinner())
+      column(9, plotlyOutput("clustPlotObject",height = 600) %>% withSpinner())
     ))
   } else {
     helpText("No data for ploting. Please import dataset and assign group information first.")
@@ -401,4 +430,3 @@ output$pcaUI <- renderUI({
   }
 })
 
-########################################################################

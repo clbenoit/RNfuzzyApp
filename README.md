@@ -38,17 +38,17 @@ For each result, downloading png images and results is available.</br>
 
 - MA plot</br>
 - Volcano plot</br>
-- Heatmap </br>
+- Heatmap and clustering </br>
 - PCA ( 2D and 3D plots)</br>
 
 <b> PART III : Enrichment & Conversion </b>
 ---
 
-<b> Enrichment : </b></br>
+<b> - Enrichment : </b></br>
 
 Giving a set of GeneIDs, this section provides you a GO Term enrichment with an associated graph. >/br>
 
-<b> Conversion : </b></br>
+<b> - Conversion : </b></br>
 
 Giving a set of Ensembl ids, Entrez ids or Symbol, this section provides a translation to other ids.
 

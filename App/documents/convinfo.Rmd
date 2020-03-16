@@ -37,8 +37,13 @@ g-table-intro h4 {
 
 
 ## Gene Ids Conversion
+---
 
-
-blablabla
+To convert your ids, just : </br>
+    - select your organism </br>
+    - choose your input type </br>
+    - paste your gene list </br>
+  
+And boom here are your translation. 
 
 

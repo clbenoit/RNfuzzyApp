@@ -41,7 +41,7 @@ For each result, downloading png images and results is available.</br>
 - Heatmap </br>
 - PCA ( 2D and 3D plots)</br>
 
-<PART III : Enrichment & Conversion </b>
+<b> PART III : Enrichment & Conversion </b>
 ---
 
 <b> Enrichment : </b></br>

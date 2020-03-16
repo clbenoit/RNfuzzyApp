@@ -43,11 +43,11 @@ observeEvent(input$sider, {
           selected = "complete"
         ),
         sliderInput(
-          "cutclus",
-          "Clusters wanted",
+          "clusterswanted",
+          "Clusters Wanted",
           min = 0,
-          max = 5,
-          value = 3,
+          max = 10,
+          value = 5,
           step = 1
         ),
         tagList(
@@ -101,7 +101,7 @@ output$heatmapSelectGene <- renderUI({
           "FDR Cut-off",
           min = 0.00000001,
           max = 0.1,
-          step = 0.000001,
+          step = 0.005,
           value = 0.01
         )
       )
@@ -192,14 +192,19 @@ observeEvent(input$heatmapRun, {
   }
   colorPal <- colorPanel()
   datat <- t(data)
+  datal <-  log1p(datat)
+  datan <- heatmaply::normalize(datal)
+  dend <- hclust(dist(t(datan), method = input$heatmapDist), method = input$heatmapCluster)
+  cut <- cutree(dend, k = input$clusterswanted)
+  cute <- as.data.frame(cut, row.names = t(datan)[1])
+  runHeatmap$height <- 600
+
   output$heatmap <- renderPlotly({
-    isolate({
-      runHeatmap$height <- 600
-      datat <-  log1p(datat)
-      datat <- heatmaply::normalize(datat)
+  
       p <- heatmaply(
-        datat,
+        datan,
         colors = colorPal,
+        k_col = input$clusterswanted,
         dist_method = input$heatmapDist,
         hclust_method = input$heatmapCluster,
         xlab = "Gene",
@@ -207,14 +212,40 @@ observeEvent(input$heatmapRun, {
         main = heatmapTitle,
         margins = c(150, 100, 40, 20),
         scale = "none",
-        labCol = colnames(datat),
-        labRow = row.names(datat)
+        labCol = colnames(datan),
+        labRow = row.names(datan)
       )
       p
-
-    })
   })
 
+  #result table 
+  output$clusterTable <- DT::renderDataTable({
+
+    DT::datatable(
+      cute,        
+      extensions = 'Buttons',
+      option = list(
+        paging = TRUE,
+        searching = TRUE,
+        fixedColumns = TRUE,
+        autoWidth = TRUE,
+        ordering = TRUE,
+        dom = 'Bfrtip',
+        buttons = list(list(
+          extend = 'collection',
+          buttons = list(extend='csv',
+                         filename = "clusters"),
+          text = 'Download')),
+        scrollX = TRUE,
+        pageLength = 10,
+        searchHighlight = TRUE,
+        orderClasses = TRUE
+        
+      ),
+      class = "display"
+)
+  }, server = FALSE)
+  
   
   
   #result table 
@@ -254,7 +285,6 @@ observeEvent(input$heatmapRun, {
         "q.value",
         colnames(data)
       ),
-      digits = 10
     ) %>% formatStyle(
       "estimatedDEG",
       target = 'row',

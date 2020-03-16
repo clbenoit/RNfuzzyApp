@@ -1,0 +1,44 @@
+---
+title: GO Enrichment informations
+author: Haering Margaux, 2020, IBDM
+framework: bootstrap
+mode: selfcontained
+widgets: "nyt_home"
+highlighter: prettify
+hitheme: twitter-bootstrap
+assets:
+  css:
+    - "http://fonts.googleapis.com/css?family=Raleway:300"
+    - "http://fonts.googleapis.com/css?family=Oxygen"
+---
+
+<style>
+body{
+  font-family: 'Oxygen', sans-serif;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+h1,h2,h3,h4 {
+  font-family: 'Raleway', sans-serif;
+}
+
+
+h4 {
+  text-indent: 100px;
+}
+
+g-table-intro h4 {
+  text-indent: 0px;
+}
+</style>
+
+
+
+
+## Gene Ids Conversion
+
+
+blablabla
+
+

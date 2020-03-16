@@ -20,6 +20,13 @@ fluidPage(fluidRow(column(
                  footer = "This part is time consuming, please wait patiently.",
                ),
                tabPanel(
+                 title = tagList(icon("table"), "Clusters"),
+                 width = NULL,
+                 solidHeader = TRUE,
+                 status = "info", 
+                 DT::dataTableOutput("clusterTable")
+               ),
+               tabPanel(
                  title = tagList(icon("table"), "Result table"),
                  width = NULL,
                  solidHeader = TRUE,

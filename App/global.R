@@ -19,6 +19,12 @@ library(tidyr)
 library(cluster)
 library(TCC)
 library(heatmaply)
+library(clusterProfiler)
+library(org.Dm.eg.db)
+library(org.Hs.eg.db)
+library(org.Mm.eg.db)
+library(org.Ce.eg.db)
+
 
 #theme
 #install_github("nik01010/dashboardthemes")

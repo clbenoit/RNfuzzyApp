@@ -10,7 +10,7 @@ tagList(dashboardPage(
       id = "sider",
       menuItem(
         "Data visualization",
-        tabName = "dateImport",
+        tabName = "dataImport",
         icon = icon("eye")),
       menuItem(
         "DE Analysis",
@@ -30,7 +30,15 @@ tagList(dashboardPage(
         menuSubItem(
           "PCA",
           tabName = "pcaTab",
-          icon = icon("bar-chart")))
+          icon = icon("bar-chart"))),
+      menuItem(
+        "GO Enrichment",
+        tabName = "enrichTab",
+        icon = icon("project-diagram")),
+      menuItem(
+        "ID Conversion",
+        tabName = "conversionTab",
+        icon = icon("sync"))
     )
   ),
   
@@ -39,7 +47,7 @@ tagList(dashboardPage(
     shinyDashboardThemes(
       theme = "blue_gradient"),
     tabItems(
-      tabItem(tabName = "dateImport", source(
+      tabItem(tabName = "dataImport", source(
         file = "ui-data-import.R",
         local = TRUE,
         encoding = "UTF-8"
@@ -61,6 +69,16 @@ tagList(dashboardPage(
       )$value),
       tabItem(tabName = "pcaTab", source(
         file = "ui-pca.R",
+        local = TRUE,
+        encoding = "UTF-8"
+      )$value),
+      tabItem(tabName = "enrichTab", source(
+        file = "ui-enrich.R",
+        local = TRUE,
+        encoding = "UTF-8"
+      )$value),
+      tabItem(tabName = "conversionTab", source(
+        file = "ui-conversion.R",
         local = TRUE,
         encoding = "UTF-8"
       )$value)

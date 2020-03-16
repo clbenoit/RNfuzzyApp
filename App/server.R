@@ -1,4 +1,4 @@
-  # Define server 
+# Define server 
 shinyServer(function(input, output, session) {
   
   source(file = "server-data-import.R",
@@ -16,6 +16,13 @@ shinyServer(function(input, output, session) {
   source(file = "server-pca.R",
          local = TRUE,
          encoding = "UTF-8")
+  source(file = "server-enrich.R",
+         local = TRUE,
+         encoding = "UTF-8")
+  source(file = "server-conversion.R",
+         local = TRUE, 
+         encoding = "UTF-8")
+  
   
   var = reactiveValues(
     count = NULL,
@@ -24,7 +31,6 @@ shinyServer(function(input, output, session) {
     groupList = NULL,
     groupListConvert = NULL,
     result = data.frame("Results will show here." = character(0)),
-    tccObject = NULL,
-    data.pca = NULL)
-
+    tccObject = NULL)
+  
 })

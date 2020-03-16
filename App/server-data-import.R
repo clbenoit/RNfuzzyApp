@@ -8,7 +8,7 @@ convertion <- function(x, df) {
 }
 
 
-observeEvent(input$confirmedGroupList, {
+observeEvent(input$uploadCountData, {
   tryCatch({
     var$CountData <-
       data.frame(fread(input$uploadCountData$datapath), row.names = 1)
@@ -37,10 +37,6 @@ observeEvent(input$confirmedGroupList, {
 
 })
 
-
-datasetInput <- reactive({
-  var$CountData
-})
 
 # Render a table of raw count data, adding color
 
@@ -94,7 +90,7 @@ observeEvent(input$confirmedGroupList, {
   }
   
   tryCatch({
-
+    
     group <- fread(input$groupSelect, header = FALSE)
     var$groupList <-
       lapply(unique(group$V2), function(x) {
@@ -107,9 +103,12 @@ observeEvent(input$confirmedGroupList, {
     for (i in 1:length(var$groupList)) {
       data.list[unlist(lapply(var$groupList[[i]], convertion, df = var$CountData))] = names(var$groupList[i])
     }
-    
-    # Storage convert group list to local
+
     var$groupListConvert <- data.list
+    selectedgroups = input$confirmedGroupList
+    tmprem = match(as.character(rownames(var$CountData)[which(!(var$groupList%in%selectedgroups))]),colnames(var$CountData))
+    tmpkeep = setdiff(1:ncol(var$CountData),tmprem)
+    var$CountData <- var$CountData[,tmpkeep]
     
     # Create TCC Object 
     tcc <-
@@ -146,6 +145,13 @@ observeEvent(input$confirmedGroupList, {
     return()
   })
 })
+
+
+datasetInput <- reactive({
+  var$CountData
+})
+
+
 
 output$DataSummary <- renderUI({
   dt <- datasetInput()
@@ -429,4 +435,3 @@ output$pcaUI <- renderUI({
     helpText("No data for ploting. Please import dataset and assign group information first.")
   }
 })
-

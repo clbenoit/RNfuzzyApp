@@ -18,7 +18,20 @@ observeEvent(input$enrichmentgo,{
     title = "Enrichment in progress...",
     value = 25
   )
+  
   geneset <- unlist(strsplit(input$refseqids, split = '\n'))
+  for(i in geneset){
+    if (startsWith(i,"FBgn") | startsWith(i,"ENS")){
+      return()
+    }else{
+      sendSweetAlert(
+        session = session,
+        title = "Input data error!",
+        text = "Wrong identiers",
+        type = "error"
+      )
+    }
+  }
   res <- enrichGO(geneset, 
                   OrgDb = input$chosendataset, 
                   keyType = 'ENSEMBL', 

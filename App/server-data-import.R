@@ -1,11 +1,5 @@
 # server-data-import.R
 
-# Convert the input of group information to
-# a specific format for normalization.
-
-convertion <- function(x, df) {
-  grep(x, colnames(df))
-}
 
 
 observeEvent(input$uploadCountData, {
@@ -14,7 +8,6 @@ observeEvent(input$uploadCountData, {
       data.frame(fread(input$uploadCountData$datapath), row.names = 1)
     var$tccObject <- NULL
     v$importActionValue <- FALSE
-    showNotification("Received uploaded file.", type = "message")
   },
   error = function(e) {
     sendSweetAlert(
@@ -100,6 +93,12 @@ observeEvent(input$confirmedGroupList, {
     
     data.list <- rep(0, ncol(var$CountData))
     
+    # Convert the input of group information to
+    # a specific format for normalization.
+    convertion <- function(x, df) {
+      grep(x, colnames(df))
+    }
+    
     for (i in 1:length(var$groupList)) {
       data.list[unlist(lapply(var$groupList[[i]], convertion, df = var$CountData))] = names(var$groupList[i])
     }
@@ -110,7 +109,7 @@ observeEvent(input$confirmedGroupList, {
     tmpkeep = setdiff(1:ncol(var$CountData),tmprem)
     var$CountData <- var$CountData[,tmpkeep]
     
-    # Create TCC Object 
+    # Create a TCC Object 
     tcc <-
       new("TCC", var$CountData[data.list != 0], data.list[data.list != 0])
     var$tccObject <- tcc
@@ -204,8 +203,7 @@ output$sampleDistributionBox <- renderPlotly({
 
     data <- left_join(cpm_stack, group, by = "col")
     data <- arrange(data, group)
-    
-    print(head(data))
+
     p <- plot_ly(
       data = data,
       x = ~ col,
@@ -259,16 +257,16 @@ output$sampleDistributionBoxPanel <- renderUI({
       )
     ))
   } else {
-    helpText("No data for ploting. Please import dataset and assign group information first.")
+    helpText("No data for ploting.")
   }
 })
 
 ################### HEATMAP #####################
-output$clustPlotObject <- renderPlotly({
+output$rawheatmap <- renderPlotly({
   if (length(var$tccObject) > 0) {
     tcc <- var$tccObject
     data <- tcc$count[rowSums(tcc$count) > 0,]
-    data <- data.frame(1 - cor(data, method = input$clustdist))
+    data <- data.frame(1 - cor(data, method = input$correlation))
     data.list.count <- length(unique(tcc$group$group))
     heatmaply(
       data,
@@ -290,7 +288,7 @@ output$clustUI <- renderUI({
       column(
         3,
         selectInput(
-          inputId = "clustdist",
+          inputId = "correlation",
           label = "Distance Measure",
           choices = c("Spearman" = "spearman",
                       "Pearson" = "pearson")
@@ -327,15 +325,15 @@ output$clustUI <- renderUI({
                   <th class="tg-031e"> <span class="label label-primary"> Pearson</span></th>
                   <th class="tg-031e"> Pearson correlation measures the degree of a linear relationship between two profiles.
                   </tr>
-                  <tr>
                   </table>
                   </div>
                   </div>'))
       ),
-      column(9, plotlyOutput("clustPlotObject",height = 600) %>% withSpinner())
+      column(9, plotlyOutput("rawheatmap",height = 600) %>% withSpinner()
+             )
     ))
   } else {
-    helpText("No data for ploting. Please import dataset and assign group information first.")
+    helpText("No data for ploting.")
   }
 })
 
@@ -432,6 +430,6 @@ output$pcaUI <- renderUI({
              ))
     ))
   } else {
-    helpText("No data for ploting. Please import dataset and assign group information first.")
+    helpText("No data for ploting.")
   }
 })

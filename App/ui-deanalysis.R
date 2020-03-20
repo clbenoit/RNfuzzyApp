@@ -29,8 +29,8 @@ fluidPage(useSweetAlert(), fluidRow(column(
         inputId = "fdr",
         label = "FDR Cut-off",
         min = 0.00001,
-        value = 0.001,
-        max = 0.01,
+        value = 0.1,
+        max = 1,
         step = 0.001
       ),
       sliderInput(

@@ -196,7 +196,6 @@ observeEvent(input$heatmapRun, {
   datan <- heatmaply::normalize(datal)
   dend <- hclust(dist(t(datan), method = input$heatmapDist), method = input$heatmapCluster)
   cut <- cutree(dend, k = input$clusterswanted)
-  #cute <- as.data.frame(cut, row.names = t(datan)[1])
   cute <- as.data.frame(cut)
   cute$gene_id <- rownames(cute)
   colnames(cute) <- c("cluster","gene_id")
@@ -223,21 +222,21 @@ observeEvent(input$heatmapRun, {
   })
 
 
+  gene_id <- row.names(data)
+  data <- cbind(data, gene_id = gene_id)
+  heatdata <- var$result
+  heatdata <- var$result[,-2]
+  heatdata <- heatdata[,-2]
+  heatdata <- heatdata[,-5]
+  colnames(heatdata) <- c("gene_id", "PValue","FDR","Rank")
+  resultTable <- merge(cute, heatdata, by = "gene_id")
+  resultTable <- merge(resultTable, data, by = "gene_id")
+  var$DEGList <- as.data.frame(resultTable$gene_id)
+  
   
   #result table 
   output$resultTableInHeatmap <- DT::renderDataTable({
-    gene_id <- row.names(data)
-    data <- cbind(data, gene_id = gene_id)
-    heatdata <- var$result
-    heatdata <- var$result[,-2]
-    heatdata <- heatdata[,-2]
-    heatdata <- heatdata[,-5]
-    colnames(heatdata) <- c("gene_id", "PValue","FDR","Rank")
-    resultTable <- merge(cute, heatdata, by = "gene_id")
-    resultTable <- merge(resultTable, data, by = "gene_id")
 
-
-    
     DT::datatable(
       resultTable,        
       extensions = 'Buttons',
@@ -263,6 +262,8 @@ observeEvent(input$heatmapRun, {
       class = "display")
   }, server = FALSE)
   
+
+  
   runHeatmap$runHeatmapValue <- input$heatmapRun
   closeSweetAlert(session = session)
   sendSweetAlert(session = session,
@@ -272,6 +273,7 @@ observeEvent(input$heatmapRun, {
 
   
 })
+
 
 # remder final heatmap 
 

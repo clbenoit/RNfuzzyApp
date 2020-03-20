@@ -21,6 +21,7 @@ fluidPage(fluidRow(column(
         "Paste Gene List",
         rows = 5,
         placeholder = "Input refseq ids, one gene per line."
+        
       ),
       selectInput(
         "chosenGO",

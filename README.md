@@ -46,7 +46,7 @@ For each result, downloading png images and results is available.</br>
 
 <b> - Enrichment : </b></br>
 
-Giving a set of GeneIDs, this section provides you a GO Term enrichment with an associated graph. >/br>
+Giving a set of GeneIDs, this section provides you a GO Term enrichment with an associated graph. </br>
 
 <b> - Conversion : </b></br>
 

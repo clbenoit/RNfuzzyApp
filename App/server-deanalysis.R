@@ -30,7 +30,8 @@ observeEvent(input$TCC, {
     norm.method = input$normMethod,
     test.method = input$testMethod,
     FDR = input$fdr,
-    floorPDEG = input$floorpdeg
+    floorPDEG = input$floorpdeg,
+    iteration = 3
   )
   
   updateProgressBar(
@@ -41,22 +42,55 @@ observeEvent(input$TCC, {
   )
   tcc <- estimateDE(tcc, #function to estime DEG
                     test.method = input$testMethod,
-                    iteration = 3,
                     FDR = input$fdr)
 
   
   var$tccObject <- tcc
   var$result <- getResult(tcc, sort = FALSE) %>% mutate_if(is.factor, as.character)
-  var$result <- var$result[,-2]
+
+  var$result_a <- var$result[,-2]
+  var$result_m <- var$result_a[,-2]
+  colnames(var$result_m) <- c("gene_id", "P Value", "FDR", "Rank", "estimatedDEG")
+  var$result_e <- var$result_m[which(var$result_m$estimatedDEG >0),]
+  var$result_s <- var$result_e[,-5]
   var$norData <- tcc$getNormalizedData()
 
+  
+  
+  output$normresultTable <- DT::renderDataTable({
+    data <- var$norData
+    DT::datatable(
+      data,
+      filter = "bottom",
+      extensions = 'Buttons',
+      option = list(
+        paging = TRUE,
+        searching = TRUE,
+        fixedColumns = TRUE,
+        autoWidth = TRUE,
+        ordering = TRUE,
+        dom = 'Bfrtip',
+        buttons = list(list(
+          extend = 'collection',
+          buttons = list(extend='csv',
+                         filename = "normalization_results"),
+          text = 'Download')),
+        scrollX = TRUE,
+        pageLength = 10,
+        searchHighlight = TRUE,
+        orderClasses = TRUE
+        
+      ),
+      
+      class = "display")
+  }, server = F)
 
   output$fullresultTable <- DT::renderDataTable({
     data <- var$norData
     gene_id <- row.names(data)
     data <- cbind(data, gene_id = gene_id)
-    
-    resultTable <- merge(var$result, data, by = "gene_id")
+
+    resultTable <- merge(var$result_m, data, by = "gene_id")
     
     DT::datatable(
       resultTable,
@@ -84,7 +118,7 @@ observeEvent(input$TCC, {
       class = "display",
       caption = tags$caption(
         tags$li(
-          HTML("<font color=\"#B22222\"><b>Gene Name</b></font> is colored when under FDR cut-off, and m.value for Log2FC")
+          HTML("<font color=\"#B22222\"><b>Gene Name</b></font> is colored when under FDR cut-off")
         )
       ))%>% formatStyle(
         "gene_id",
@@ -92,6 +126,38 @@ observeEvent(input$TCC, {
         color = styleEqual(1, "#B22222"),
         fontWeight = styleEqual(c(0, 1), c("normal", "bold"))
       )
+  }, server = F)
+  
+  output$sortedresultTable <- DT::renderDataTable({
+    data <- var$norData
+    gene_id <- row.names(data)
+    data <- cbind(data, gene_id = gene_id)
+    resultTable <- merge(var$result_s, data, by = "gene_id")
+    
+    DT::datatable(
+      resultTable,
+      filter = "bottom",
+      extensions = 'Buttons',
+      option = list(
+        paging = TRUE,
+        searching = TRUE,
+        fixedColumns = TRUE,
+        autoWidth = TRUE,
+        ordering = TRUE,
+        dom = 'Bfrtip',
+        buttons = list(list(
+          extend = 'collection',
+          buttons = list(extend='csv',
+                         filename = "DEG_results"),
+          text = 'Download')),
+        scrollX = TRUE,
+        pageLength = 10,
+        searchHighlight = TRUE,
+        orderClasses = TRUE
+        
+      ),
+      
+      class = "display")
   }, server = F)
 
   closeSweetAlert(session = session)
@@ -111,15 +177,37 @@ resultTable <- reactive({
 
 
 
-# result table render
+# results tables render
+
+output$NormResultTable <- renderUI({
+  if(tccRun$tccRunValue){
+    tagList(
+      fluidRow(column(
+        12, DT::dataTableOutput('normresultTable') %>% withSpinner()
+      )))} else {
+        helpText("Run Normalization to obtain Result Table.")
+      }
+})
+
 
 output$mainResultTable <- renderUI({
   if(tccRun$tccRunValue){
-  tagList(
-  fluidRow(column(
-    12, DT::dataTableOutput('fullresultTable') %>% withSpinner()
-  )))} else {
-    helpText("Click [Run Normalization] to obtain Result Table.")
-  }
+    tagList(
+      fluidRow(column(
+        12, DT::dataTableOutput('fullresultTable') %>% withSpinner()
+      )))} else {
+        helpText("Run Normalization to obtain Result Table.")
+      }
+})
+
+
+output$mainsortedResultTable <- renderUI({
+  if(tccRun$tccRunValue){
+    tagList(
+      fluidRow(column(
+        12, DT::dataTableOutput('sortedresultTable') %>% withSpinner()
+      )))} else {
+        helpText("Run Normalization to obtain Result Table.")
+      }
 })
 

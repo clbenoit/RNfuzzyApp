@@ -101,7 +101,7 @@ output$heatmapSelectGene <- renderUI({
           "FDR Cut-off",
           min = 0.00000001,
           max = 0.1,
-          step = 0.005,
+          step = 0.0001,
           value = 0.01
         )
       )
@@ -196,7 +196,11 @@ observeEvent(input$heatmapRun, {
   datan <- heatmaply::normalize(datal)
   dend <- hclust(dist(t(datan), method = input$heatmapDist), method = input$heatmapCluster)
   cut <- cutree(dend, k = input$clusterswanted)
-  cute <- as.data.frame(cut, row.names = t(datan)[1])
+  #cute <- as.data.frame(cut, row.names = t(datan)[1])
+  cute <- as.data.frame(cut)
+  cute$gene_id <- rownames(cute)
+  colnames(cute) <- c("cluster","gene_id")
+  rownames(cute) <- NULL
   runHeatmap$height <- 600
 
   output$heatmap <- renderPlotly({
@@ -218,42 +222,21 @@ observeEvent(input$heatmapRun, {
       p
   })
 
-  #result table 
-  output$clusterTable <- DT::renderDataTable({
 
-    DT::datatable(
-      cute,        
-      extensions = 'Buttons',
-      option = list(
-        paging = TRUE,
-        searching = TRUE,
-        fixedColumns = TRUE,
-        autoWidth = TRUE,
-        ordering = TRUE,
-        dom = 'Bfrtip',
-        buttons = list(list(
-          extend = 'collection',
-          buttons = list(extend='csv',
-                         filename = "clusters"),
-          text = 'Download')),
-        scrollX = TRUE,
-        pageLength = 10,
-        searchHighlight = TRUE,
-        orderClasses = TRUE
-        
-      ),
-      class = "display"
-)
-  }, server = FALSE)
-  
-  
   
   #result table 
   output$resultTableInHeatmap <- DT::renderDataTable({
     gene_id <- row.names(data)
     data <- cbind(data, gene_id = gene_id)
-    
-    resultTable <- merge(var$result, data, by = "gene_id")
+    heatdata <- var$result
+    heatdata <- var$result[,-2]
+    heatdata <- heatdata[,-2]
+    heatdata <- heatdata[,-5]
+    colnames(heatdata) <- c("gene_id", "PValue","FDR","Rank")
+    resultTable <- merge(cute, heatdata, by = "gene_id")
+    resultTable <- merge(resultTable, data, by = "gene_id")
+
+
     
     DT::datatable(
       resultTable,        
@@ -277,19 +260,7 @@ observeEvent(input$heatmapRun, {
         
       ),
       
-      class = "display"
-      )%>% formatRound(
-      columns = c(
-        "m.value",
-        "p.value",
-        "q.value",
-        colnames(data)
-      ),
-    ) %>% formatStyle(
-      "estimatedDEG",
-      target = 'row',
-      backgroundColor = styleEqual(1, "lightblue")
-    )
+      class = "display")
   }, server = FALSE)
   
   runHeatmap$runHeatmapValue <- input$heatmapRun

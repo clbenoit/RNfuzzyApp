@@ -70,11 +70,25 @@ column(
     includeMarkdown("documents/tccinfo.Rmd")
      ),
   tabPanel(
+    title = tagList(icon("table"), "Normalization Table"),
+    width = NULL,
+    solidHeader = TRUE,
+    status = "primary",
+    uiOutput("NormResultTable")
+  ),
+  tabPanel(
     title = tagList(icon("table"), "Result Table"),
     value = 'redirectres',
     width = NULL,
     solidHeader = TRUE,
     status = "primary",
     uiOutput("mainResultTable")
+  ),
+  tabPanel(
+    title = tagList(icon("table"), "DEG Table"),
+    width = NULL,
+    solidHeader = TRUE,
+    status = "primary",
+    uiOutput("mainsortedResultTable")
   )
 ))))

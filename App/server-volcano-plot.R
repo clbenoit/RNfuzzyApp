@@ -38,7 +38,7 @@ observeEvent(input$sider, {
           ),
           spectrumInput(
             inputId = "downColor",
-            label = tagList("Down-regulated in G2", htmlOutput("downPreview")),
+            label = tagList("Down-regulated in G2" ,htmlOutput("downPreview")),
           choices = list(
             list(
               "red",
@@ -56,7 +56,7 @@ observeEvent(input$sider, {
         ),
           spectrumInput(
             inputId = "upColor",
-            label = tagList("Up-regulated in G2", htmlOutput("upPreview")),
+            label = tagList("Up-regulated in G2" ,htmlOutput("upPreview")),
             choices = list(
               list(
                 "green",
@@ -94,11 +94,12 @@ observeEvent({
   downCut <- input$CutFC[1]
   upCut <- input$CutFC[2]
   pvalueCut <- input$Cutpvalue
+  dtDEG <- dt[which(dt$estimatedDEG >0),]
   
   downCount <-
-    nrow(dt[dt$m.value <= downCut & dt[["p.value"]] <= pvalueCut,])
+    nrow(dtDEG[dtDEG$m.value <= downCut & dtDEG[["p.value"]] <= pvalueCut,])
   upCount <-
-    nrow(dt[dt$m.value >= upCut & dt[["p.value"]] <= pvalueCut,])
+    nrow(dtDEG[dtDEG$m.value >= upCut & dtDEG[["p.value"]] <= pvalueCut,])
   
   output$downPreview <- renderText({
     paste0("<font color=\"",
@@ -114,6 +115,7 @@ observeEvent({
            upCount,
            " genes</b></font>")
   })
+  
 })
 
 # Check the `Generate` button, if the botton has been clicked, generate volcano plot 
@@ -314,6 +316,11 @@ output$resultTableVolc <- DT::renderDataTable({
   } else {
     if (length(input$Cutpvalue) > 0) {
       fdrCut <- input$Cutpvalue
+      volcT <- resultTable()
+      volcT <- volcT[,-2]
+      volcT <- volcT[which(volcT$estimatedDEG >0),]
+      volcT <- volcT[,-6]
+      colnames(volcT) <- c("gene_id", "Log2FC","PValue", "FDR", "Rank")
       
     } else {
       fdrCut <- 0
@@ -323,7 +330,7 @@ output$resultTableVolc <- DT::renderDataTable({
     gene_id <- row.names(data)
     data <- cbind(data, gene_id = gene_id)
     
-    resultTable <- merge(resultTable(), data, by = "gene_id")
+    resultTable <- merge(volcT, data, by = "gene_id")
     
     t <- DT::datatable(
       resultTable,
@@ -354,13 +361,13 @@ output$resultTableVolc <- DT::renderDataTable({
         )
       ))
     
-    if (!is.na(sum(resultTable()$m.value))) {
-      t   %>% formatStyle("gene_id", "m.value",
+    if (!is.na(sum(volcT$Log2FC))) {
+      t   %>% formatStyle("gene_id", "Log2FC",
                           color = styleInterval(input$CutFC,
                                                 c(
                                                   input$downColor, "black", input$upColor
                                                 ))) %>% formatStyle("gene_id",
-                                                                    "p.value",
+                                                                    "PValue",
                                                                     fontWeight = styleInterval(fdrCut, c("bold", "normal")))
     } else {
       t
@@ -392,6 +399,10 @@ output$resultTabledown <- DT::renderDataTable({
       fdrCut <- input$Cutpvalue
       sortedvolc <- sortedvolc[sortedvolc$p.value < fdrCut,]
       sortedvolc <- sortedvolc[sortedvolc$m.value < downCut,]
+      sortedvolc <- sortedvolc[,-2]
+      sortedvolc <- sortedvolc[which(sortedvolc$estimatedDEG >0),]
+      sortedvolc <- sortedvolc[,-6]
+      colnames(sortedvolc) <- c("gene_id", "Log2FC","PValue", "FDR", "Rank")
       
     } else {
       fdrCut <- 0
@@ -432,13 +443,13 @@ output$resultTabledown <- DT::renderDataTable({
       )
     ))
     
-    if (!is.na(sum(resultTable()$m.value))) {
-      t   %>% formatStyle("gene_id", "m.value",
+    if (!is.na(sum(sortedvolc$Log2FC))) {
+      t   %>% formatStyle("gene_id", "Log2FC",
                           color = styleInterval(input$CutFC,
                                                 c(
                                                   input$downColor, "black", input$upColor
                                                 ))) %>% formatStyle("gene_id",
-                                                                    "p.value",
+                                                                    "PValue",
                                                                     fontWeight = styleInterval(fdrCut, c("bold", "normal")))
     } else {
       t
@@ -460,6 +471,10 @@ output$resultTableup <- DT::renderDataTable({
       fdrCut <- input$Cutpvalue
       sortedvolc <- sortedvolc[sortedvolc$p.value < fdrCut,]
       sortedvolc <- sortedvolc[sortedvolc$m.value > upCut,]
+      sortedvolc <- sortedvolc[,-2]
+      sortedvolc <- sortedvolc[which(sortedvolc$estimatedDEG >0),]
+      sortedvolc <- sortedvolc[,-6]
+      colnames(sortedvolc) <- c("gene_id", "Log2FC","PValue", "FDR", "Rank")
       
     } else {
       fdrCut <- 0
@@ -499,13 +514,13 @@ output$resultTableup <- DT::renderDataTable({
         "Please verify your Log2FC if changed from the default one."
       )))
     
-    if (!is.na(sum(resultTable()$m.value))) {
-      t   %>% formatStyle("gene_id", "m.value",
+    if (!is.na(sum(sortedvolc$Log2FC))) {
+      t   %>% formatStyle("gene_id", "Log2FC",
                           color = styleInterval(input$CutFC,
                                                 c(
                                                   input$downColor, "black", input$upColor
                                                 ))) %>% formatStyle("gene_id",
-                                                                    "p.value",
+                                                                    "PValue",
                                                                     fontWeight = styleInterval(fdrCut, c("bold", "normal")))
     } else {
       t

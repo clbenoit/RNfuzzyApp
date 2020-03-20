@@ -16,7 +16,7 @@ tagList(dashboardPage(
         "DE Analysis",
         icon = icon("flask"),
         menuSubItem(
-          "Normalization",
+          "Normalization & Analysis",
           tabName = "deanalysisTab",
           icon = icon("calculator")),
         menuSubItem(

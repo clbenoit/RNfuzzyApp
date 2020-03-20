@@ -6,12 +6,13 @@ observeEvent(input$sider, {
   if (input$sider == "pcaTab") {
     output$pcaParameter <- renderUI({
       tagList(
-          tipify(sliderInput(
-            "pcFDR",
-            "FDR Cut-off",
-            min = 0.01,
-            max = 1,
-            value = 0.05
+          tipify(numericInput(
+            inputId = "pcFDR",
+            label = "FDR Cut-off",
+            min = 0.00001,
+            value = 0.001,
+            max = 0.01,
+            step = 0.001
           ),
           title = "Genes under the FDR cut-off will be used for PCA. Set 1 for exploratory analysis with all genes."),
 

@@ -25,12 +25,12 @@ fluidPage(useSweetAlert(), fluidRow(column(
           "DESeq2" = "deseq2",
           "baySeq" = "bayseq"
       )),
-      sliderInput(
-        "fdr",
-        "FDR Cut-off",
-        min = 0,
-        max = 0.1,
-        value = 0.01,
+      numericInput(
+        inputId = "fdr",
+        label = "FDR Cut-off",
+        min = 0.00001,
+        value = 0.001,
+        max = 0.01,
         step = 0.001
       ),
       sliderInput(

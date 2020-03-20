@@ -11,7 +11,7 @@ observeEvent(input$sider, {
         tagList(
           textInput("graphicTitle", "Graphic Title", value = "Volcano Plot"),
           textInput("xlabs", "X-axis Label", value = "log<sub>2</sub>(Fold Change)"),
-          textInput("ylabs", "Y-axis Label", value = "-log<sub>10</sub>(P-value)"),
+          textInput("ylabs", "Y-axis Label", value = "-log<sub>10</sub>(FDR)"),
           sliderInput(
             "CutFC",
             "Fold Change (X-axis) Cut-off",
@@ -20,13 +20,13 @@ observeEvent(input$sider, {
             value = c(-2, 2),
             step = 0.5
           ),
-          sliderInput(
-            inputId = "Cutpvalue",
-            label = "P-value Cut-off",
+          numericInput(
+            inputId = "Cutfdr",
+            label = "FDR Cut-off",
             min = 0.00001,
-            value = 0.05,
-            max = 1,
-            step = 0.00001
+            value = 0.001,
+            max = 0.01,
+            step = 0.001
           ),
           sliderInput(
             "volcanoPointSize",
@@ -88,18 +88,18 @@ observeEvent(input$sider, {
 # Preview up and down regulated genes under Color selection 
 observeEvent({
   input$CutFC
-  input$Cutpvalue
+  input$Cutfdr
 }, {
   dt <- resultTable()
   downCut <- input$CutFC[1]
   upCut <- input$CutFC[2]
-  pvalueCut <- input$Cutpvalue
+  FDRCut <- input$Cutfdr
   dtDEG <- dt[which(dt$estimatedDEG >0),]
   
   downCount <-
-    nrow(dtDEG[dtDEG$m.value <= downCut & dtDEG[["p.value"]] <= pvalueCut,])
+    nrow(dtDEG[dtDEG$m.value <= downCut & dtDEG[["q.value"]] <= FDRCut,])
   upCount <-
-    nrow(dtDEG[dtDEG$m.value >= upCut & dtDEG[["p.value"]] <= pvalueCut,])
+    nrow(dtDEG[dtDEG$m.value >= upCut & dtDEG[["q.value"]] <= FDRCut,])
   
   output$downPreview <- renderText({
     paste0("<font color=\"",
@@ -121,9 +121,9 @@ observeEvent({
 # Check the `Generate` button, if the botton has been clicked, generate volcano plot 
 
 observeEvent(input$makeVolcanoPlot, {
-  yaxis <- "p.value"
+  yaxis <- "q.value"
   output$volcanoPloty <- renderPlotly({
-    validate(need(resultTable()[[yaxis]] != "", "No p-values for ploting."))
+    validate(need(resultTable()[[yaxis]] != "", "No data for ploting."))
     req(input$makeVolcanoPlot)
     isolate({
       dt <- resultTable()
@@ -134,7 +134,7 @@ observeEvent(input$makeVolcanoPlot, {
       tryCatch({
         dt[dt$m.value <= downCut,]$color <- "Down"
         dt[dt$m.value >= upCut,]$color <- "Up"
-        dt[dt[[yaxis]] > input$Cutpvalue,]$color <-
+        dt[dt[[yaxis]] > input$Cutfdr,]$color <-
           "None"
       }, error = function(e) {
         sendSweetAlert(session = session, title = "ERROR", text = "No data was satisfied to your cut-off!")
@@ -221,8 +221,8 @@ observeEvent(input$makeVolcanoPlot, {
             ),
             list(
               type = 'line',
-              y0 = -log10(input$Cutpvalue),
-              y1 = -log10(input$Cutpvalue),
+              y0 = -log10(input$Cutfdr),
+              y1 = -log10(input$Cutfdr),
               x0 =  ~ min(m.value),
               x1 =  ~ max(m.value),
               line = list(dash = 'dot', width = 2)
@@ -314,8 +314,8 @@ output$resultTableVolc <- DT::renderDataTable({
   if (nrow(resultTable()) == 0) {
     DT::datatable(resultTable())
   } else {
-    if (length(input$Cutpvalue) > 0) {
-      fdrCut <- input$Cutpvalue
+    if (length(input$Cutfdr) > 0) {
+      fdrCut <- input$Cutfdr
       volcT <- resultTable()
       volcT <- volcT[,-2]
       volcT <- volcT[which(volcT$estimatedDEG >0),]
@@ -393,11 +393,11 @@ output$resultTabledown <- DT::renderDataTable({
   if (nrow(sortedvolc) == 0) {
     DT::datatable(sortedvolc)
   } else {
-    if (length(input$Cutpvalue) > 0) {
+    if (length(input$Cutfdr) > 0) {
       downCut <- input$CutFC[1]
       upCut <- input$CutFC[2]
-      fdrCut <- input$Cutpvalue
-      sortedvolc <- sortedvolc[sortedvolc$p.value < fdrCut,]
+      fdrCut <- input$Cutfdr
+      sortedvolc <- sortedvolc[sortedvolc$q.value < fdrCut,]
       sortedvolc <- sortedvolc[sortedvolc$m.value < downCut,]
       sortedvolc <- sortedvolc[,-2]
       sortedvolc <- sortedvolc[which(sortedvolc$estimatedDEG >0),]
@@ -465,11 +465,11 @@ output$resultTableup <- DT::renderDataTable({
   if (nrow(sortedvolc) == 0) {
     DT::datatable(sortedvolc)
   } else {
-    if (length(input$Cutpvalue) > 0) {
+    if (length(input$Cutfdr) > 0) {
       downCut <- input$CutFC[1]
       upCut <- input$CutFC[2]
-      fdrCut <- input$Cutpvalue
-      sortedvolc <- sortedvolc[sortedvolc$p.value < fdrCut,]
+      fdrCut <- input$Cutfdr
+      sortedvolc <- sortedvolc[sortedvolc$q.value < fdrCut,]
       sortedvolc <- sortedvolc[sortedvolc$m.value > upCut,]
       sortedvolc <- sortedvolc[,-2]
       sortedvolc <- sortedvolc[which(sortedvolc$estimatedDEG >0),]

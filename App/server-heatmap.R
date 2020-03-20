@@ -96,14 +96,14 @@ output$heatmapSelectGene <- renderUI({
     ),
     "By FDR" =
       tagList(
-        sliderInput(
-          "heatmapFDR",
-          "FDR Cut-off",
-          min = 0.00000001,
-          max = 0.1,
-          step = 0.0001,
-          value = 0.01
-        )
+        numericInput(
+          inputId = "heatmapFDR",
+          label = "FDR Cut-off",
+          min = 0.00001,
+          value = 0.001,
+          max = 0.01,
+          step = 0.001
+        ),
       )
   )
 })

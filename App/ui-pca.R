@@ -13,10 +13,10 @@ fluidPage(column(
 column(
   9,
   navbarPage("Results",
-    tabPanel(tagList(icon("square-o"), "PCA Plot (2D)"),
-             uiOutput("D2PlotUI")),
-    tabPanel(tagList(icon("cube"), "PCA Plot (3D)"),
-             uiOutput("D3PlotUI"))
-
+             tabPanel(tagList(icon("square-o"), "PCA Plot (2D)"),
+                      uiOutput("D2PlotUI")),
+             tabPanel(tagList(icon("cube"), "PCA Plot (3D)"),
+                      uiOutput("D3PlotUI"))
+             
   )
 ))

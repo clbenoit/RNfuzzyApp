@@ -1,25 +1,25 @@
 # ui-data-import.R
 navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
-  tabPanel(
-    title = tagList(icon("table"), "Data"),
-    fluidPage(
-      fluidRow(column(3,
-    box(
-    title = tagList(icon("cloud-upload"), "Upload"),
-    solidHeader = T,
-    status = "primary",
-    width = NULL,
-      fileInput(
-        "uploadCountData",
-        "Upload Count Data",
-        accept = c("text/csv",
-                   "text/comma-separated-values,text/plain",
-                   ".csv"),
-        buttonLabel = "Upload...",
-        placeholder = "No file has been uploaded."
-      ),
-    tags$div(
-      HTML('<div class="panel panel-primary">
+           tabPanel(
+             title = tagList(icon("table"), "Data"),
+             fluidPage(
+               fluidRow(column(3,
+                               box(
+                                 title = tagList(icon("cloud-upload"), "Upload"),
+                                 solidHeader = T,
+                                 status = "primary",
+                                 width = NULL,
+                                 fileInput(
+                                   "uploadCountData",
+                                   "Upload Count Data",
+                                   accept = c("text/csv",
+                                              "text/comma-separated-values,text/plain",
+                                              ".csv"),
+                                   buttonLabel = "Upload...",
+                                   placeholder = "No file has been uploaded."
+                                 ),
+                                 tags$div(
+                                   HTML('<div class="panel panel-primary">
                     <div class="panel-heading"> <span style="padding-left:10px"><b> Input file description</b> </span></div>
                   <div class="panel-body">
                   <style type="text/css">
@@ -68,108 +68,114 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
                   </table>
                   </div>
                   </div>'))
-           )),
-    
-    column(3,
-  box(
-    title = tagList(icon("tags"), "Group Assignment"),
-    solidHeader = TRUE,
-    status = "primary",
-    width = NULL,
-    textAreaInput(
-      "groupSelect",
-      "Input your group info",
-      rows = 6,
-      placeholder = paste(
-        "rep1,Group1",
-        "rep2,Group1",
-        "rep1,Group2",
-        "rep2,Group2",
-        "rep1,Group3",
-        "rep2,Group3",
-        sep = '\n'
-      )
-    )),
-  
-  
-  do.call(actionBttn, c(
-    list(
-      inputId = "confirmedGroupList",
-      label = "Assign Group Label",
-      icon = icon("play"))
-  )
-  )),
-  column(3,
-         box(
-           title = tagList(icon("question"), "About Groups"),
-           solidHeader = TRUE,
-           status = "primary",
-           width = NULL,
-           helpText(HTML('<div class="panel panel-primary">
-                    <div class="panel-heading"> <span style="padding-left:10px"><b> Group Assignement</b> </span></div>
-                  <div class="panel-body">
-                  <style type="text/css">
-                  .tg {
-                  border-collapse: collapse;
-                  border-spacing: 0;
-                  border: none;
-                  }
-                  .tg td {
-                  font-family: Arial, sans-serif;
-                  font-size: 14px;
-                  padding: 10px 5px;
-                  border-style: solid;
-                  border-width: 0px;
-                  overflow: hidden;
-                  word-break: normal;
-                  }
-                  .tg th {
-                  font-family: Arial, sans-serif;
-                  font-size: 14px;
-                  font-weight: normal;
-                  padding: 10px 5px;
-                  border-style: solid;
-                  border-width: 0px;
-                  overflow: hidden;
-                  word-break: normal;
-                  }
-                  .tg .tg-s6z2 {
-                  text-align: center
-                  }
-                  </style>
-                  <table class="tg">
-                  <tr>
-                  <th class="tg-031e"> - Enter only the groups you want to study, not necessarily every groups of your data </br>  - The raw table is not updated but the summary is.
-                  </tr>
-                  <tr>
-                  </table>
-                  </div>
-                  </div>')
-             
-           )
-         ),
-         box(
-           title = tagList(icon("file-alt"), "Summary"),
-           solidHeader = TRUE,
-           status = "primary",
-           width = NULL,
-         uiOutput("DataSummary"))
-         
-         
-         
-         ))),
-  box(
-    title = tagList(icon("table"), "Read Count Table"),
-    solidHeader = TRUE,
-    status = "primary",
-    width = NULL,
-    uiOutput("showTable")
-  )
-  ),
-tabPanel(title = tagList(icon("bar-chart"), "Count Distribution"),
-         uiOutput("sampleDistributionBoxPanel")),
-tabPanel(title = tagList(icon("sitemap"), "Hierarchical Clustering"),
-         uiOutput("clustUI")),
-tabPanel(title = tagList(icon("object-group"), "PCA"),
-         uiOutput("pcaUI"))
+                               )),
+                        
+                        column(3,
+                               box(
+                                 title = tagList(icon("filter"), "Filter Low Count Genes"),
+                                 solidHeader = TRUE, 
+                                 status = "primary",
+                                 width = NULL, 
+                                 sliderInput(
+                                   "filterCount",
+                                   "Filter Low Count Genes",
+                                   min = 0,
+                                   max = 100,
+                                   value = 0,
+                                   step = 1
+                                 )
+                               ),
+                               box(
+                                 title = tagList(icon("tags"), "Group Assignment"),
+                                 solidHeader = TRUE,
+                                 status = "primary",
+                                 width = NULL,
+                                 textAreaInput(
+                                   "groupSelect",
+                                   "Input your group info",
+                                   rows = 6,
+                                   placeholder = paste(
+                                     "rep1,Group1",
+                                     "rep2,Group1",
+                                     "rep1,Group2",
+                                     "rep2,Group2",
+                                     "rep1,Group3",
+                                     "rep2,Group3",
+                                     sep = '\n'
+                                   )
+                                 )),
+                               
+                               
+                               do.call(actionBttn, c(
+                                 list(
+                                   inputId = "confirmedGroupList",
+                                   label = "Assign Group Label",
+                                   icon = icon("play"))
+                               )
+                               )),
+                        column(3,
+                               box(
+                                 title = tagList(icon("question"), "About Groups"),
+                                 solidHeader = TRUE,
+                                 status = "primary",
+                                 width = NULL,
+                                 helpText(HTML(' Enter only groups you want to study, 
+                                               not necessarily every groups of your data.')
+                                          
+                                 )
+                               ),
+                               box(
+                                 title = tagList(icon("file-alt"), "Summary"),
+                                 solidHeader = TRUE,
+                                 status = "primary",
+                                 width = NULL,
+                                 uiOutput("DataSummary"))
+                               
+                               
+                               
+                        ))),
+             tabBox(
+               title = "",
+               width = NULL,
+               tabPanel(
+                 title = tagList(icon("bar-chart"), "Actual Table"),
+                 uiOutput("showTable")
+               ),
+               tabPanel(
+                 title = tagList(icon("bar-chart"), "Input Table"),
+                 uiOutput("showInputTable")
+               ),
+               tabPanel(
+                 title = tagList(icon("bar-chart"), "Filtered Table"),
+                 uiOutput("showLowTable")
+               )
+             )),
+  #           navbarPage("Read Count Table",
+   #                     tabPanel(
+    #                        title = tagList(icon("table"), "Actual Table"),
+     #                      solidHeader = TRUE,
+      #                     status = "primary",
+       #                   uiOutput("showTable")
+  #                      ),
+   #                     tabPanel(
+    #                      title = tagList(icon("table"), "Input Table"),
+     #                     solidHeader = TRUE,
+      #                    status = "primary",
+       #                   width = NULL,
+        #                  uiOutput("InputTable")
+         #               ),
+#                        tabPanel(
+ #                        solidHeader = TRUE,
+  #                        status = "primary",
+   #                       width = NULL,
+    #                      uiOutput("LowTable")
+     #                   ))
+                        
+      #     ),
+           tabPanel(title = tagList(icon("bar-chart"), "Count Distribution"),
+                    uiOutput("sampleDistributionBoxPanel")),
+           tabPanel(title = tagList(icon("sitemap"), "Hierarchical Clustering"),
+                    uiOutput("clustUI")),
+           tabPanel(title = tagList(icon("object-group"), "PCA"),
+                    uiOutput("pcaUI"))
 )

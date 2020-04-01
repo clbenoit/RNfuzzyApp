@@ -17,29 +17,21 @@ fluidPage(useSweetAlert(), fluidRow(column(
         c("TMM" = "tmm",
           "DESeq2" = "deseq2")
       ),
-        selectInput(
+      selectInput(
         "testMethod",
         "DEG Identification Method",
         c(
           "edgeR" = "edger",
           "DESeq2" = "deseq2",
           "baySeq" = "bayseq"
-      )),
+        )),
       numericInput(
         inputId = "fdr",
         label = "FDR Cut-off",
         min = 0.00001,
-        value = 0.1,
+        value = 0.01,
         max = 1,
-        step = 0.001
-      ),
-      sliderInput(
-        "filterLowCount",
-        "Filtering Low Count Genes",
-        min = 0,
-        max = 100,
-        value = 100,
-        step = 1
+        step = 0.0001
       ),
       sliderInput(
         "floorpdeg",
@@ -51,44 +43,44 @@ fluidPage(useSweetAlert(), fluidRow(column(
       ),
       do.call(actionBttn, c(
         list(
-          inputId = "TCC",
+          inputId = "DEA",
           label = "Run Analysis",
           icon = icon("play")
         )))
     ))),
   
   #result table 
-column(
-  9,
-  navbarPage("Results",
-             id = "tabs",
-  tabPanel(
-    title = tagList(icon("question"), "TCC info"),
-    width = NULL,
-    solidHeader = T,
-    status = "primary",
-    includeMarkdown("documents/tccinfo.Rmd")
-     ),
-  tabPanel(
-    title = tagList(icon("table"), "Normalization Table"),
-    width = NULL,
-    solidHeader = TRUE,
-    status = "primary",
-    uiOutput("NormResultTable")
-  ),
-  tabPanel(
-    title = tagList(icon("table"), "Result Table"),
-    value = 'redirectres',
-    width = NULL,
-    solidHeader = TRUE,
-    status = "primary",
-    uiOutput("mainResultTable")
-  ),
-  tabPanel(
-    title = tagList(icon("table"), "DEG Table"),
-    width = NULL,
-    solidHeader = TRUE,
-    status = "primary",
-    uiOutput("mainsortedResultTable")
-  )
-))))
+  column(
+    9,
+    navbarPage("Results",
+               id = "tabs",
+               tabPanel(
+                 title = tagList(icon("question"), "TCC info"),
+                 width = NULL,
+                 solidHeader = T,
+                 status = "primary",
+                 includeMarkdown("documents/tccinfo.Rmd")
+               ),
+               tabPanel(
+                 title = tagList(icon("table"), "Normalization Table"),
+                 width = NULL,
+                 solidHeader = TRUE,
+                 status = "primary",
+                 uiOutput("NormResultTable")
+               ),
+               tabPanel(
+                 title = tagList(icon("table"), "Result Table"),
+                 value = 'redirectres',
+                 width = NULL,
+                 solidHeader = TRUE,
+                 status = "primary",
+                 uiOutput("mainResultTable")
+               ),
+               tabPanel(
+                 title = tagList(icon("table"), "DEG Table"),
+                 width = NULL,
+                 solidHeader = TRUE,
+                 status = "primary",
+                 uiOutput("mainsortedResultTable")
+               )
+    ))))

@@ -82,10 +82,16 @@ fluidPage(fluidRow(column(
                ),
                tabPanel(
                  title = tagList(icon("braille"), "Graph"),
-                 value = 'redirectres',
                  width = NULL,
                  solidHeader = TRUE,
                  status = "primary",
                  plotlyOutput('statenrich', height = 800)%>% withSpinner()
+               ),
+               tabPanel(
+                 title = tagList(icon("braille"), "Pie Chart"),
+                 width = NULL,
+                 solidHeader = TRUE,
+                 status = "primary",
+                 plotlyOutput('pieenrich', height = 800)%>% withSpinner()
                )
     ))))

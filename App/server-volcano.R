@@ -7,38 +7,38 @@ runVolcano <- reactiveValues(runVolcanoValue = FALSE)
 
 observeEvent(input$sider, {
   if (input$sider == "volcanoplotTab") {
-      output$valcanoParameter <- renderUI({
-        tagList(
-          textInput("graphicTitle", "Graphic Title", value = "Volcano Plot"),
-          textInput("xlabs", "X-axis Label", value = "log<sub>2</sub>(Fold Change)"),
-          textInput("ylabs", "Y-axis Label", value = "-log<sub>10</sub>(FDR)"),
-          sliderInput(
-            "CutFC",
-            "Fold Change (X-axis) Cut-off",
-            min = ceiling(min(resultTable()$m.value)),
-            max = floor(max(resultTable()$m.value)),
-            value = c(-2, 2),
-            step = 0.5
-          ),
-          numericInput(
-            inputId = "Cutfdr",
-            label = "FDR Cut-off",
-            min = 0.00001,
-            value = 0.001,
-            max = 0.01,
-            step = 0.001
-          ),
-          sliderInput(
-            "volcanoPointSize",
-            "Point Size",
-            min = 1,
-            max = 5,
-            value = 3,
-            step = 0.2
-          ),
-          spectrumInput(
-            inputId = "downColor",
-            label = tagList("Down-regulated in G2" ,htmlOutput("downPreview")),
+    output$valcanoParameter <- renderUI({
+      tagList(
+        textInput("graphicTitle", "Graphic Title", value = "Volcano Plot"),
+        textInput("xlabs", "X-axis Label", value = "log<sub>2</sub>(Fold Change)"),
+        textInput("ylabs", "Y-axis Label", value = "-log<sub>10</sub>(FDR)"),
+        sliderInput(
+          "CutFC",
+          "Fold Change (X-axis) Cut-off",
+          min = ceiling(min(resultTable()$m.value)),
+          max = floor(max(resultTable()$m.value)),
+          value = c(-2, 2),
+          step = 0.5
+        ),
+        numericInput(
+          inputId = "Cutfdr",
+          label = "FDR Cut-off",
+          min = 0.00001,
+          value = 0.001,
+          max = 0.01,
+          step = 0.0001
+        ),
+        sliderInput(
+          "volcanoPointSize",
+          "Point Size",
+          min = 1,
+          max = 5,
+          value = 3,
+          step = 0.2
+        ),
+        spectrumInput(
+          inputId = "downColor",
+          label = tagList("Down-regulated in G2" ,htmlOutput("downPreview")),
           choices = list(
             list(
               "red",
@@ -54,34 +54,34 @@ observeEvent(input$sider, {
           ),
           options = list(`toggle-palette-more-text` = "Show more")
         ),
-          spectrumInput(
-            inputId = "upColor",
-            label = tagList("Up-regulated in G2" ,htmlOutput("upPreview")),
-            choices = list(
-              list(
-                "green",
-                'black',
-                'white',
-                'blanchedalmond',
-                'steelblue',
-                'forestgreen'
-              ),
-              as.list(brewer.pal(n = 9, name = "Blues")),
-              as.list(brewer.pal(n = 9, name = "Greens")),
-              as.list(brewer.pal(n = 11, name = "Spectral"))
-            ),
-            options = list(`toggle-palette-more-text` = "Show more")
-            
-          ),
-          do.call(actionBttn, c(
+        spectrumInput(
+          inputId = "upColor",
+          label = tagList("Up-regulated in G2" ,htmlOutput("upPreview")),
+          choices = list(
             list(
-              inputId = "makeVolcanoPlot",
-              label = "Generate Volcano Plot",
-              icon = icon("play")
-            )
-          ))
-        )
-      })
+              "green",
+              'black',
+              'white',
+              'blanchedalmond',
+              'steelblue',
+              'forestgreen'
+            ),
+            as.list(brewer.pal(n = 9, name = "Blues")),
+            as.list(brewer.pal(n = 9, name = "Greens")),
+            as.list(brewer.pal(n = 11, name = "Spectral"))
+          ),
+          options = list(`toggle-palette-more-text` = "Show more")
+          
+        ),
+        do.call(actionBttn, c(
+          list(
+            inputId = "makeVolcanoPlot",
+            label = "Generate Volcano Plot",
+            icon = icon("play")
+          )
+        ))
+      )
+    })
   }
 })
 
@@ -245,17 +245,17 @@ output$VolcanoBarPlot <- renderPlotly({
     !is.null(eventdata),
     "Hover over the point to show gene's expression level of interest."
   ))
-
+  
   gene_id <- eventdata$key
-
+  
   expression <-
     var$CountData[row.names(var$CountData) == gene_id,]
-
+  
   expressionNor <-
     t(t(var$norData[row.names(var$norData) == gene_id,]))
   
   data <- var$CountData
-  data.list <- var$groupListConvert
+  data.list <- var$selectedgroups
   
   expression <- t(expression[data.list != 0])
   data.list <- data.list[data.list != 0]
@@ -277,11 +277,11 @@ output$VolcanoBarPlot <- renderPlotly({
     type = "bar",
     name = "Raw"
   ) %>%
-  layout(
-    xaxis = xform,
-    yaxis = list(title = "Raw Count"),
-    title = colnames(expression)
-  )
+    layout(
+      xaxis = xform,
+      yaxis = list(title = "Raw Count"),
+      title = colnames(expression)
+    )
 })
 
 
@@ -296,17 +296,17 @@ output$volcanoUI <- renderUI({
     )
     helpText("Volcano Plot is unavailable for multiple comparison now.")
   }else{
-  
-  if(runVolcano$runVolcanoValue){
-    tagList(
-      fluidRow(
-        column(8, plotlyOutput("volcanoPloty") %>% withSpinner()),
-        column(4, plotlyOutput("VolcanoBarPlot") %>% withSpinner())
+    
+    if(runVolcano$runVolcanoValue){
+      tagList(
+        fluidRow(
+          column(8, plotlyOutput("volcanoPloty") %>% withSpinner()),
+          column(4, plotlyOutput("VolcanoBarPlot") %>% withSpinner())
+        )
       )
-    )
-  } else {
-    helpText("Please click [Generate Volcano Plot] first.")
-  }}
+    } else {
+      helpText("Please click [Generate Volcano Plot] first.")
+    }}
 })
 # Render table result
 
@@ -317,10 +317,9 @@ output$resultTableVolc <- DT::renderDataTable({
     if (length(input$Cutfdr) > 0) {
       fdrCut <- input$Cutfdr
       volcT <- resultTable()
-      volcT <- volcT[,-2]
       volcT <- volcT[which(volcT$estimatedDEG >0),]
-      volcT <- volcT[,-6]
-      colnames(volcT) <- c("gene_id", "Log2FC","PValue", "FDR", "Rank")
+      volcT <- volcT[,-7]
+      colnames(volcT) <- c("gene_id","BaseMean", "Log2FC", "PValue", "FDR", "Rank")
       
     } else {
       fdrCut <- 0
@@ -437,11 +436,11 @@ output$resultTabledown <- DT::renderDataTable({
       ),
       
       class = "display",
-    caption = tags$caption(
-      tags$li(
-        "Please verify your Log2FC if changed from the default one."
-      )
-    ))
+      caption = tags$caption(
+        tags$li(
+          "Please verify your Log2FC if changed from the default one."
+        )
+      ))
     
     if (!is.na(sum(sortedvolc$Log2FC))) {
       t   %>% formatStyle("gene_id", "Log2FC",
@@ -509,10 +508,10 @@ output$resultTableup <- DT::renderDataTable({
       ),
       
       class = "display",
-    caption = tags$caption(
-      tags$li(
-        "Please verify your Log2FC if changed from the default one."
-      )))
+      caption = tags$caption(
+        tags$li(
+          "Please verify your Log2FC if changed from the default one."
+        )))
     
     if (!is.na(sum(sortedvolc$Log2FC))) {
       t   %>% formatStyle("gene_id", "Log2FC",

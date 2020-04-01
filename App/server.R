@@ -7,7 +7,10 @@ shinyServer(function(input, output, session) {
   source(file = "server-deanalysis.R",
          local = TRUE,
          encoding = "UTF-8")
-  source(file = "server-volcano-plot.R",
+  source(file = "server-volcano.R",
+         local = TRUE,
+         encoding = "UTF-8")
+  source(file = "server-ma.R",
          local = TRUE,
          encoding = "UTF-8")
   source(file = "server-heatmap.R",
@@ -26,10 +29,11 @@ shinyServer(function(input, output, session) {
   
   var = reactiveValues(
     count = NULL,
-    count.data = NULL,
+    InputTable = data.frame(),
+    LowCountGenes = data.frame(),
     CountData = data.frame(),
     groupList = NULL,
-    groupListConvert = NULL,
+    selectedgroups = NULL,
     result = data.frame("Results will show here." = character(0)),
     tccObject = NULL)
   

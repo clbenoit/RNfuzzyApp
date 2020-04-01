@@ -20,9 +20,14 @@ tagList(dashboardPage(
           tabName = "deanalysisTab",
           icon = icon("calculator")),
         menuSubItem(
+          "MA Plot",
+          tabName = "maTab",
+          icon = icon("line-chart")),
+        menuSubItem(
           "Volcano Plot",
           tabName = "volcanoplotTab",
           icon = icon("area-chart")),
+
         menuSubItem(
           "Heatmap",
           tabName = "heatmapTab",
@@ -57,8 +62,13 @@ tagList(dashboardPage(
         local = TRUE,
         encoding = "UTF-8"
       )$value),
+      tabItem(tabName = "maTab", source(
+        file = "ui-ma.R",
+        local = TRUE,
+        encoding = "UTF-8"
+      )$value),
       tabItem(tabName = "volcanoplotTab", source(
-        file = "ui-volcano-plot.R",
+        file = "ui-volcano.R",
         local = TRUE,
         encoding = "UTF-8"
       )$value),

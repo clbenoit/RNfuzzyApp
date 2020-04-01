@@ -20,7 +20,7 @@ observeEvent(input$enrichmentgo,{
   )
   
   geneset <- unlist(strsplit(input$refseqids, split = '\n'))
-    
+  
   res <- enrichGO(geneset, 
                   OrgDb = input$chosendataset, 
                   keyType = 'ENSEMBL', 
@@ -80,25 +80,46 @@ observeEvent(input$enrichmentgo,{
   
   
   
-output$statenrich <- renderPlotly({
-  fig <- plot_ly(res, 
-                 x = ~(-log(p.adjust)), 
-                 y = ~Description, 
-                 text = ~paste('GO term:', ID, '<br>Count :', Count, '<br>P-Value :', p.adjust, '<br>Q-Value :', qvalue),
-                 type = 'scatter', 
-                 mode = 'markers',
-                 color = ~ONTOLOGY,
-                 colors = "Reds",
-                 marker = list(size = ~Count*2, opacity = 1)
-                 )%>% layout(title = 'Statistics of the Enrichment',
-                             yaxis = list(title = 'Description'),
-                             xaxis = list(title = '-log(P-value)')
-                             )
-                  fig
+  output$statenrich <- renderPlotly({
+    fig <- plot_ly(res, 
+                   x = ~(-log(p.adjust)), 
+                   y = ~Description, 
+                   text = ~paste('GO term:', ID, '<br>Count :', Count, '<br>P-Value :', p.adjust, '<br>Q-Value :', qvalue),
+                   type = 'scatter', 
+                   mode = 'markers',
+                   color = ~ONTOLOGY,
+                   colors = "Reds",
+                   marker = list(size = ~Count*2, opacity = 1)
+    )%>% layout(title = 'Statistics of the Enrichment',
+                yaxis = list(title = 'Description'),
+                xaxis = list(title = '-log(P-value)')
+    )
+    fig
+    
+  })  
   
-})  
   
 
+  
+  output$pieenrich <- renderPlotly({
+    fig <- plot_ly(res, 
+                   labels = ~Description, 
+                   values = ~Count, 
+                   type = 'pie',
+                   textposition = 'inside',
+                   textinfo = 'label+percent',
+                   insidetextfont = list(color = '#FFFFFF'),
+                   hoverinfo = 'text',
+                   showlegend = FALSE
+                   
+    )%>% layout(title = 'Statistics of the Enrichment per count',
+                xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
+                yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
+    )
+    fig
+    
+  })
+  
 })
 
 # result table render

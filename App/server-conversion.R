@@ -9,13 +9,13 @@ observeEvent(input$convgo,{
   
   inputids <- unlist(strsplit(input$inputids, split = '\n'))
   conversion <- bitr(
-                   geneID = inputids, 
-                   fromType = input$inputtype,
-                   toType = c('ENTREZID','ENSEMBL','SYMBOL'),
-                   OrgDb = input$chosendatabase
-    )
-
-
+    geneID = inputids, 
+    fromType = input$inputtype,
+    toType = c('ENTREZID','ENSEMBL','SYMBOL'),
+    OrgDb = input$chosendatabase
+  )
+  
+  
   
   conversion <- as.data.frame(conversion)
   output$ConvResults <-  DT::renderDataTable({

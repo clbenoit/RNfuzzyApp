@@ -4,9 +4,8 @@
 
 observeEvent(input$uploadCountData, {
   tryCatch({
-    var$CountData <-
+    var$InputTable <-
       data.frame(fread(input$uploadCountData$datapath), row.names = 1)
-    var$tccObject <- NULL
     v$importActionValue <- FALSE
   },
   error = function(e) {
@@ -27,40 +26,19 @@ observeEvent(input$uploadCountData, {
     )
     return()
   })
-
+  
+  observeEvent(input$filterCount,{
+    if (input$filterCount != 0) {
+      var$LowCountGenes <- var$InputTable[rowSums(var$InputTable >= as.numeric(input$filterCount)) == 0,]
+      var$CountData <- var$InputTable[rowSums(var$InputTable >= as.numeric(input$filterCount)) > 0 , ]
+    }else{
+      var$CountData <- var$InputTable
+      var$LowCountGenes <- "No filtered data."
+    }
+  })
+  
 })
 
-
-# Render a table of raw count data, adding color
-
-output$table <- DT::renderDataTable({
-  df <- datasetInput()
-  DT::datatable(
-    df,
-    colnames = c("Gene Name" = 1),
-    extensions = c("Scroller", "RowReorder"),
-    option = list(
-      rowReorder = TRUE,
-      deferRender = TRUE,
-      scrollY = 400,
-      scroller = TRUE,
-      scrollX = TRUE,
-      searchHighlight = TRUE,
-      orderClasses = TRUE
-    )
-  )
-})
-
-
-# Render DataTable of row data count
-
-output$showTable <- renderUI({
-  if (nrow(datasetInput()) == 0) {
-    tags$p("No data to show. Upload your dataset.")
-  } else {
-    DT::dataTableOutput('table')
-  }
-})
 
 observeEvent(input$confirmedGroupList, {
   if (nrow(datasetInput()) == 0) {
@@ -90,11 +68,10 @@ observeEvent(input$confirmedGroupList, {
         group[group$V2 == x, ]$V1
       })
     names(var$groupList) <- unique(group$V2)
-    
     data.list <- rep(0, ncol(var$CountData))
     
-    # Convert the input of group information to
-    # a specific format for normalization.
+    
+    # Convert the input of group information to a specific format for normalization.
     convertion <- function(x, df) {
       grep(x, colnames(df))
     }
@@ -102,18 +79,13 @@ observeEvent(input$confirmedGroupList, {
     for (i in 1:length(var$groupList)) {
       data.list[unlist(lapply(var$groupList[[i]], convertion, df = var$CountData))] = names(var$groupList[i])
     }
-
-    var$groupListConvert <- data.list
-    selectedgroups = input$confirmedGroupList
-    tmprem = match(as.character(rownames(var$CountData)[which(!(var$groupList%in%selectedgroups))]),colnames(var$CountData))
+    
+    groupListConvert <- data.list
+    var$selectedgroups <- groupListConvert[!(groupListConvert) == 0]
+    tmprem = match(as.character(rownames(var$CountData)[which(!(var$groupList%in%var$selectedgroups))]),colnames(var$CountData))
     tmpkeep = setdiff(1:ncol(var$CountData),tmprem)
     var$CountData <- var$CountData[,tmpkeep]
     
-    # Create a TCC Object 
-    tcc <-
-      new("TCC", var$CountData[data.list != 0], data.list[data.list != 0])
-    var$tccObject <- tcc
-    var$count.data <- tcc$count
     
     closeSweetAlert(session = session)
     sendSweetAlert(
@@ -143,6 +115,13 @@ observeEvent(input$confirmedGroupList, {
     )
     return()
   })
+  groupd <- as.data.frame(group)
+  rep <- groupd$V1
+  group <- groupd$V2
+  var$groupdf <- data.frame(group, row.names = rep)
+  var$matrixcount <- as.matrix(var$CountData)
+  var$CountData <- var$CountData[,which(colnames(var$CountData) == rownames(var$groupdf))]
+  
 })
 
 
@@ -153,9 +132,16 @@ datasetInput <- reactive({
 
 
 output$DataSummary <- renderUI({
+  odf <- var$InputTable
   dt <- datasetInput()
-  
-  rowCount <- nrow(dt)
+  orowCount <- nrow(odf)
+  if(input$filterCount == 0){
+    rowCount <- orowCount
+    filtCount <- 0
+  }else{
+    rowCount <- nrow(dt)
+    filtCount <- (orowCount - rowCount)
+  }
   groupCount <- length(var$groupList)
   groupText <- sapply(var$groupList, length)
   if (length(groupText) > 0) {
@@ -169,8 +155,18 @@ output$DataSummary <- renderUI({
   
   tagList(
     tipify(
-      tags$p(tags$b("N", tags$sub("gene")), ":", rowCount),
+      tags$p(tags$b("N", tags$sub("genes")), ":", rowCount),
       title = "Number of Genes",
+      placement = "left"
+    ),
+    tipify(
+      tags$p(tags$b("N", tags$sub(" input genes")), ":", orowCount),
+      title = "Number of Input Genes",
+      placement = "left"
+    ),
+    tipify(
+      tags$p(tags$b("N", tags$sub("filtered genes")), ":", filtCount),
+      title = "Number of Filtered Genes",
       placement = "left"
     ),
     tipify(
@@ -179,31 +175,122 @@ output$DataSummary <- renderUI({
       placement = "left"
     ),
     tipify(
-      tags$p(tags$b("NR"), ": ", gText),
+      tags$p(tags$b("N", tags$sub("replicates")), ": ", gText),
       title = "Number of Replicates",
       placement = "left"
     )
   )
 })
 
+
+# Render a table of raw count data
+
+output$table <- DT::renderDataTable({
+  df <- datasetInput()
+  DT::datatable(
+    df,
+    colnames = c("Gene Name" = 1),
+    extensions = c("Scroller", "RowReorder"),
+    option = list(
+      rowReorder = TRUE,
+      deferRender = TRUE,
+      scrollY = 400,
+      scroller = TRUE,
+      scrollX = TRUE,
+      searchHighlight = TRUE,
+      orderClasses = TRUE
+    )
+  )
+})
+
+
+# Render DataTable of row data count
+
+output$showTable <- renderUI({
+  if (nrow(datasetInput()) == 0) {
+    tags$p("No data to show. Upload your dataset.")
+  } else {
+    DT::dataTableOutput('table')
+  }
+})
+ ###### input 
+output$inputable <- DT::renderDataTable({
+  inputdf <- var$InputTable
+  DT::datatable(
+    inputdf,
+    colnames = c("Gene Name" = 1),
+    extensions = c("Scroller", "RowReorder"),
+    option = list(
+      rowReorder = TRUE,
+      deferRender = TRUE,
+      scrollY = 400,
+      scroller = TRUE,
+      scrollX = TRUE,
+      searchHighlight = TRUE,
+      orderClasses = TRUE
+    )
+  )
+})
+
+
+# Render DataTable of row data count
+
+output$showInputTable <- renderUI({
+  if (nrow(datasetInput()) == 0) {
+    tags$p("No data to show. Upload your dataset.")
+  } else {
+    DT::dataTableOutput('inputable')
+  }
+})
+
+
+output$filtable <- DT::renderDataTable({
+  low <- var$LowCountGenes
+  DT::datatable(
+    low,
+    colnames = c("Gene Name" = 1),
+    extensions = c("Scroller", "RowReorder"),
+    option = list(
+      rowReorder = TRUE,
+      deferRender = TRUE,
+      scrollY = 400,
+      scroller = TRUE,
+      scrollX = TRUE,
+      searchHighlight = TRUE,
+      orderClasses = TRUE
+    )
+  )
+})
+
+
+# Render DataTable of row data count
+
+output$showLowTable <- renderUI({
+  if (is.data.frame(var$LowCountGenes) == FALSE) {
+    tags$p("No Filtered data.")
+  } else {
+    DT::dataTableOutput('filtable')
+  }
+})
+
+
 v <- reactiveValues(importActionValue = FALSE)
 
 ################### BOXPLOT  #####################
 output$sampleDistributionBox <- renderPlotly({
-  if (length(var$tccObject) > 0) {
-    tcc <- var$tccObject
-    data <- tcc$count
+  if (length(var$matrixcount) > 0) {
+    data <- var$matrixcount
     
     cpm <- log2(data + 1)
     cpm_stack <- data.frame(stack(cpm))
-
+    
     group <-
-      data.frame("col" = rownames(tcc$group),
-                 "group" = tcc$group$group)
-
+      data.frame("col" = rownames(var$groupdf),
+                 "group" = var$groupdf$group)
+    
     data <- left_join(cpm_stack, group, by = "col")
     data <- arrange(data, group)
-
+    
     p <- plot_ly(
       data = data,
       x = ~ col,
@@ -263,11 +350,10 @@ output$sampleDistributionBoxPanel <- renderUI({
 
 ################### HEATMAP #####################
 output$rawheatmap <- renderPlotly({
-  if (length(var$tccObject) > 0) {
-    tcc <- var$tccObject
-    data <- tcc$count[rowSums(tcc$count) > 0,]
+  if (length(var$matrixcount) > 0) {
+    data <- var$matrixcount
     data <- data.frame(1 - cor(data, method = input$correlation))
-    data.list.count <- length(unique(tcc$group$group))
+    data.list.count <- length(unique(var$groupListConvert))
     heatmaply(
       data,
       hclust_method = "complete",
@@ -330,20 +416,19 @@ output$clustUI <- renderUI({
                   </div>'))
       ),
       column(9, plotlyOutput("rawheatmap",height = 600) %>% withSpinner()
-             )
+      )
     ))
   } else {
     helpText("No data for ploting.")
   }
 })
 
- ################### PCA #####################
+################### PCA #####################
 
 # 2D Plot 
 output$pcaPlotObject2d <- renderPlotly({
-  if (length(var$tccObject) > 0) {
-    tcc <- var$tccObject
-    data <- log1p(tcc$count)
+  if (length(var$matrixcount) > 0) {
+    data <- log1p(var$matrixcount)
     data <- data[apply(data, 1, var) != 0, ]
     if(!is.na(input$pcaTopGene) & input$pcaTopGene < nrow(data)){
       data <- t(data[order(apply(data, 1, var), decreasing = TRUE)[1:input$pcaTopGene], ])
@@ -351,8 +436,8 @@ output$pcaPlotObject2d <- renderPlotly({
     data.pca.all <- prcomp(data,center = T,scale. = T)
     data <- data.frame(data.pca.all$x)
     data$name <- rownames(data)
-    group <- tcc$group
-    group$name <- rownames(group)
+    group <- var$groupdf
+    group$name <- rownames(var$groupdf)
     data <- left_join(x = data, y = group, by = "name")
     p <- plot_ly(
       data = data,
@@ -373,9 +458,8 @@ output$pcaPlotObject2d <- renderPlotly({
 
 # 3D Plot
 output$pcaPlotObject3d <- renderPlotly({
-  if (length(var$tccObject) > 0) {
-    tcc <- var$tccObject
-    data <- log1p(tcc$count)
+  if (length(var$matrixcount) > 0) {
+    data <- log1p(var$matrixcount)
     data <- data[apply(data, 1, var) != 0, ]
     if(!is.na(input$pcaTopGene) & input$pcaTopGene < nrow(data)){
       data <- t(data[order(apply(data, 1, var), decreasing = TRUE)[1:input$pcaTopGene], ])
@@ -384,8 +468,8 @@ output$pcaPlotObject3d <- renderPlotly({
     
     data <- data.frame(data.pca.all$x)
     data$name <- rownames(data)
-    group <- tcc$group
-    group$name <- rownames(group)
+    group <- var$groupdf
+    group$name <- rownames(var$groupdf)
     data <- left_join(x = data, y = group, by = "name")
     p <- plot_ly(
       data = data,
@@ -412,16 +496,16 @@ output$pcaUI <- renderUI({
     tagList(fluidRow(
       column(
         3,
-          numericInput(
-            inputId = "pcaTopGene",
-            label = "Top Gene",
-            value = 100,
-            min = 2,
-            step = 1
-          ),
+        numericInput(
+          inputId = "pcaTopGene",
+          label = "Top Gene",
+          value = 100,
+          min = 2,
+          step = 1
+        ),
         tags$div(
           HTML("Choose the number of genes for render. "))
-        ),
+      ),
       column(9,
              tabsetPanel(
                tabPanel(title = "2D Plot", plotlyOutput("pcaPlotObject2d") %>% withSpinner()),

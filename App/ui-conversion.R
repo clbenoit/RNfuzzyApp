@@ -17,10 +17,10 @@ fluidPage(fluidRow(column(
       ),
       selectInput(
         "inputtype",
-      "Choose your input type",
-      c("EntrezID" = "ENTREZID",
-        "EnsemblID" = "ENSEMBL",
-        " Symbol" = "SYMBOL")
+        "Choose your input type",
+        c("EntrezID" = "ENTREZID",
+          "EnsemblID" = "ENSEMBL",
+          " Symbol" = "SYMBOL")
       ),
       textAreaInput(
         "inputids",
@@ -28,34 +28,34 @@ fluidPage(fluidRow(column(
         rows = 5,
         placeholder = "Input genes, one gene per line."
       )
-      )
-    ),
-    do.call(actionBttn, c(
-      list(
-        inputId = "convgo",
-        label = "Convert",
-        icon = icon("play")
-      )))
+    )
   ),
-  
-  #result table 
-  column(
-    9,
-    navbarPage("Results",
-               id = "convtabs",
-               tabPanel(
-                 title = tagList(icon("question"), "Info"),
-                 width = NULL,
-                 solidHeader = TRUE,
-                 status = "primary",
-                 includeMarkdown("documents/convinfo.Rmd")
-               ),
-               tabPanel(
-                 title = tagList(icon("table"), "Result Table"),
-                 value = 'redirectconv',
-                 width = NULL,
-                 solidHeader = TRUE,
-                 status = "primary",
-                 uiOutput('ConversionResults')
-               )
-    ))))
+  do.call(actionBttn, c(
+    list(
+      inputId = "convgo",
+      label = "Convert",
+      icon = icon("play")
+    )))
+),
+
+#result table 
+column(
+  9,
+  navbarPage("Results",
+             id = "convtabs",
+             tabPanel(
+               title = tagList(icon("question"), "Info"),
+               width = NULL,
+               solidHeader = TRUE,
+               status = "primary",
+               includeMarkdown("documents/convinfo.Rmd")
+             ),
+             tabPanel(
+               title = tagList(icon("table"), "Result Table"),
+               value = 'redirectconv',
+               width = NULL,
+               solidHeader = TRUE,
+               status = "primary",
+               uiOutput('ConversionResults')
+             )
+  ))))

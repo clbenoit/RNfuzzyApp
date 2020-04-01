@@ -1,9 +1,9 @@
 # server-normalization.R
 
 
-tccRun <- reactiveValues(tccRunValue = FALSE)
+AnalysisRun <- reactiveValues(AnalysisRunValue = FALSE)
 
-observeEvent(input$TCC, {
+observeEvent(input$DEA, {
   progressSweetAlert(
     session = session,
     id = "DEAnalysisProgress",
@@ -12,12 +12,11 @@ observeEvent(input$TCC, {
     value = 0
   )
   
-  data <- var$CountData
-  data.list <- var$groupListConvert
-  tcc <- var$tccObject
-  if (input$filterLowCount != 0) {
-    tcc$count <- tcc$count[rowMeans(tcc$count) > as.numeric(input$filterLowCount), ]
-  }
+  # Create a TCC Object 
+  tcc <-
+    new("TCC", var$CountData, var$selectedgroups)
+  var$tccObject <- tcc
+
   
   updateProgressBar(
     session = session,
@@ -40,21 +39,20 @@ observeEvent(input$TCC, {
     title = "DE Analysis in progress...",
     value = 75
   )
-  tcc <- estimateDE(tcc, #function to estime DEG
+  tcc <- estimateDE(tcc,
                     test.method = input$testMethod,
                     FDR = input$fdr)
-
+  
   
   var$tccObject <- tcc
   var$result <- getResult(tcc, sort = FALSE) %>% mutate_if(is.factor, as.character)
-
+  
   var$result_a <- var$result[,-2]
   var$result_m <- var$result_a[,-2]
   colnames(var$result_m) <- c("gene_id", "P Value", "FDR", "Rank", "estimatedDEG")
   var$result_e <- var$result_m[which(var$result_m$estimatedDEG >0),]
   var$result_s <- var$result_e[,-5]
   var$norData <- tcc$getNormalizedData()
-
   
   
   output$normresultTable <- DT::renderDataTable({
@@ -84,12 +82,12 @@ observeEvent(input$TCC, {
       
       class = "display")
   }, server = F)
-
+  
   output$fullresultTable <- DT::renderDataTable({
     data <- var$norData
     gene_id <- row.names(data)
     data <- cbind(data, gene_id = gene_id)
-
+    
     resultTable <- merge(var$result_m, data, by = "gene_id")
     
     DT::datatable(
@@ -159,17 +157,17 @@ observeEvent(input$TCC, {
       
       class = "display")
   }, server = F)
-
+  
   closeSweetAlert(session = session)
   sendSweetAlert(session = session,
                  title = "DONE",
                  text = "DE Analysis was successfully performed.",
                  type = "success")
-
   
-  tccRun$tccRunValue <- input$TCC
+  
+  AnalysisRun$AnalysisRunValue <- input$DEA
   updateNavbarPage(session, "tabs", "redirectres")
-
+  
 })
 resultTable <- reactive({
   var$result
@@ -179,8 +177,9 @@ resultTable <- reactive({
 
 # results tables render
 
+
 output$NormResultTable <- renderUI({
-  if(tccRun$tccRunValue){
+  if(AnalysisRun$AnalysisRunValue){
     tagList(
       fluidRow(column(
         12, DT::dataTableOutput('normresultTable') %>% withSpinner()
@@ -191,7 +190,7 @@ output$NormResultTable <- renderUI({
 
 
 output$mainResultTable <- renderUI({
-  if(tccRun$tccRunValue){
+  if(AnalysisRun$AnalysisRunValue){
     tagList(
       fluidRow(column(
         12, DT::dataTableOutput('fullresultTable') %>% withSpinner()
@@ -202,7 +201,7 @@ output$mainResultTable <- renderUI({
 
 
 output$mainsortedResultTable <- renderUI({
-  if(tccRun$tccRunValue){
+  if(AnalysisRun$AnalysisRunValue){
     tagList(
       fluidRow(column(
         12, DT::dataTableOutput('sortedresultTable') %>% withSpinner()

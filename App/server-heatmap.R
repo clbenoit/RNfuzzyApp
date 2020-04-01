@@ -42,12 +42,12 @@ observeEvent(input$sider, {
           ),
           selected = "complete"
         ),
-        sliderInput(
-          "clusterswanted",
-          "Clusters Wanted",
-          min = 0,
-          max = 10,
+        numericInput(
+          inputId = "clusterswanted",
+          label = "Clusters Wanted",
+          min = 1,
           value = 5,
+          max = 100,
           step = 1
         ),
         tagList(
@@ -102,7 +102,7 @@ output$heatmapSelectGene <- renderUI({
           min = 0.00001,
           value = 0.001,
           max = 0.01,
-          step = 0.001
+          step = 0.0001
         ),
       )
   )
@@ -154,7 +154,7 @@ output$colorPreview <- renderPlot({
 
 # heatmaply obj
 observeEvent(input$heatmapRun, {
-  data.list <- var$groupListConvert
+  data.list <- var$selectedgroups
   data <- var$norData
   data.list <- data.list[data.list != 0]
   if (input$heatmapGeneSelectType == "By list") {
@@ -162,18 +162,18 @@ observeEvent(input$heatmapRun, {
       row.names(data) %in% unlist(strsplit(x = input$heatmapTextList, split = '[\r\n]'))
     heatmapTitle <- "Heatmap of specific genes"
   }
-
+  
   if (input$heatmapGeneSelectType == "By FDR") {
-
-      selectedListForHeatmap <-
-        row.names(data) %in% resultTable()[resultTable()$q.value <= input$heatmapFDR,]$gene_id
-      heatmapTitle <-
-        paste0("Heatmap of gene expression (q.value < ",
-               input$heatmapFDR,
-               ", ",
-               sum(selectedListForHeatmap),
-               "DEGs)")
-    }
+    
+    selectedListForHeatmap <-
+      row.names(data) %in% resultTable()[resultTable()$q.value <= input$heatmapFDR,]$gene_id
+    heatmapTitle <-
+      paste0("Heatmap of gene expression (q.value < ",
+             input$heatmapFDR,
+             ", ",
+             sum(selectedListForHeatmap),
+             "DEGs)")
+  }
   
   data <- data[selectedListForHeatmap, ]
   
@@ -201,27 +201,27 @@ observeEvent(input$heatmapRun, {
   colnames(cute) <- c("cluster","gene_id")
   rownames(cute) <- NULL
   runHeatmap$height <- 600
-
-  output$heatmap <- renderPlotly({
   
-      p <- heatmaply(
-        datan,
-        colors = colorPal,
-        k_col = input$clusterswanted,
-        dist_method = input$heatmapDist,
-        hclust_method = input$heatmapCluster,
-        xlab = "Gene",
-        ylab = "Sample",
-        main = heatmapTitle,
-        margins = c(150, 100, 40, 20),
-        scale = "none",
-        labCol = colnames(datan),
-        labRow = row.names(datan)
-      )
-      p
+  output$heatmap <- renderPlotly({
+    
+    p <- heatmaply(
+      datan,
+      colors = colorPal,
+      k_col = input$clusterswanted,
+      dist_method = input$heatmapDist,
+      hclust_method = input$heatmapCluster,
+      xlab = "Gene",
+      ylab = "Sample",
+      main = heatmapTitle,
+      margins = c(150, 100, 40, 20),
+      scale = "none",
+      labCol = colnames(datan),
+      labRow = row.names(datan)
+    )
+    p
   })
-
-
+  
+  
   gene_id <- row.names(data)
   data <- cbind(data, gene_id = gene_id)
   heatdata <- var$result
@@ -236,7 +236,7 @@ observeEvent(input$heatmapRun, {
   
   #result table 
   output$resultTableInHeatmap <- DT::renderDataTable({
-
+    
     DT::datatable(
       resultTable,        
       extensions = 'Buttons',
@@ -262,7 +262,7 @@ observeEvent(input$heatmapRun, {
       class = "display")
   }, server = FALSE)
   
-
+  
   
   runHeatmap$runHeatmapValue <- input$heatmapRun
   closeSweetAlert(session = session)
@@ -270,7 +270,7 @@ observeEvent(input$heatmapRun, {
                  title = "Completed!",
                  type = "success")
   
-
+  
   
 })
 

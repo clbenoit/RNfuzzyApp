@@ -21,6 +21,7 @@ observeEvent(input$enrichmentgo,{
   
   geneset <- unlist(strsplit(input$refseqids, split = '\n'))
   
+  
   res <- enrichGO(geneset, 
                   OrgDb = input$chosendataset, 
                   keyType = 'ENSEMBL', 
@@ -33,6 +34,7 @@ observeEvent(input$enrichmentgo,{
                   readable = FALSE,
                   pool = FALSE
   )
+  print(res)
   
   updateProgressBar(
     session = session,
@@ -44,8 +46,7 @@ observeEvent(input$enrichmentgo,{
   res <- as.data.frame(res)
   output$EnrichResultTable <-  DT::renderDataTable({
     DT::datatable(
-      res,
-      filter = "bottom",
+      res,        
       extensions = 'Buttons',
       option = list(
         paging = TRUE,
@@ -57,7 +58,7 @@ observeEvent(input$enrichmentgo,{
         buttons = list(list(
           extend = 'collection',
           buttons = list(extend='csv',
-                         filename = "enrichment_results"),
+                         filename = "results_conversion"),
           text = 'Download')),
         scrollX = TRUE,
         pageLength = 10,
@@ -67,7 +68,7 @@ observeEvent(input$enrichmentgo,{
       ),
       
       class = "display")
-  },server=F)
+  }, server = FALSE)
   
   EnrichRun$EnrichRunValue <- input$enrichmentgo
   updateNavbarPage(session, "entabs", "redirectres")
@@ -81,20 +82,38 @@ observeEvent(input$enrichmentgo,{
   
   
   output$statenrich <- renderPlotly({
-    fig <- plot_ly(res, 
-                   x = ~(-log(p.adjust)), 
-                   y = ~Description, 
-                   text = ~paste('GO term:', ID, '<br>Count :', Count, '<br>P-Value :', p.adjust, '<br>Q-Value :', qvalue),
-                   type = 'scatter', 
-                   mode = 'markers',
-                   color = ~ONTOLOGY,
-                   colors = "Reds",
-                   marker = list(size = ~Count*2, opacity = 1)
-    )%>% layout(title = 'Statistics of the Enrichment',
-                yaxis = list(title = 'Description'),
-                xaxis = list(title = '-log(P-value)')
-    )
-    fig
+    if ( input$chosenGO == "ALL"){
+      fig <- plot_ly(res, 
+                     x = ~(-log(p.adjust)), 
+                     y = ~Description, 
+                     text = ~paste('GO term:', ID, '<br>Count :', Count, '<br>P-Value :', p.adjust, '<br>Q-Value :', qvalue),
+                     type = 'scatter', 
+                     mode = 'markers',
+                     color = ~ONTOLOGY,
+                     colors = "Reds",
+                     marker = list(size = ~Count*2, opacity = 1)
+      )%>% layout(title = 'Statistics of the Enrichment',
+                  yaxis = list(title = 'Description'),
+                  xaxis = list(title = '-log(P-value)')
+      )
+      fig
+    }else{
+      fig <- plot_ly(res, 
+                     x = ~(-log(p.adjust)), 
+                     y = ~Description, 
+                     text = ~paste('GO term:', ID, '<br>Count :', Count, '<br>P-Value :', p.adjust, '<br>Q-Value :', qvalue),
+                     type = 'scatter', 
+                     mode = 'markers',
+                     color = ~Count,
+                     colors = "Reds",
+                     marker = list(size = ~Count*2, opacity = 1)
+      )%>% layout(title = 'Statistics of the Enrichment',
+                  yaxis = list(title = 'Description'),
+                  xaxis = list(title = '-log(P-value)')
+      )
+      fig
+    }
+ 
     
   })  
   

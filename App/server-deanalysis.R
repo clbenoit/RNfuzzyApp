@@ -58,8 +58,7 @@ observeEvent(input$DEA, {
   output$normresultTable <- DT::renderDataTable({
     data <- var$norData
     DT::datatable(
-      data,
-      filter = "bottom",
+      data,        
       extensions = 'Buttons',
       option = list(
         paging = TRUE,
@@ -71,7 +70,7 @@ observeEvent(input$DEA, {
         buttons = list(list(
           extend = 'collection',
           buttons = list(extend='csv',
-                         filename = "normalization_results"),
+                         filename = "results_conversion"),
           text = 'Download')),
         scrollX = TRUE,
         pageLength = 10,
@@ -81,7 +80,7 @@ observeEvent(input$DEA, {
       ),
       
       class = "display")
-  }, server = F)
+  }, server = FALSE)
   
   output$fullresultTable <- DT::renderDataTable({
     data <- var$norData
@@ -91,8 +90,7 @@ observeEvent(input$DEA, {
     resultTable <- merge(var$result_m, data, by = "gene_id")
     
     DT::datatable(
-      resultTable,
-      filter = "bottom",
+      resultTable,        
       extensions = 'Buttons',
       option = list(
         paging = TRUE,
@@ -104,7 +102,7 @@ observeEvent(input$DEA, {
         buttons = list(list(
           extend = 'collection',
           buttons = list(extend='csv',
-                         filename = "full_normalization_results"),
+                         filename = "results_conversion"),
           text = 'Download')),
         scrollX = TRUE,
         pageLength = 10,
@@ -113,7 +111,7 @@ observeEvent(input$DEA, {
         
       ),
       
-      class = "display",
+      class = "display"),
       caption = tags$caption(
         tags$li(
           HTML("<font color=\"#B22222\"><b>Gene Name</b></font> is colored when under FDR cut-off")
@@ -133,8 +131,7 @@ observeEvent(input$DEA, {
     resultTable <- merge(var$result_s, data, by = "gene_id")
     
     DT::datatable(
-      resultTable,
-      filter = "bottom",
+      resultTable,        
       extensions = 'Buttons',
       option = list(
         paging = TRUE,
@@ -146,7 +143,7 @@ observeEvent(input$DEA, {
         buttons = list(list(
           extend = 'collection',
           buttons = list(extend='csv',
-                         filename = "DEG_results"),
+                         filename = "results_conversion"),
           text = 'Download')),
         scrollX = TRUE,
         pageLength = 10,
@@ -156,7 +153,7 @@ observeEvent(input$DEA, {
       ),
       
       class = "display")
-  }, server = F)
+  }, server = FALSE)
   
   closeSweetAlert(session = session)
   sendSweetAlert(session = session,

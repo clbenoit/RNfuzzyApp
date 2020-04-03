@@ -79,9 +79,8 @@ observeEvent(input$confirmedGroupList, {
     for (i in 1:length(var$groupList)) {
       data.list[unlist(lapply(var$groupList[[i]], convertion, df = var$CountData))] = names(var$groupList[i])
     }
-    
-    groupListConvert <- data.list
-    var$selectedgroups <- groupListConvert[!(groupListConvert) == 0]
+
+    var$selectedgroups <- data.list[!(data.list) == 0]
     tmprem = match(as.character(rownames(var$CountData)[which(!(var$groupList%in%var$selectedgroups))]),colnames(var$CountData))
     tmpkeep = setdiff(1:ncol(var$CountData),tmprem)
     var$CountData <- var$CountData[,tmpkeep]
@@ -151,7 +150,6 @@ output$DataSummary <- renderUI({
   }
   
   data <- var$CountData
-  data.list <- var$groupListConvert
   
   tagList(
     tipify(
@@ -351,9 +349,8 @@ output$sampleDistributionBoxPanel <- renderUI({
 ################### HEATMAP #####################
 output$rawheatmap <- renderPlotly({
   if (length(var$matrixcount) > 0) {
-    data <- var$matrixcount
+    data <- var$CountData
     data <- data.frame(1 - cor(data, method = input$correlation))
-    data.list.count <- length(unique(var$groupListConvert))
     heatmaply(
       data,
       hclust_method = "complete",

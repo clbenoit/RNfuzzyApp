@@ -3,6 +3,64 @@
 
 AnalysisRun <- reactiveValues(AnalysisRunValue = FALSE)
 
+
+
+output$CondDEAParams <- renderUI({
+  if (v$importActionValue){
+    uiOutput("DEAParams")
+  }else{
+    sendSweetAlert(
+      session = session,
+      title = "ERROR",
+      text = "You must upload a count data fist.",
+      type = "info"
+    )
+    helpText("Please upload a count data first.")
+  }
+})
+
+
+output$DEAParams <- renderUI({
+  tagList(
+    selectInput(
+      "normMethod",
+      "Normalization Method",
+      c("TMM" = "tmm",
+        "DESeq2" = "deseq2")
+    ),
+    selectInput(
+      "testMethod",
+      "DEG Identification Method",
+      c(
+        "edgeR" = "edger",
+        "DESeq2" = "deseq2",
+        "baySeq" = "bayseq"
+      )),
+    numericInput(
+      inputId = "fdr",
+      label = "FDR Cut-off",
+      min = 0.00001,
+      value = 0.01,
+      max = 1,
+      step = 0.0001
+    ),
+    sliderInput(
+      "floorpdeg",
+      "Elimination of Potential DEGs",
+      min = 0,
+      max = 1,
+      value = 0.05,
+      step = 0.05
+    ),
+    do.call(actionBttn, c(
+      list(
+        inputId = "DEA",
+        label = "Run Analysis",
+        icon = icon("play")
+      )))
+  )
+})
+
 observeEvent(input$DEA, {
   progressSweetAlert(
     session = session,

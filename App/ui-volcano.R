@@ -6,7 +6,7 @@ fluidPage(fluidRow(column(
     solidHeader = TRUE,
     status = "primary",
     width = NULL,
-    uiOutput("valcanoParameter")
+    uiOutput("CondvolcanoParams")
   )
 ),
 column(

@@ -3,86 +3,99 @@
 runVolcano <- reactiveValues(runVolcanoValue = FALSE)
 
 
-
-
-observeEvent(input$sider, {
-  if (input$sider == "volcanoplotTab") {
-    output$valcanoParameter <- renderUI({
-      tagList(
-        textInput("graphicTitle", "Graphic Title", value = "Volcano Plot"),
-        textInput("xlabs", "X-axis Label", value = "log<sub>2</sub>(Fold Change)"),
-        textInput("ylabs", "Y-axis Label", value = "-log<sub>10</sub>(FDR)"),
-        sliderInput(
-          "CutFC",
-          "Fold Change (X-axis) Cut-off",
-          min = ceiling(min(resultTable()$m.value)),
-          max = floor(max(resultTable()$m.value)),
-          value = c(-2, 2),
-          step = 0.5
-        ),
-        numericInput(
-          inputId = "Cutfdr",
-          label = "FDR Cut-off",
-          min = 0.00001,
-          value = 0.001,
-          max = 0.01,
-          step = 0.0001
-        ),
-        sliderInput(
-          "volcanoPointSize",
-          "Point Size",
-          min = 1,
-          max = 5,
-          value = 3,
-          step = 0.2
-        ),
-        spectrumInput(
-          inputId = "downColor",
-          label = tagList("Down-regulated in G2" ,htmlOutput("downPreview")),
-          choices = list(
-            list(
-              "red",
-              'black',
-              'white',
-              'blanchedalmond',
-              'steelblue',
-              'forestgreen'
-            ),
-            as.list(brewer.pal(n = 9, name = "Oranges")),
-            as.list(brewer.pal(n = 9, name = "Reds")),
-            as.list(brewer.pal(n = 11, name = "Spectral"))
-          ),
-          options = list(`toggle-palette-more-text` = "Show more")
-        ),
-        spectrumInput(
-          inputId = "upColor",
-          label = tagList("Up-regulated in G2" ,htmlOutput("upPreview")),
-          choices = list(
-            list(
-              "green",
-              'black',
-              'white',
-              'blanchedalmond',
-              'steelblue',
-              'forestgreen'
-            ),
-            as.list(brewer.pal(n = 9, name = "Blues")),
-            as.list(brewer.pal(n = 9, name = "Greens")),
-            as.list(brewer.pal(n = 11, name = "Spectral"))
-          ),
-          options = list(`toggle-palette-more-text` = "Show more")
-          
-        ),
-        do.call(actionBttn, c(
-          list(
-            inputId = "makeVolcanoPlot",
-            label = "Generate Volcano Plot",
-            icon = icon("play")
-          )
-        ))
-      )
-    })
+output$CondvolcanoParams <- renderUI({
+  if (AnalysisRun$AnalysisRunValue){
+    uiOutput("volcanoParams")
+  }else{
+    sendSweetAlert(
+      session = session,
+      title = "ERROR",
+      text = "You must perform a DEA before.",
+      type = "info"
+    )
+    helpText("Please perform a DEA first.")
   }
+  
+  
+})
+
+
+
+
+output$volcanoParams <- renderUI({
+  tagList(
+    textInput("graphicTitle", "Graphic Title", value = "Volcano Plot"),
+    textInput("xlabs", "X-axis Label", value = "log<sub>2</sub>(Fold Change)"),
+    textInput("ylabs", "Y-axis Label", value = "-log<sub>10</sub>(FDR)"),
+    sliderInput(
+      "CutFC",
+      "Fold Change (X-axis) Cut-off",
+      min = ceiling(min(resultTable()$m.value)),
+      max = floor(max(resultTable()$m.value)),
+      value = c(-2, 2),
+      step = 0.5
+    ),
+    numericInput(
+      inputId = "Cutfdr",
+      label = "FDR Cut-off",
+      min = 0.00001,
+      value = 0.001,
+      max = 0.01,
+      step = 0.0001
+    ),
+    sliderInput(
+      "volcanoPointSize",
+      "Point Size",
+      min = 1,
+      max = 5,
+      value = 3,
+      step = 0.2
+    ),
+    spectrumInput(
+      inputId = "downColor",
+      label = tagList("Down-regulated in G2" ,htmlOutput("downPreview")),
+      choices = list(
+        list(
+          "red",
+          'black',
+          'white',
+          'blanchedalmond',
+          'steelblue',
+          'forestgreen'
+        ),
+        as.list(brewer.pal(n = 9, name = "Oranges")),
+        as.list(brewer.pal(n = 9, name = "Reds")),
+        as.list(brewer.pal(n = 11, name = "Spectral"))
+      ),
+      options = list(`toggle-palette-more-text` = "Show more")
+    ),
+    spectrumInput(
+      inputId = "upColor",
+      label = tagList("Up-regulated in G2" ,htmlOutput("upPreview")),
+      choices = list(
+        list(
+          "green",
+          'black',
+          'white',
+          'blanchedalmond',
+          'steelblue',
+          'forestgreen'
+        ),
+        as.list(brewer.pal(n = 9, name = "Blues")),
+        as.list(brewer.pal(n = 9, name = "Greens")),
+        as.list(brewer.pal(n = 11, name = "Spectral"))
+      ),
+      options = list(`toggle-palette-more-text` = "Show more")
+      
+    ),
+    do.call(actionBttn, c(
+      list(
+        inputId = "makeVolcanoPlot",
+        label = "Generate Volcano Plot",
+        icon = icon("play")
+      )
+    ))
+  )
 })
 
 # Preview up and down regulated genes under Color selection 
@@ -287,26 +300,27 @@ output$VolcanoBarPlot <- renderPlotly({
 
 # volcanoUI 
 output$volcanoUI <- renderUI({
-  if (length(var$groupList) > 2) {
-    sendSweetAlert(
-      session = session,
-      title = "ERROR",
-      text = "Volcano Plot is unavailable for multiple comparison now.",
-      type = "info"
-    )
-    helpText("Volcano Plot is unavailable for multiple comparison now.")
-  }else{
-    
-    if(runVolcano$runVolcanoValue){
-      tagList(
-        fluidRow(
-          column(8, plotlyOutput("volcanoPloty") %>% withSpinner()),
-          column(4, plotlyOutput("VolcanoBarPlot") %>% withSpinner())
-        )
+    if (length(var$groupList) > 2) {
+      sendSweetAlert(
+        session = session,
+        title = "ERROR",
+        text = "Volcano Plot is unavailable for multiple comparison now.",
+        type = "info"
       )
-    } else {
-      helpText("Please click [Generate Volcano Plot] first.")
-    }}
+      helpText("Volcano Plot is unavailable for multiple comparison now.")
+    }else{
+      
+      if(runVolcano$runVolcanoValue){
+        tagList(
+          fluidRow(
+            column(8, plotlyOutput("volcanoPloty") %>% withSpinner()),
+            column(4, plotlyOutput("VolcanoBarPlot") %>% withSpinner())
+          )
+        )
+      } else {
+        helpText("Please click [Generate Volcano Plot] first.")
+      }}
+
 })
 # Render table result
 

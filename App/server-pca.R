@@ -2,57 +2,62 @@
 
 runPCA <- reactiveValues(runPCAValue = FALSE)
 
-observeEvent(input$sider, {
-  if (input$sider == "pcaTab") {
-    output$pcaParameter <- renderUI({
-      tagList(
-        tipify(numericInput(
-          inputId = "pcFDR",
-          label = "FDR Cut-off",
-          min = 0.00001,
-          value = 0.001,
-          max = 0.01,
-          step = 0.001
-        ),
-        title = "Genes under the FDR cut-off will be used for PCA. Set 1 for exploratory analysis with all genes."),
-        
-        do.call(actionBttn, c(
-          list(
-            inputId = "pcRun",
-            label = "Run PCA",
-            icon = icon("play")
-          )
-        ))
-      )
-    })
+
+output$CondPCAParams <- renderUI({
+  if (AnalysisRun$AnalysisRunValue){
+    uiOutput("PCAParams")
+  }else{
+    sendSweetAlert(
+      session = session,
+      title = "ERROR",
+      text = "You must perform a DEA before.",
+      type = "info"
+    )
+    helpText("Please perform a DEA first.")
   }
+  
+  
+})
+
+output$PCAParams <- renderUI({
+  tagList(
+    numericInput(
+      inputId = "pcFDR",
+      label = "FDR Cut-off",
+      min = 0.00001,
+      value = 0.001,
+      max = 0.01,
+      step = 0.001
+    ),
+    
+    do.call(actionBttn, c(
+      list(
+        inputId = "pcRun",
+        label = "Run PCA",
+        icon = icon("play")
+      )
+    ))
+  )
 })
 
 
-
-# launch
-
 observeEvent(input$pcRun, {
   runPCA$runPCAValue <- input$pcRun
-  tcc <- var$tccObject
-  data <- getNormalizedData(tcc)
-  result <- getResult(tcc)
-  data <- data[result$q.value <= input$pcFDR,] 
+  data <- var$norData
+  data <- data[var$result$q.value <= input$pcFDR,] 
   data <- t(log1p(data)) 
   data.pca <- prcomp(data[, apply(data, 2, var) != 0],
                      center = T,
                      scale. = T)
-  
-  var$data.pca <- data.pca
+  var$pcadata <- data.pca
 })
-
 
 
 # 2D plotly object
 output$D2pca <- renderPlotly({
-  if (length(var$data.pca) > 0) {
+  if (length(var$pcadata) > 0) {
     tcc <- var$tccObject
-    data.pca <- var$data.pca
+    data.pca <- var$pcadata
     data <- data.frame(data.pca$x)
     data$name <- rownames(data)
     group <- tcc$group
@@ -77,9 +82,9 @@ output$D2pca <- renderPlotly({
 
 #  3D plotly object 
 output$D3pca <- renderPlotly({
-  if (length(var$data.pca) > 0) {
+  if (length(var$pcadata) > 0) {
     tcc <- var$tccObject
-    data.pca <- var$data.pca
+    data.pca <- var$pcadata
     data <- data.frame(data.pca$x)
     data$name <- rownames(data)
     group <- tcc$group

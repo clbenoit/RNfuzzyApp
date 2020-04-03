@@ -7,7 +7,7 @@ fluidPage(fluidRow(column(
     solidHeader = TRUE,
     status = "primary",
     width = NULL,
-    uiOutput("MAPlotParams")
+    uiOutput("CondMAPlotParams")
   ),
 ),
 column(

@@ -2,89 +2,97 @@
 
 runHeatmap <- reactiveValues(runHeatmapValue = FALSE, height = 300)
 
-# parameters
+output$CondHeatmapParams <- renderUI({
+  if (AnalysisRun$AnalysisRunValue){
+    uiOutput("HeatParams")
+  }else{
+    sendSweetAlert(
+      session = session,
+      title = "ERROR",
+      text = "You must perform a DEA before.",
+      type = "info"
+    )
+    helpText("Please perform a DEA first.")
+  }
+})
 
 
-observeEvent(input$sider, {
-  if (input$sider == "heatmapTab") {
-    output$heatmapParameter <- renderUI({
-      tagList(
-        radioGroupButtons(
-          inputId = "heatmapGeneSelectType",
-          label = "Select Genes",
-          choices = c("By List" = "By list",
-                      "By FDR" = "By FDR"),
-          justified = TRUE,
-          status = "primary"
+output$HeatParams <- renderUI({
+  tagList(
+    radioGroupButtons(
+      inputId = "heatmapGeneSelectType",
+      label = "Select Genes",
+      choices = c("By List" = "By list",
+                  "By FDR" = "By FDR"),
+      justified = TRUE,
+      status = "primary"
+    ),
+    uiOutput("heatmapSelectGene"),
+    selectInput(
+      "heatmapDist",
+      "Distance Measure",
+      choices = list(
+        "Euclidean" = "euclidean",
+        "Maximum" = "maximum",
+        "Manhattan" = "manhattan",
+        "Canberra" = "canberra",
+        "Binary" = "binary",
+        "Minkowski" = "minkowski"
+      ),
+      selected = "euclidean"
+    ),
+    selectInput(
+      "heatmapCluster",
+      "Agglomeration Method",
+      choices = list(
+        "ward.D2" = "ward.D2",
+        "Single" = "single",
+        "Complete" = "complete",
+        "UPGMA" = "average"
+      ),
+      selected = "complete"
+    ),
+    numericInput(
+      inputId = "clusterswanted",
+      label = "Clusters Wanted",
+      min = 1,
+      value = 5,
+      max = 100,
+      step = 1
+    ),
+    tagList(
+      selectInput(
+        "heatmapColor",
+        "Choose Colormap",
+        choices = list(
+          "PiYG",
+          "PRGn",
+          "BrBG",
+          "PuOr",
+          "OrRd",
+          "Oranges",
+          "RdGy",
+          "RdBu",
+          "RdYlBu",
+          "RdYlGn",
+          "Spectral",
+          "coolwarm"
         ),
-        uiOutput("heatmapSelectGene"),
-        selectInput(
-          "heatmapDist",
-          "Distance Measure",
-          choices = list(
-            "Euclidean" = "euclidean",
-            "Maximum" = "maximum",
-            "Manhattan" = "manhattan",
-            "Canberra" = "canberra",
-            "Binary" = "binary",
-            "Minkowski" = "minkowski"
-          ),
-          selected = "euclidean"
-        ),
-        selectInput(
-          "heatmapCluster",
-          "Agglomeration Method",
-          choices = list(
-            "ward.D2" = "ward.D2",
-            "Single" = "single",
-            "Complete" = "complete",
-            "UPGMA" = "average"
-          ),
-          selected = "complete"
-        ),
-        numericInput(
-          inputId = "clusterswanted",
-          label = "Clusters Wanted",
-          min = 1,
-          value = 5,
-          max = 100,
-          step = 1
-        ),
-        tagList(
-          selectInput(
-            "heatmapColor",
-            "Choose Colormap",
-            choices = list(
-              "PiYG",
-              "PRGn",
-              "BrBG",
-              "PuOr",
-              "OrRd",
-              "Oranges",
-              "RdGy",
-              "RdBu",
-              "RdYlBu",
-              "RdYlGn",
-              "Spectral",
-              "coolwarm"
-            ),
-            selected = "RdYlGn"
-          )
-        ),
-        tags$b("Color Preview"),
-        plotOutput("colorPreview", height = "20px"),
-        do.call(actionBttn, c(
-          list(
-            inputId = "heatmapRun",
-            label = "Run Heatmap",
-            icon = icon("play")
-          )
-        )))
-    })}})
+        selected = "RdYlGn"
+      )
+    ),
+    tags$b("Color Preview"),
+    plotOutput("colorPreview", height = "20px"),
+    do.call(actionBttn, c(
+      list(
+        inputId = "heatmapRun",
+        label = "Run Heatmap",
+        icon = icon("play")
+      )
+    )))
+})
 
 
-
-# gene list in param
 output$heatmapSelectGene <- renderUI({
   switch(
     input$heatmapGeneSelectType,
@@ -231,7 +239,6 @@ observeEvent(input$heatmapRun, {
   colnames(heatdata) <- c("gene_id", "PValue","FDR","Rank")
   resultTable <- merge(cute, heatdata, by = "gene_id")
   resultTable <- merge(resultTable, data, by = "gene_id")
-  var$DEGList <- as.data.frame(resultTable$gene_id)
   
   
   #result table 

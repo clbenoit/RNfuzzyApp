@@ -32,9 +32,13 @@ shinyServer(function(input, output, session) {
     InputTable = data.frame(),
     LowCountGenes = data.frame(),
     CountData = data.frame(),
+    groupdf = data.frame(),
+    matrixcount = matrix(),
     groupList = NULL,
+    groupListConvert = NULL,
     selectedgroups = NULL,
     result = data.frame("Results will show here." = character(0)),
-    tccObject = NULL)
+    tccObject = NULL,
+    pcadata = NULL)
   
 })

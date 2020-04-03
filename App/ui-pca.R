@@ -7,7 +7,7 @@ fluidPage(column(
     width = NULL,
     solidHeader = TRUE,
     status = "primary",
-    uiOutput("pcaParameter")
+    uiOutput("CondPCAParams")
   )
 ),
 column(

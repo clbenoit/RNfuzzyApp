@@ -7,7 +7,8 @@ fluidPage(fluidRow(column(
     width = NULL,
     solidHeader = TRUE,
     status = "primary",
-    uiOutput("heatmapParameter"))),
+    uiOutput("CondHeatmapParams")
+    )),
   column(
     9,
     navbarPage("Results",

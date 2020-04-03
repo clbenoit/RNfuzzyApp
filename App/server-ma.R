@@ -2,6 +2,24 @@
 
 runMA <- reactiveValues(runMAValues = FALSE)
 
+
+output$CondMAPlotParams <- renderUI({
+  if (AnalysisRun$AnalysisRunValue){
+    uiOutput("MAPlotParams")
+  }else{
+    sendSweetAlert(
+      session = session,
+      title = "ERROR",
+      text = "You must perform a DEA before.",
+      type = "info"
+    )
+    helpText("Please perform a DEA first.")
+  }
+  
+  
+})
+
+
 observeEvent(input$sider, {
     output$MAPlotParams <- renderUI({
       tagList(
@@ -146,23 +164,25 @@ output$maFDRpreview <- renderText({
 
 #main  plot output 
 output$MAPlotUI <- renderUI({
-  if (length(var$groupList) > 2) {
-    sendSweetAlert(
-      session = session,
-      title = "ERROR",
-      text = "MA Plot is unavailable for multiple comparison now.",
-      type = "info"
-    )
-    helpText("MA Plot is unavailable for multiple comparison now.")
-  }else{
-  if (runMA$runMAValues) {
-    tagList(fluidRow(
-      column(8, plotlyOutput("maploty") %>% withSpinner()),
-      column(4, plotlyOutput("geneBarPlot") %>% withSpinner())
-    ))
-  } else {
-    helpText("Please click [Generate MA Plot] first.")
-  }}
+  if (runVolcano$runVolcanoValue){
+    if (length(var$groupList) > 2) {
+      sendSweetAlert(
+        session = session,
+        title = "ERROR",
+        text = "MA Plot is unavailable for multiple comparison now.",
+        type = "info"
+      )
+      helpText("MA Plot is unavailable for multiple comparison now.")
+    }else{
+    if (runMA$runMAValues) {
+      tagList(fluidRow(
+        column(8, plotlyOutput("maploty") %>% withSpinner()),
+        column(4, plotlyOutput("geneBarPlot") %>% withSpinner())
+      ))
+    } else {
+      helpText("Please click [Generate MA Plot] first.")
+    }}
+}
 })
 
 

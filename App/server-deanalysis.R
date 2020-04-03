@@ -111,7 +111,7 @@ observeEvent(input$DEA, {
         
       ),
       
-      class = "display"),
+      class = "display",
       caption = tags$caption(
         tags$li(
           HTML("<font color=\"#B22222\"><b>Gene Name</b></font> is colored when under FDR cut-off")

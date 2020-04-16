@@ -38,24 +38,21 @@ g-table-intro h4 {
 
 ## GO Enrichment
 ---
+R-EnrichTool is based on EnrichR. 
 
-To obtain your associated GO terms and description in a nice table and graph, just choose your organism.
+To obtain your associated GO terms and description in a nice table and graph, just paste a Symbol list.
 
 
 
 -  <u> As input </u> </br>
-Paste a list of <b> gene ids </b> of interest (EnsemblIDs)
+Paste a list of <b> Symbols</b> of interest 
 
 
 
 - <u> GO Terms </u> </br>
-Choose a p-value cut-off and the GO enrichment you want to obtain.
+Choose the GO enrichment you want and the number of results to show.
+(results are sorted from the most significant p-value to the least)
 
 
 <br/>
 <br/>
-
- <u>About the p-value adjustment :</u> 
-
-[Why, When and How to Adjust Your P Values ?](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6099145/) : p-value quantification issues occurs when multtesting. <br/>
-Indeeed, in multitesting, the probability of false positive may inflate, so it would need an adjustemnt to correct this inflation.

@@ -7,15 +7,6 @@ fluidPage(fluidRow(column(
     solidHeader = TRUE,
     status = "primary",
     tagList(
-      selectInput(
-        "chosendataset",
-        "Choose your Organism",
-        c("Drosophila melanogaster" = "org.Dm.eg.db",
-          "Mus musculus" = "org.Mm.eg.db ",
-          "Homo sapiens" = "org.Hs.eg.db", 
-          "Caenorhabditis elegans" = "org.Ce.eg.db",
-          "Escherichia coli" = "org.EcK12.eg.db")
-      ),
       textAreaInput(
         "refseqids",
         "Paste Gene List",
@@ -26,30 +17,17 @@ fluidPage(fluidRow(column(
       selectInput(
         "chosenGO",
         "Choose your Enrichment",
-        c( "Biological Process" = "BP",
-           "Molecular Fonction" = "MF",
-           "Cellular Component" = "CC",
-           "All" = 'ALL')
+        c( "Biological Process" =  "GO_Biological_Process_2018",
+           "Molecular Fonction" =  "GO_Molecular_Function_2018",
+           "Cellular Component" =  "GO_Cellular_Component_2018")
       ),
-      sliderInput(
-        "pval",
-        "P-value Cut-off",
-        min = 0.00001,
-        max = 0.01,
-        value = 0.001,
-        step = 0.001
-      ),
-      selectInput(
-        "pvaladj",
-        "P-value Adjustment",
-        c("None" = "none",
-          "Bonferroni" = "bonferroni",
-          "Holm" = "holm",
-          "Hochberg" = "hochberg",
-          "Hommel" = "hommel",
-          "BH" = "BH",
-          "BY" = "BY",
-          "FDR" = "fdr")
+      numericInput(
+        "topres",
+        "Top results",
+        min = 1,
+        max = 100,
+        value = 30,
+        step = 1
       )
     ),
     do.call(actionBttn, c(
@@ -63,7 +41,7 @@ fluidPage(fluidRow(column(
   #result table 
   column(
     9,
-    navbarPage("Results",
+    navbarPage(theme=shinytheme("sandstone"),"Results",
                id = "entabs",
                tabPanel(
                  title = tagList(icon("question"), "Info"),
@@ -81,17 +59,10 @@ fluidPage(fluidRow(column(
                  uiOutput('EnrichResults')
                ),
                tabPanel(
-                 title = tagList(icon("braille"), "Graph"),
+                 title = tagList(icon("braille"), "Bar Chart"),
                  width = NULL,
                  solidHeader = TRUE,
                  status = "primary",
-                 plotlyOutput('statenrich', height = 800)%>% withSpinner()
-               ),
-               tabPanel(
-                 title = tagList(icon("braille"), "Pie Chart"),
-                 width = NULL,
-                 solidHeader = TRUE,
-                 status = "primary",
-                 plotlyOutput('pieenrich', height = 800)%>% withSpinner()
+                 plotlyOutput('barenrich',height = 800)%>% withSpinner()
                )
     ))))

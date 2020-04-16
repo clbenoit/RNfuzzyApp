@@ -12,29 +12,24 @@ observeEvent(input$enrichmentgo,{
     value = 0
   )
   
+  
+  
+  geneset <- unlist(strsplit(input$refseqids, split = '\n'))
+  
   updateProgressBar(
     session = session,
     id = "enrichProgress",
     title = "Enrichment in progress...",
-    value = 25
+    value = 50
   )
   
-  geneset <- unlist(strsplit(input$refseqids, split = '\n'))
+  
+  res <- listEnrichrDbs()
+  res <- input$chosenGO
+  enriched <- enrichr(geneset, res)
   
   
-  res <- enrichGO(geneset, 
-                  OrgDb = input$chosendataset, 
-                  keyType = 'ENSEMBL', 
-                  ont = input$chosenGO, 
-                  pvalueCutoff = input$pval, 
-                  pAdjustMethod = input$pvaladj,
-                  qvalueCutoff = 0.2,
-                  minGSSize = 10,
-                  maxGSSize = 500,
-                  readable = FALSE,
-                  pool = FALSE
-  )
-  print(res)
+  
   
   updateProgressBar(
     session = session,
@@ -43,10 +38,17 @@ observeEvent(input$enrichmentgo,{
     value = 75
   )
   
-  res <- as.data.frame(res)
+  res_enrich <- as.data.frame(enriched)
+  res_enrich <- res_enrich[,-4]
+  res_enrich <- res_enrich[,-4]
+  res_enrich <- res_enrich[,-4]
+  colnames(res_enrich) <- c("Term","Overlap","P.value","Odd.Ratio","Combined.Score","Genes")
+  res_enrich <- res_enrich[order(res_enrich[,3]),]
+  n <- as.numeric(input$topres)
+  res_enrich <- res_enrich[1:n,]
   output$EnrichResultTable <-  DT::renderDataTable({
     DT::datatable(
-      res,        
+      res_enrich,        
       extensions = 'Buttons',
       option = list(
         paging = TRUE,
@@ -58,7 +60,7 @@ observeEvent(input$enrichmentgo,{
         buttons = list(list(
           extend = 'collection',
           buttons = list(extend='csv',
-                         filename = "results_conversion"),
+                         filename = "results_enrichment"),
           text = 'Download')),
         scrollX = TRUE,
         pageLength = 10,
@@ -81,63 +83,22 @@ observeEvent(input$enrichmentgo,{
   
   
   
-  output$statenrich <- renderPlotly({
-    if ( input$chosenGO == "ALL"){
-      fig <- plot_ly(res, 
-                     x = ~(-log(p.adjust)), 
-                     y = ~Description, 
-                     text = ~paste('GO term:', ID, '<br>Count :', Count, '<br>P-Value :', p.adjust, '<br>Q-Value :', qvalue),
-                     type = 'scatter', 
-                     mode = 'markers',
-                     color = ~ONTOLOGY,
-                     colors = "Reds",
-                     marker = list(size = ~Count*2, opacity = 1)
-      )%>% layout(title = 'Statistics of the Enrichment',
-                  yaxis = list(title = 'Description'),
-                  xaxis = list(title = '-log(P-value)')
-      )
-      fig
-    }else{
-      fig <- plot_ly(res, 
-                     x = ~(-log(p.adjust)), 
-                     y = ~Description, 
-                     text = ~paste('GO term:', ID, '<br>Count :', Count, '<br>P-Value :', p.adjust, '<br>Q-Value :', qvalue),
-                     type = 'scatter', 
-                     mode = 'markers',
-                     color = ~Count,
-                     colors = "Reds",
-                     marker = list(size = ~Count*2, opacity = 1)
-      )%>% layout(title = 'Statistics of the Enrichment',
-                  yaxis = list(title = 'Description'),
-                  xaxis = list(title = '-log(P-value)')
-      )
-      fig
-    }
- 
+  output$barenrich <- renderPlotly({
+    fig <- plot_ly(
+      res_enrich,
+      x = ~(-log(P.value)),
+      y = ~reorder(Term,(-log(P.value))),
+      text = ~Term, 
+      textposition = 'auto',
+      type = "bar",
+      colors = "Reds"
+    )%>% layout(title = 'Statistics of the Enrichment',
+                yaxis = list(title = 'Enrichment'),
+                xaxis = list(title = '-log(P-value)'))
     
-  })  
-  
-  
-
-  
-  output$pieenrich <- renderPlotly({
-    fig <- plot_ly(res, 
-                   labels = ~Description, 
-                   values = ~Count, 
-                   type = 'pie',
-                   textposition = 'inside',
-                   textinfo = 'label+percent',
-                   insidetextfont = list(color = '#FFFFFF'),
-                   hoverinfo = 'text',
-                   showlegend = FALSE
-                   
-    )%>% layout(title = 'Statistics of the Enrichment per count',
-                xaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE),
-                yaxis = list(showgrid = FALSE, zeroline = FALSE, showticklabels = FALSE)
-    )
     fig
-    
   })
+  
   
 })
 

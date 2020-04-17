@@ -58,13 +58,13 @@ observeEvent(input$sider, {
           ),
           options = list(`toggle-palette-more-text` = "Show more")
         ),
-        do.call(actionBttn, c(
+        do.call(actionBttn,c(
           list(
             inputId = "makeMAPlot",
             label = "Generate MA Plot",
             icon = icon("play")
-          )
         ))
+        )
       )
     })
 })
@@ -164,7 +164,6 @@ output$maFDRpreview <- renderText({
 
 #main  plot output 
 output$MAPlotUI <- renderUI({
-  if (runVolcano$runVolcanoValue){
     if (length(var$groupList) > 2) {
       sendSweetAlert(
         session = session,
@@ -182,7 +181,6 @@ output$MAPlotUI <- renderUI({
     } else {
       helpText("Please click [Generate MA Plot] first.")
     }}
-}
 })
 
 

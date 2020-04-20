@@ -19,14 +19,16 @@ output$CondvolcanoParams <- renderUI({
   
 })
 
-
-
-
 output$volcanoParams <- renderUI({
   tagList(
-    textInput("graphicTitle", "Graphic Title", value = "Volcano Plot"),
-    textInput("xlabs", "X-axis Label", value = "log<sub>2</sub>(Fold Change)"),
-    textInput("ylabs", "Y-axis Label", value = "-log<sub>10</sub>(FDR)"),
+    sliderInput(
+      "volcanoPointSize",
+      "Point Size",
+      min = 1,
+      max = 5,
+      value = 3,
+      step = 0.2
+    ),
     sliderInput(
       "CutFC",
       "Fold Change (X-axis) Cut-off",
@@ -42,14 +44,6 @@ output$volcanoParams <- renderUI({
       value = 0.001,
       max = 0.01,
       step = 0.0001
-    ),
-    sliderInput(
-      "volcanoPointSize",
-      "Point Size",
-      min = 1,
-      max = 5,
-      value = 3,
-      step = 0.2
     ),
     spectrumInput(
       inputId = "downColor",
@@ -142,50 +136,31 @@ observeEvent(input$makeVolcanoPlot, {
       dt <- resultTable()
       downCut <- input$CutFC[1]
       upCut <- input$CutFC[2]
-      
       dt$color <- "None"
+      
       tryCatch({
         dt[dt$m.value <= downCut,]$color <- "Down"
         dt[dt$m.value >= upCut,]$color <- "Up"
-        dt[dt[[yaxis]] > input$Cutfdr,]$color <-
-          "None"
+        dt[dt[[yaxis]] > input$Cutfdr,]$color <- "None"
       }, error = function(e) {
         sendSweetAlert(session = session, title = "ERROR", text = "No data was satisfied to your cut-off!")
       })
       
-      x <- factor(dt$color)
-      levels(x) <- list("Down" = 0,
+      FCcut <- factor(dt$color)
+      levels(FCcut) <- list("Down" = 0,
                         "None" = 1,
                         "Up" = 2)
       
       # link to bar plot
       key <- resultTable()$gene_id
       
-      if (is.null(input$resultTableInVolcanalPlot_rows_selected)) {
-        annotation <- list()
-      } else {
-        markerSelect <- dt[input$resultTableInVolcanalPlot_rows_selected, ]
-        
-        annotation <- list(
-          x = markerSelect$m.value,
-          y = -log10(markerSelect[[yaxis]]),
-          text = markerSelect$gene_id,
-          xref = "x",
-          yref = "y",
-          showarrow = TRUE,
-          arrowhead = 7,
-          ax = 20,
-          ay = 40
-        )
-      }
-      
       p <- plot_ly(
-        data = dt,
+        dt,
         x = ~ m.value,
         y = ~ -log10(dt[[yaxis]]),
         type = "scatter",
         mode = "markers",
-        color = ~ x,
+        color = ~ FCcut,
         colors = c(input$downColor, "black", input$upColor),
         marker = list(size = input$volcanoPointSize),
         hoverinfo = "text",
@@ -205,16 +180,18 @@ observeEvent(input$makeVolcanoPlot, {
         source = "volcano"
       ) %>%
         layout(
-          xaxis = list(title = input$xlabs),
-          yaxis = list(title = input$ylabs),
-          title = input$graphicTitle,
+          xaxis = list(title = "log<sub>2</sub>(Fold Change)"),
+          yaxis = list(title = "-log<sub>10</sub>(FDR)"),
+          title = paste0(
+            "Volcano Plot with q-value < ",
+            input$Cutfdr
+          ),
           legend = list(
             orientation = 'h',
             xanchor = "center",
             x = 0.5,
             y = 1.05
           ),
-          annotations = annotation,
           shapes = list(
             list(
               type = 'line',
@@ -260,21 +237,14 @@ output$VolcanoBarPlot <- renderPlotly({
   ))
   
   gene_id <- eventdata$key
-  
   expression <-
     var$CountData[row.names(var$CountData) == gene_id,]
-  
-  expressionNor <-
-    t(t(var$norData[row.names(var$norData) == gene_id,]))
-  
   data <- var$CountData
-  data.list <- var$selectedgroups
-  
-  expression <- t(expression[data.list != 0])
-  data.list <- data.list[data.list != 0]
+  dataGroups <- var$selectedgroups
+  expression <- t(expression[dataGroups != 0])
   
   xOrder <-
-    data.frame("name" = row.names(expression), "group" = data.list)
+    data.frame("name" = row.names(expression), "group" = dataGroups)
   xOrderVector <- unique(xOrder[order(xOrder$group),]$name)
   xform <- list(categoryorder = "array",
                 categoryarray = xOrderVector,
@@ -283,7 +253,7 @@ output$VolcanoBarPlot <- renderPlotly({
   plot_ly(
     x = ~ row.names(expression),
     y = ~ expression[, 1],
-    color = as.factor(data.list),
+    color = as.factor(dataGroups),
     text = expression[, 1],
     textposition = 'outside',
     showlegend = FALSE,
@@ -298,30 +268,6 @@ output$VolcanoBarPlot <- renderPlotly({
 })
 
 
-# volcanoUI 
-output$volcanoUI <- renderUI({
-    if (length(var$groupList) > 2) {
-      sendSweetAlert(
-        session = session,
-        title = "ERROR",
-        text = "Volcano Plot is unavailable for multiple comparison now.",
-        type = "info"
-      )
-      helpText("Volcano Plot is unavailable for multiple comparison now.")
-    }else{
-      
-      if(runVolcano$runVolcanoValue){
-        tagList(
-          fluidRow(
-            column(8, plotlyOutput("volcanoPloty") %>% withSpinner()),
-            column(4, plotlyOutput("VolcanoBarPlot") %>% withSpinner())
-          )
-        )
-      } else {
-        helpText("Please click [Generate Volcano Plot] first.")
-      }}
-
-})
 # Render table result
 
 output$resultTableVolc <- DT::renderDataTable({
@@ -540,3 +486,28 @@ output$resultTableup <- DT::renderDataTable({
     }
   }
 },server = F)
+
+# volcanoUI 
+output$volcanoUI <- renderUI({
+  if (length(var$groupList) > 2) {
+    sendSweetAlert(
+      session = session,
+      title = "ERROR",
+      text = "Volcano Plot is unavailable for multiple comparison now.",
+      type = "info"
+    )
+    helpText("Volcano Plot is unavailable for multiple comparison now.")
+  }else{
+    
+    if(runVolcano$runVolcanoValue){
+      tagList(
+        fluidRow(
+          column(8, plotlyOutput("volcanoPloty") %>% withSpinner()),
+          column(4, plotlyOutput("VolcanoBarPlot") %>% withSpinner())
+        )
+      )
+    } else {
+      helpText("Please click [Generate Volcano Plot] first.")
+    }}
+  
+})

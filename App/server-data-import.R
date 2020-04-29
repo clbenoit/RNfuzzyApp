@@ -505,8 +505,8 @@ output$pcaUI <- renderUI({
       ),
       column(9,
              tabsetPanel(
-               tabPanel(title = "2D Plot", plotlyOutput("pcaPlotObject2d") %>% withSpinner()),
-               tabPanel(title = "3D Plot", plotlyOutput("pcaPlotObject3d") %>% withSpinner())
+               tabPanel(title = "2D Plot", plotlyOutput("pcaPlotObject2d", width = 800) %>% withSpinner()),
+               tabPanel(title = "3D Plot", plotlyOutput("pcaPlotObject3d", width = 800) %>% withSpinner())
                
              ))
     ))

@@ -222,7 +222,7 @@ observeEvent(input$heatmapRun, {
       ylab = "Sample",
       main = heatmapTitle,
       margins = c(150, 100, 40, 20),
-      scale = "none",
+      dendrogram = "column",
       labCol = colnames(datan),
       labRow = row.names(datan)
     )

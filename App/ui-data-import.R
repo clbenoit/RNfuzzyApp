@@ -28,15 +28,6 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
                   border-spacing: 0;
                   border: none;
                   }
-                  .tg td {
-                  font-family: Arial, sans-serif;
-                  font-size: 14px;
-                  padding: 10px 5px;
-                  border-style: solid;
-                  border-width: 0px;
-                  overflow: hidden;
-                  word-break: normal;
-                  }
                   .tg th {
                   font-family: Arial, sans-serif;
                   font-size: 14px;
@@ -150,28 +141,6 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
                  uiOutput("showLowTable")
                )
              )),
-  #           navbarPage("Read Count Table",
-   #                     tabPanel(
-    #                        title = tagList(icon("table"), "Actual Table"),
-     #                      solidHeader = TRUE,
-      #                     status = "primary",
-       #                   uiOutput("showTable")
-  #                      ),
-   #                     tabPanel(
-    #                      title = tagList(icon("table"), "Input Table"),
-     #                     solidHeader = TRUE,
-      #                    status = "primary",
-       #                   width = NULL,
-        #                  uiOutput("InputTable")
-         #               ),
-#                        tabPanel(
- #                        solidHeader = TRUE,
-  #                        status = "primary",
-   #                       width = NULL,
-    #                      uiOutput("LowTable")
-     #                   ))
-                        
-      #     ),
            tabPanel(title = tagList(icon("bar-chart"), "Count Distribution"),
                     uiOutput("sampleDistributionBoxPanel")),
            tabPanel(title = tagList(icon("sitemap"), "Hierarchical Clustering"),

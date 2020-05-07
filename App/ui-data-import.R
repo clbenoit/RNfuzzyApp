@@ -142,7 +142,7 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
                )
              )),
            tabPanel(title = tagList(icon("bar-chart"), "Count Distribution"),
-                    uiOutput("sampleDistributionBoxPanel")),
+                    uiOutput("CountDistrib")),
            tabPanel(title = tagList(icon("sitemap"), "Hierarchical Clustering"),
                     uiOutput("clustUI")),
            tabPanel(title = tagList(icon("object-group"), "PCA"),

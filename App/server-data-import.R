@@ -69,7 +69,7 @@ observeEvent(input$confirmedGroupList, {
       })
     names(var$groupList) <- unique(group$V2)
     data.list <- rep(0, ncol(var$CountData))
-    
+
     
     # Convert the input of group information to a specific format for normalization.
     convertion <- function(x, df) {
@@ -275,33 +275,31 @@ output$showLowTable <- renderUI({
 v <- reactiveValues(importActionValue = FALSE)
 
 ################### BOXPLOT  #####################
-output$sampleDistributionBox <- renderPlotly({
+output$CountDistribBox <- renderPlotly({
   if (length(var$matrixcount) > 0) {
     data <- var$matrixcount
     
     cpm <- log2(data + 1)
     cpm_stack <- data.frame(stack(cpm))
     
-    group <-
-      data.frame("col" = rownames(var$groupdf),
+    group <- data.frame("col" = rownames(var$groupdf),
                  "group" = var$groupdf$group)
     
     data <- left_join(cpm_stack, group, by = "col")
     data <- arrange(data, group)
     
     p <- plot_ly(
-      data = data,
+      data,
       x = ~ col,
       y = ~ value,
       type = "box",
       split = ~ group,
       color = ~ group
     ) %>% layout(
-      title = input$sampleDistributionTitle,
-      xaxis = list(title = input$sampleDistributionXlab, categoryarray = "array", categoryarray = ~col),
-      yaxis = list(title = input$sampleDistributionYlab)
+      title = input$CountDistribTitle,
+      xaxis = list(title = input$CountDistribXlab, categoryarray = "array", categoryarray = ~col),
+      yaxis = list(title = input$CountDistribYlab)
     )
-    var$sampleDistributionBar <- p
     p
   } else {
     return()
@@ -312,25 +310,25 @@ output$sampleDistributionBox <- renderPlotly({
 
 
 # render UI 
-output$sampleDistributionBoxPanel <- renderUI({
+output$CountDistrib <- renderUI({
   if (v$importActionValue) {
     tagList(fluidRow(
       column(
         3,
         textInput(
-          inputId = "sampleDistributionTitle",
+          inputId = "CountDistribTitle",
           label = "Title",
           value = "Raw Count",
           placeholder = "Raw Count"
         ),
         textInput(
-          inputId = "sampleDistributionXlab",
+          inputId = "CountDistribXlab",
           label = "X label",
           value = "Sample",
           placeholder = "Sample"
         ),
         textInput(
-          inputId = "sampleDistributionYlab",
+          inputId = "CountDistribYlab",
           label = "Y label",
           value = "log<sub>2</sub>(Count + 1)",
           placeholder = "log<sub>2</sub>(Count + 1)"
@@ -338,7 +336,7 @@ output$sampleDistributionBoxPanel <- renderUI({
       ),
       column(
         9,
-        plotlyOutput("sampleDistributionBox") %>% withSpinner()
+        plotlyOutput("CountDistribBox") %>% withSpinner()
       )
     ))
   } else {
@@ -412,7 +410,7 @@ output$clustUI <- renderUI({
                   </div>
                   </div>'))
       ),
-      column(9, plotlyOutput("rawheatmap",height = 600) %>% withSpinner()
+      column(9, plotlyOutput("rawheatmap",height = 600, width = 800) %>% withSpinner()
       )
     ))
   } else {

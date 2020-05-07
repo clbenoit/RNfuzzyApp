@@ -78,11 +78,6 @@ observeEvent(input$makeMAPlot, {
     isolate({
       key <- resultTable()$gene_id
       DEGcut <- cut(resultTable()$q.value, breaks = c(0, input$maFDR, 1))
-      levels(DEGcut) <-
-        list(
-          "DEG" = paste("(0,", input$maFDR, "]", sep = ""),
-          "non-DEG" = paste("(", input$maFDR, ",1]", sep = "")
-        )
       
       p <- plot_ly(
         data = resultTable(),
@@ -121,7 +116,6 @@ observeEvent(input$makeMAPlot, {
             y = 1.05
           )
         )
-      var$MAPlotObject <- p
       p
     })
   })
@@ -134,7 +128,7 @@ output$geneBarPlot <- renderPlotly({
   eventdata <- event_data("plotly_hover", source = "ma")
   validate(need(
     !is.null(eventdata),
-    "Hover over the point to show gene's expression level of interest."
+    "Hover a gene to show its expression."
   ))
   
   gene_id <- eventdata$key

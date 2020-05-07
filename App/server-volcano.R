@@ -147,13 +147,9 @@ observeEvent(input$makeVolcanoPlot, {
       })
       
       FCcut <- factor(dt$color)
-      levels(FCcut) <- list("Down" = 0,
-                        "None" = 1,
-                        "Up" = 2)
       
       # link to bar plot
       key <- resultTable()$gene_id
-      
       p <- plot_ly(
         dt,
         x = ~ m.value,
@@ -219,7 +215,6 @@ observeEvent(input$makeVolcanoPlot, {
             )
           )
         )
-      var$VolcanoPlotObject <- p
       p
     })
   })

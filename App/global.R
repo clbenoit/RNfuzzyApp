@@ -22,7 +22,8 @@ library(heatmaply)
 library(enrichR)
 library(clusterProfiler)
 
-#theme
-#library(devtools)
-#install_github("nik01010/dashboardthemes")
+# app theme
+
+# library(devtools)
+# install_github("nik01010/dashboardthemes")
 

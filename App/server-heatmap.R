@@ -1,11 +1,11 @@
 # server-heatmap.R
 
-runHeatmap <- reactiveValues(runHeatmapValue = FALSE, height = 300)
+runHeatmap <- reactiveValues(runHeatmapValue = FALSE, height = 300) # to precise the run button has not been clicked
 
 output$CondHeatmapParams <- renderUI({
-  if (AnalysisRun$AnalysisRunValue){
+  if (AnalysisRun$AnalysisRunValue){           # if a DEA analysis has been performed then show the parameters 
     uiOutput("HeatParams")
-  }else{
+  }else{                                       # if not error message to do it 
     sendSweetAlert(
       session = session,
       title = "ERROR",
@@ -17,7 +17,7 @@ output$CondHeatmapParams <- renderUI({
 })
 
 
-output$HeatParams <- renderUI({
+output$HeatParams <- renderUI({               # set of parameters 
   tagList(
     radioGroupButtons(
       inputId = "heatmapGeneSelectType",
@@ -160,33 +160,33 @@ output$colorPreview <- renderPlot({
 })
 
 
-# heatmaply obj
+# heatmaply object
 observeEvent(input$heatmapRun, {
-  data.list <- var$selectedgroups
-  data <- var$norData
+  data.list <- var$selectedgroups # seelcting only the selected groups
+  data <- var$norData             # the normalized data 
   data.list <- data.list[data.list != 0]
-  if (input$heatmapGeneSelectType == "By list") {
+  if (input$heatmapGeneSelectType == "By list") {  # if gene selection is by list, find these genes in the global list of gene from the input table
     selectedListForHeatmap <-
       row.names(data) %in% unlist(strsplit(x = input$heatmapTextList, split = '[\r\n]'))
     heatmapTitle <- "Heatmap of specific genes"
   }
   
-  if (input$heatmapGeneSelectType == "By FDR") {
+  if (input$heatmapGeneSelectType == "By FDR") { # if gene selection is by fdr cut off 
     
-    selectedListForHeatmap <-
+    selectedListForHeatmap <-     # it justs select the genes respecting the cut off
       row.names(data) %in% resultTable()[resultTable()$q.value <= input$heatmapFDR,]$gene_id
     heatmapTitle <-
-      paste0("Heatmap of gene expression (q.value < ",
+      paste0("Heatmap of gene expression (q.value < ",  # title of the heatmap accoring to the fdr cut off
              input$heatmapFDR,
              ", ",
              sum(selectedListForHeatmap),
              "DEGs)")
   }
   
-  data <- data[selectedListForHeatmap, ]
+  data <- data[selectedListForHeatmap, ]  # updating selected data
   
   
-  if (nrow(data) == 0) {
+  if (nrow(data) == 0) {    # error is gene list is selected and is empty
     sendSweetAlert(
       session = session,
       title = "ERROR",
@@ -194,35 +194,35 @@ observeEvent(input$heatmapRun, {
       type = "error"
     )
     return()
-  } else {
+  } else {               # shows the number of DEGs used according to the selection and the samples (groups)
     showNotification(paste0(dim(data)[1], " DEGs, ", dim(data)[2], " sample will be used."))
     showNotification("Generating, please be patient...", type = "message")
   }
   colorPal <- colorPanel()
-  datat <- t(data)
+  datat <- t(data) # transform the matrix to have genes as column and groups as row
   datal <-  log1p(datat)
   datan <- heatmaply::normalize(datal)
-  dend <- hclust(dist(t(datan), method = input$heatmapDist), method = input$heatmapCluster)
-  cut <- cutree(dend, k = input$clusterswanted)
-  cute <- as.data.frame(cut)
+  dend <- hclust(dist(t(datan), method = input$heatmapDist), method = input$heatmapCluster) # to assign the cluster
+  cut <- cutree(dend, k = input$clusterswanted) # with the number of wanted clusters
+  cute <- as.data.frame(cut)   # and finally to accord it as a dataframe to reveal it
   cute$gene_id <- rownames(cute)
   colnames(cute) <- c("cluster","gene_id")
   rownames(cute) <- NULL
-  runHeatmap$height <- 600
+  runHeatmap$height <- 600  # size of the heatmap
   
-  output$heatmap <- renderPlotly({
+  output$heatmap <- renderPlotly({    # heatmap
     
     p <- heatmaply(
       datan,
       colors = colorPal,
-      k_col = input$clusterswanted,
-      dist_method = input$heatmapDist,
-      hclust_method = input$heatmapCluster,
+      k_col = input$clusterswanted,# clusters wanted
+      dist_method = input$heatmapDist, # distance method
+      hclust_method = input$heatmapCluster, # agglomeration method
       xlab = "Gene",
       ylab = "Sample",
-      main = heatmapTitle,
+      main = heatmapTitle,    # title
       margins = c(150, 100, 40, 20),
-      dendrogram = "column",
+      dendrogram = "column",   # add a dendrogram on the columns (genes)
       labCol = colnames(datan),
       labRow = row.names(datan)
     )
@@ -232,10 +232,10 @@ observeEvent(input$heatmapRun, {
   
   gene_id <- row.names(data)
   data <- cbind(data, gene_id = gene_id)
-  heatdata <- var$result
-  heatdata <- var$result[,-2]
-  heatdata <- heatdata[,-2]
-  heatdata <- heatdata[,-5]
+  heatdata <- var$result        # select only gene id, pvalue fdr and rank for the result table
+  heatdata <- var$result[,-2]   #
+  heatdata <- heatdata[,-2]     #
+  heatdata <- heatdata[,-5]     #
   colnames(heatdata) <- c("gene_id", "PValue","FDR","Rank")
   resultTable <- merge(cute, heatdata, by = "gene_id")
   resultTable <- merge(resultTable, data, by = "gene_id")
@@ -246,7 +246,7 @@ observeEvent(input$heatmapRun, {
     
     DT::datatable(
       resultTable,        
-      extensions = 'Buttons',
+      extensions = 'Buttons',      # download button 
       option = list(
         paging = TRUE,
         searching = TRUE,
@@ -261,7 +261,7 @@ observeEvent(input$heatmapRun, {
           text = 'Download')),
         scrollX = TRUE,
         pageLength = 10,
-        searchHighlight = TRUE,
+        searchHighlight = TRUE,      #search bar
         orderClasses = TRUE
         
       ),
@@ -271,7 +271,7 @@ observeEvent(input$heatmapRun, {
   
   
   
-  runHeatmap$runHeatmapValue <- input$heatmapRun
+  runHeatmap$runHeatmapValue <- input$heatmapRun #precise the run button has been clicked and heatmap performed
   closeSweetAlert(session = session)
   sendSweetAlert(session = session,
                  title = "Completed!",
@@ -285,10 +285,10 @@ observeEvent(input$heatmapRun, {
 # remder final heatmap 
 
 output$heatmapPlot <- renderUI({
-  if (runHeatmap$runHeatmapValue) {
+  if (runHeatmap$runHeatmapValue) {   # if the run button  has been clicked, then it shows the heatmap
     plotlyOutput("heatmap", height = runHeatmap$height) %>% withSpinner()
   }
-  else{
+  else{                               # if not, message to do it
     helpText("Enter parameters to plot the heatmap first.")
   }
 })

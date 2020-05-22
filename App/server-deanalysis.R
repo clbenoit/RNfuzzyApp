@@ -1,14 +1,14 @@
 # server-normalization.R
 
 
-AnalysisRun <- reactiveValues(AnalysisRunValue = FALSE)
+AnalysisRun <- reactiveValues(AnalysisRunValue = FALSE) # to precise the run button has not been clicked
 
 
 
-output$CondDEAParams <- renderUI({
+output$CondDEAParams <- renderUI({  # if a count data table has been uploaded then it shows the parameters
   if (v$importActionValue){
     uiOutput("DEAParams")
-  }else{
+  }else{                            # if not, error message to do it 
     sendSweetAlert(
       session = session,
       title = "ERROR",
@@ -20,7 +20,7 @@ output$CondDEAParams <- renderUI({
 })
 
 
-output$DEAParams <- renderUI({
+output$DEAParams <- renderUI({     # set of paramters 
   tagList(
     selectInput(
       "normMethod",
@@ -52,7 +52,7 @@ output$DEAParams <- renderUI({
       value = 0.05,
       step = 0.05
     ),
-    do.call(actionBttn, c(
+    do.call(actionBttn, c(           # run button 
       list(
         inputId = "DEA",
         label = "Run Analysis",
@@ -61,8 +61,8 @@ output$DEAParams <- renderUI({
   )
 })
 
-observeEvent(input$DEA, {
-  progressSweetAlert(
+observeEvent(input$DEA, {           # when the run button is clicked 
+  progressSweetAlert(               # progress bar 
     session = session,
     id = "DEAnalysisProgress",
     title = "Work in progress",
@@ -70,54 +70,54 @@ observeEvent(input$DEA, {
     value = 0
   )
   
-  # Create a TCC Object 
-  tcc <-
+  # Creation of a TCC Object 
+  tcc <-                           
     new("TCC", var$CountData, var$selectedgroups)
-  var$tccObject <- tcc
+  var$tccObject <- tcc             # save the object
 
   
-  updateProgressBar(
+  updateProgressBar(               # updating progress bar
     session = session,
     id = "DEAnalysisProgress",
     title = "DE Analysis in progress...",
     value = 50
   )
-  tcc <- calcNormFactors( #function to norm
+  tcc <- calcNormFactors(         # first calculation of the normalization and estimation of DEGs
     tcc,
     norm.method = input$normMethod,
     test.method = input$testMethod,
     FDR = input$fdr,
     floorPDEG = input$floorpdeg,
-    iteration = 3
+    iteration = 3                # iteration value set to 3 
   )
   
-  updateProgressBar(
+  updateProgressBar(             # updating progress bar 
     session = session,
     id = "DEAnalysisProgress",
     title = "DE Analysis in progress...",
     value = 75
   )
-  tcc <- estimateDE(tcc,
+  tcc <- estimateDE(tcc,        # final estimation of the DEGs 
                     test.method = input$testMethod,
                     FDR = input$fdr)
   
   
-  var$tccObject <- tcc
-  var$result <- getResult(tcc, sort = FALSE) %>% mutate_if(is.factor, as.character)
+  var$tccObject <- tcc         # save the updated object 
+  var$result <- getResult(tcc, sort = FALSE) %>% mutate_if(is.factor, as.character) # get the result of the calculation
   
-  var$result_a <- var$result[,-2]
-  var$result_m <- var$result_a[,-2]
+  var$result_a <- var$result[,-2]        # deleting the a value (Basemean) of the results
+  var$result_m <- var$result_a[,-2]      # deleting the m value (Log2FC) of the results
   colnames(var$result_m) <- c("gene_id", "P Value", "FDR", "Rank", "estimatedDEG")
-  var$result_e <- var$result_m[which(var$result_m$estimatedDEG >0),]
-  var$result_s <- var$result_e[,-5]
-  var$norData <- tcc$getNormalizedData()
+  var$result_e <- var$result_m[which(var$result_m$estimatedDEG >0),] # selection of the DEGs
+  var$result_s <- var$result_e[,-5]      # deleting the column showing which one is a DEG and which one is not
+  var$norData <- tcc$getNormalizedData() # only the normalized data
   
   
-  output$normresultTable <- DT::renderDataTable({
+  output$normresultTable <- DT::renderDataTable({  # normaliszed data table
     data <- var$norData
     DT::datatable(
       data,        
-      extensions = 'Buttons',
+      extensions = 'Buttons',                      # download button 
       option = list(
         paging = TRUE,
         searching = TRUE,
@@ -132,7 +132,7 @@ observeEvent(input$DEA, {
           text = 'Download')),
         scrollX = TRUE,
         pageLength = 10,
-        searchHighlight = TRUE,
+        searchHighlight = TRUE,                  # search bar 
         orderClasses = TRUE
         
       ),
@@ -140,7 +140,7 @@ observeEvent(input$DEA, {
       class = "display")
   }, server = FALSE)
   
-  output$fullresultTable <- DT::renderDataTable({
+  output$fullresultTable <- DT::renderDataTable({   # full results table where genes under the cut off are colored in red
     data <- var$norData
     gene_id <- row.names(data)
     data <- cbind(data, gene_id = gene_id)
@@ -182,7 +182,7 @@ observeEvent(input$DEA, {
       )
   }, server = F)
   
-  output$sortedresultTable <- DT::renderDataTable({
+  output$sortedresultTable <- DT::renderDataTable({            # only DEGs table 
     data <- var$norData
     gene_id <- row.names(data)
     data <- cbind(data, gene_id = gene_id)
@@ -213,18 +213,18 @@ observeEvent(input$DEA, {
       class = "display")
   }, server = FALSE)
   
-  closeSweetAlert(session = session)
+  closeSweetAlert(session = session)       # close alert precising the calculation od done
   sendSweetAlert(session = session,
                  title = "DONE",
                  text = "DE Analysis was successfully performed.",
                  type = "success")
   
   
-  AnalysisRun$AnalysisRunValue <- input$DEA
-  updateNavbarPage(session, "tabs", "redirectres")
+  AnalysisRun$AnalysisRunValue <- input$DEA    # precise the run button has been clicked 
+  updateNavbarPage(session, "tabs", "redirectres") # redirection to the full result table
   
 })
-resultTable <- reactive({
+resultTable <- reactive({   # saving the updated results to plot furtherly 
   var$result
 })
 
@@ -234,33 +234,33 @@ resultTable <- reactive({
 
 
 output$NormResultTable <- renderUI({
-  if(AnalysisRun$AnalysisRunValue){
+  if(AnalysisRun$AnalysisRunValue){     # if the calculation is done then show the tables 
     tagList(
       fluidRow(column(
         12, DT::dataTableOutput('normresultTable') %>% withSpinner()
-      )))} else {
+      )))} else {                       # if not, message to do it 
         helpText("Run Normalization to obtain Result Table.")
       }
 })
 
 
 output$mainResultTable <- renderUI({
-  if(AnalysisRun$AnalysisRunValue){
+  if(AnalysisRun$AnalysisRunValue){    # if the calculation is done then show the tables 
     tagList(
       fluidRow(column(
         12, DT::dataTableOutput('fullresultTable') %>% withSpinner()
-      )))} else {
+      )))} else {                       # if not, message to do it 
         helpText("Run Normalization to obtain Result Table.")
       }
 })
 
 
 output$mainsortedResultTable <- renderUI({
-  if(AnalysisRun$AnalysisRunValue){
+  if(AnalysisRun$AnalysisRunValue){    # if the calculation is done then show the tables 
     tagList(
       fluidRow(column(
         12, DT::dataTableOutput('sortedresultTable') %>% withSpinner()
-      )))} else {
+      )))} else {                      # if not, message to do it 
         helpText("Run Normalization to obtain Result Table.")
       }
 })

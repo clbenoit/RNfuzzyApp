@@ -1,11 +1,16 @@
+#ui-conversion.R
+# visible part of the ID conversion tool including selection of the organism, 
+# the type of input and the place to paste the gene set. 
+# provide a panel with a Rmd of informations and a panel with a result table
+
 fluidPage(fluidRow(column(
   3,
-  box(
+  box(                                                 #parameter box
     title = tagList(icon("cogs"), "Parameters"),
     width = NULL,
     solidHeader = TRUE,
     status = "primary",
-    tagList(
+    tagList(                                           # set of parameters
       selectInput(
         "chosendatabase",
         "Choose your Organism",
@@ -30,7 +35,7 @@ fluidPage(fluidRow(column(
       )
     )
   ),
-  do.call(actionBttn, c(
+  do.call(actionBttn, c(                           #validation button 
     list(
       inputId = "convgo",
       label = "Convert",
@@ -38,19 +43,21 @@ fluidPage(fluidRow(column(
     )))
 ),
 
-#result table 
+
+
+
 column(
   9,
   navbarPage("Results",
              id = "convtabs",
-             tabPanel(
+             tabPanel(                         # panel of information 
                title = tagList(icon("question"), "Info"),
                width = NULL,
                solidHeader = TRUE,
                status = "primary",
                includeMarkdown("documents/convinfo.Rmd")
              ),
-             tabPanel(
+             tabPanel(                        # panel of result table 
                title = tagList(icon("table"), "Result Table"),
                value = 'redirectconv',
                width = NULL,

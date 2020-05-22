@@ -1,11 +1,12 @@
 # ui.R
+# Menu of the app, Items with corresponding ui file 
 
 
-tagList(dashboardPage(
-  dashboardHeader(
+tagList(dashboardPage(                  #the global app
+  dashboardHeader(                      #header of the app
     title = span(tagList(icon("react"),"RNApp : a RNA-seq Analysis App")),
     titleWidth = 500),
-  dashboardSidebar(
+  dashboardSidebar(                     #side menu and its items
     sidebarMenu(
       id = "sider",
       menuItem(
@@ -48,10 +49,10 @@ tagList(dashboardPage(
   ),
   
   
-  dashboardBody(
-    shinyDashboardThemes(
+  dashboardBody(                     #content of the app 
+    shinyDashboardThemes(            #theme of the app 
       theme = "blue_gradient"),
-    tabItems(
+    tabItems(                        #according menu items to their corresponding files
       tabItem(tabName = "dataImport", source(
         file = "ui-data-import.R",
         local = TRUE,

@@ -1,10 +1,12 @@
 # ui-data-import.R
-navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
+
+
+navbarPage(theme=shinytheme("sandstone"),"Data Visualization", # theme for navbars of the app
            tabPanel(
              title = tagList(icon("table"), "Data"),
              fluidPage(
                fluidRow(column(3,
-                               box(
+                               box(        # uplaod data box
                                  title = tagList(icon("cloud-upload"), "Upload"),
                                  solidHeader = T,
                                  status = "primary",
@@ -18,7 +20,7 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
                                    buttonLabel = "Upload...",
                                    placeholder = "No file has been uploaded."
                                  ),
-                                 tags$div(
+                                 tags$div( # instructions 
                                    HTML('<div class="panel panel-primary">
                     <div class="panel-heading"> <span style="padding-left:10px"><b> Input file description</b> </span></div>
                   <div class="panel-body">
@@ -62,7 +64,7 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
                                )),
                         
                         column(3,
-                               box(
+                               box(     # filtering box
                                  title = tagList(icon("filter"), "Filter Low Count Genes"),
                                  solidHeader = TRUE, 
                                  status = "primary",
@@ -76,7 +78,7 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
                                    step = 1
                                  )
                                ),
-                               box(
+                               box(    # group assignement box
                                  title = tagList(icon("tags"), "Group Assignment"),
                                  solidHeader = TRUE,
                                  status = "primary",
@@ -85,7 +87,7 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
                                    "groupSelect",
                                    "Input your group info",
                                    rows = 6,
-                                   placeholder = paste(
+                                   placeholder = paste( #example
                                      "rep1,Group1",
                                      "rep2,Group1",
                                      "rep1,Group2",
@@ -97,7 +99,7 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
                                  )),
                                
                                
-                               do.call(actionBttn, c(
+                               do.call(actionBttn, c(      # run button to confirm groups
                                  list(
                                    inputId = "confirmedGroupList",
                                    label = "Assign Group Label",
@@ -105,7 +107,7 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
                                )
                                )),
                         column(3,
-                               box(
+                               box(            # info about group assignement box
                                  title = tagList(icon("question"), "About Groups"),
                                  solidHeader = TRUE,
                                  status = "primary",
@@ -115,7 +117,7 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
                                           
                                  )
                                ),
-                               box(
+                               box(           # summary of upload table box
                                  title = tagList(icon("file-alt"), "Summary"),
                                  solidHeader = TRUE,
                                  status = "primary",
@@ -125,26 +127,32 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization",
                                
                                
                         ))),
-             tabBox(
+             tabBox(                  # panels of different tables box
                title = "",
                width = NULL,
-               tabPanel(
+               tabPanel(              # final table of selected genes
                  title = tagList(icon("bar-chart"), "Actual Table"),
                  uiOutput("showTable")
                ),
-               tabPanel(
+               tabPanel(             # raw input table
                  title = tagList(icon("bar-chart"), "Input Table"),
                  uiOutput("showInputTable")
                ),
-               tabPanel(
+               tabPanel(             # table of filtered datz
                  title = tagList(icon("bar-chart"), "Filtered Table"),
                  uiOutput("showLowTable")
                )
              )),
-           tabPanel(title = tagList(icon("bar-chart"), "Count Distribution"),
-                    uiOutput("CountDistrib")),
-           tabPanel(title = tagList(icon("sitemap"), "Hierarchical Clustering"),
-                    uiOutput("clustUI")),
-           tabPanel(title = tagList(icon("object-group"), "PCA"),
-                    uiOutput("pcaUI"))
+           tabPanel(   # panel of the count distribution bar chart
+             title = tagList(icon("bar-chart"), "Count Distribution"),
+                    uiOutput("CountDistrib")
+             ),
+           tabPanel(  # panel of groups heatmap 
+             title = tagList(icon("sitemap"), "Hierarchical Clustering"),
+                    uiOutput("clustUI")
+             ),
+           tabPanel(   # panel of PCA
+             title = tagList(icon("object-group"), "PCA"),
+                    uiOutput("pcaUI")
+             )
 )

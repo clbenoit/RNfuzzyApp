@@ -2,7 +2,7 @@
 
 fluidPage(fluidRow(column(
   3,
-  box(
+  box(                                 # parameter box
     title = tagList(icon("cogs"), "MA Plot Parameters"),
     solidHeader = TRUE,
     status = "primary",
@@ -12,19 +12,19 @@ fluidPage(fluidRow(column(
 ),
 column(
   9,
-  navbarPage("Results",
-             tabPanel(
+  navbarPage("Results",               # result panels
+             tabPanel(                # MA plot panel
                title = tagList(icon("line-chart"), "MA plot"),
                width = NULL,
                solidHeader = TRUE,
                status = "info", 
                uiOutput("MAPlotUI"),
              ),
-             tabPanel(
+             tabPanel(               # result table panel
                title = tagList(icon("table"), "Result table"),
                width = NULL,
                solidHeader = TRUE,
                status = "info", 
-               DT::dataTableOutput("resultTableInPlot")
+               DT::dataTableOutput("resultTableInPlot") # dataframe output
              )
 ))))

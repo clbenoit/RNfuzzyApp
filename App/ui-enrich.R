@@ -1,12 +1,14 @@
+#ui-enrich.R
+
 
 fluidPage(fluidRow(column(
   3,
-  box(
+  box(                          #parameter box 
     title = tagList(icon("cogs"), "Parameters"),
     width = NULL,
     solidHeader = TRUE,
     status = "primary",
-    tagList(
+    tagList(                    # set of parameters
       textAreaInput(
         "refseqids",
         "Paste Gene List",
@@ -30,7 +32,7 @@ fluidPage(fluidRow(column(
         step = 1
       )
     ),
-    do.call(actionBttn, c(
+    do.call(actionBttn, c(          # run button 
       list(
         inputId = "enrichmentgo",
         label = "Enrich",
@@ -41,16 +43,17 @@ fluidPage(fluidRow(column(
   #result table 
   column(
     9,
-    navbarPage(theme=shinytheme("sandstone"),"Results",
+    navbarPage(           # result panels
+               theme=shinytheme("sandstone"),"Results",
                id = "entabs",
-               tabPanel(
+               tabPanel(  # Rmd info panel
                  title = tagList(icon("question"), "Info"),
                  width = NULL,
                  solidHeader = TRUE,
                  status = "primary",
                  includeMarkdown("documents/goinfo.Rmd")
                ),
-               tabPanel(
+               tabPanel(  # result table panel
                  title = tagList(icon("table"), "Result Table"),
                  value = 'redirectres',
                  width = NULL,
@@ -58,7 +61,7 @@ fluidPage(fluidRow(column(
                  status = "primary",
                  uiOutput('EnrichResults')
                ),
-               tabPanel(
+               tabPanel(  # bar chart panel 
                  title = tagList(icon("braille"), "Bar Chart"),
                  width = NULL,
                  solidHeader = TRUE,

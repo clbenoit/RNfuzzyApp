@@ -1,10 +1,10 @@
 #server-enrich.R
 
-EnrichRun <- reactiveValues(EnrichRunValue = FALSE)
+EnrichRun <- reactiveValues(EnrichRunValue = FALSE) # to precise the run button has not been clicked
 
 
-observeEvent(input$enrichmentgo,{
-  progressSweetAlert(
+observeEvent(input$enrichmentgo,{  # when the button is clicked 
+  progressSweetAlert(              # progress bar 
     session = session,
     id = "enrichProgress",
     title = "Work in progress",
@@ -14,9 +14,9 @@ observeEvent(input$enrichmentgo,{
   
   
   
-  geneset <- unlist(strsplit(input$refseqids, split = '\n'))
+  geneset <- unlist(strsplit(input$refseqids, split = '\n')) # takes the gene set 
   
-  updateProgressBar(
+  updateProgressBar(              # update progress bar 
     session = session,
     id = "enrichProgress",
     title = "Enrichment in progress...",
@@ -24,32 +24,34 @@ observeEvent(input$enrichmentgo,{
   )
   
   
-  res <- listEnrichrDbs()
-  res <- input$chosenGO
-  enriched <- enrichr(geneset, res)
+  res <- listEnrichrDbs()       # look up to available databases on Rnchir
+  res <- input$chosenGO         # chosen ontology to perform the enrichment 
+  enriched <- enrichr(geneset, res)  # the enrichment 
   
   
   
   
-  updateProgressBar(
+  updateProgressBar(           # updating the progress bar 
     session = session,
     id = "enrichProgress",
     title = "Enrichement in progress...",
     value = 75
   )
   
-  res_enrich <- as.data.frame(enriched)
-  res_enrich <- res_enrich[,-4]
+  res_enrich <- as.data.frame(enriched)   # result as data frame
+  res_enrich <- res_enrich[,-4]           # deleting useless columns to keep only the ones below
   res_enrich <- res_enrich[,-4]
   res_enrich <- res_enrich[,-4]
   colnames(res_enrich) <- c("Term","Overlap","P.value","Odd.Ratio","Combined.Score","Genes")
-  res_enrich <- res_enrich[order(res_enrich[,3]),]
+  res_enrich <- res_enrich[order(res_enrich[,3]),]   # class the results according to the pvalue
   n <- as.numeric(input$topres)
   res_enrich <- res_enrich[1:n,]
-  output$EnrichResultTable <-  DT::renderDataTable({
+  
+  
+  output$EnrichResultTable <-  DT::renderDataTable({   # result table
     DT::datatable(
       res_enrich,        
-      extensions = 'Buttons',
+      extensions = 'Buttons',    # download button 
       option = list(
         paging = TRUE,
         searching = TRUE,
@@ -64,7 +66,7 @@ observeEvent(input$enrichmentgo,{
           text = 'Download')),
         scrollX = TRUE,
         pageLength = 10,
-        searchHighlight = TRUE,
+        searchHighlight = TRUE,     # search bar 
         orderClasses = TRUE
         
       ),
@@ -72,10 +74,10 @@ observeEvent(input$enrichmentgo,{
       class = "display")
   }, server = FALSE)
   
-  EnrichRun$EnrichRunValue <- input$enrichmentgo
-  updateNavbarPage(session, "entabs", "redirectres")
+  EnrichRun$EnrichRunValue <- input$enrichmentgo   # precise the run button has been clicked
+  updateNavbarPage(session, "entabs", "redirectres") # redirection to the result table after the enrichment is done
   
-  closeSweetAlert(session = session)
+  closeSweetAlert(session = session)        # close alert that the enrichment is done 
   sendSweetAlert(session = session,
                  title = "DONE",
                  text = "Enrichment was successfully performed.",
@@ -83,16 +85,16 @@ observeEvent(input$enrichmentgo,{
   
   
   
-  output$barenrich <- renderPlotly({
+  output$barenrich <- renderPlotly({     # bar chart of results using plotly  : term with respect of -log(p-value)
     fig <- plot_ly(
       res_enrich,
-      x = ~(-log(P.value)),
+      x = ~(-log(P.value)),   
       y = ~reorder(Term,(-log(P.value))),
       text = ~Term, 
       textposition = 'auto',
-      type = "bar",
-      colors = "Reds"
-    )%>% layout(title = 'Statistics of the Enrichment',
+      type = "bar",    # bar chart
+      colors = "Reds"  # colors
+    )%>% layout(title = 'Statistics of the Enrichment',  # titles
                 yaxis = list(title = 'Enrichment'),
                 xaxis = list(title = '-log(P-value)'))
     
@@ -105,11 +107,11 @@ observeEvent(input$enrichmentgo,{
 # result table render
 
 output$EnrichResults <- renderUI({
-  if(EnrichRun$EnrichRunValue){
+  if(EnrichRun$EnrichRunValue){   # if the run button has been clicked, then show the results
     tagList(
       fluidRow(column(
         12, dataTableOutput('EnrichResultTable') %>% withSpinner()
-      )))} else {
+      )))} else {                 # if not message to do it 
         helpText("Run Enrichment to obtain the Result Table.")
       }
 })

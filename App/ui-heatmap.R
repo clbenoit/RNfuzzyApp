@@ -2,7 +2,7 @@
 
 fluidPage(fluidRow(column(
   3,
-  box(
+  box(                               # parameter box
     title = tagList(icon("cogs"), "Heatmap Parameters"),
     width = NULL,
     solidHeader = TRUE,
@@ -11,8 +11,8 @@ fluidPage(fluidRow(column(
     )),
   column(
     9,
-    navbarPage("Results",
-               tabPanel(
+    navbarPage("Results",           # result panels
+               tabPanel(            # heatmap panel
                  title = tagList(icon("delicious"), "Heatmap"),
                  width = NULL,
                  solidHeader = TRUE,
@@ -20,11 +20,14 @@ fluidPage(fluidRow(column(
                  uiOutput("heatmapPlot"),
                  footer = "This part is time consuming, please wait patiently.",
                ),
-               tabPanel(
+               tabPanel(           # result table panel
                  title = tagList(icon("table"), "Result table"),
                  width = NULL,
                  solidHeader = TRUE,
                  status = "info", 
                  DT::dataTableOutput("resultTableInHeatmap")
                )
-    ))))
+    )
+    )
+  )
+  )

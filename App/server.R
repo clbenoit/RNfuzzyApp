@@ -1,5 +1,6 @@
-# Define server 
-shinyServer(function(input, output, session) {
+# Define server of the app
+
+shinyServer(function(input, output, session) { #all server files 
   
   source(file = "server-data-import.R",
          local = TRUE,
@@ -26,19 +27,18 @@ shinyServer(function(input, output, session) {
          local = TRUE, 
          encoding = "UTF-8")
   
-  
+  # reactive variables that are saved and can be use in another file than the original where it was created
   var = reactiveValues(
-    count = NULL,
-    InputTable = data.frame(),
-    LowCountGenes = data.frame(),
-    CountData = data.frame(),
-    groupdf = data.frame(),
-    matrixcount = matrix(),
-    groupList = NULL,
-    groupListConvert = NULL,
-    selectedgroups = NULL,
-    result = data.frame("Results will show here." = character(0)),
-    tccObject = NULL,
-    pcadata = NULL)
+    count = NULL,                        #
+    InputTable = data.frame(),           # original input dataa frame
+    LowCountGenes = data.frame(),        # data frame of filtered data from the original one
+    CountData = data.frame(),            # input data frame after filtering low count genes 
+    groupdf = data.frame(),              # data frame from the group assignement, associating replicates to groups
+    matrixcount = matrix(),              # matrix of CountData
+    groupList = NULL,                    # list of the groups only
+    selectedgroups = NULL,               # selected groups of the original data frame is not all are selected
+    result = data.frame("Results will show here." = character(0)), #vmessage to put in the beginning when no input yet
+    tccObject = NULL,                    # tcc object containing results of the tcc calculation 
+    pcadata = NULL)                      # pca data 
   
 })

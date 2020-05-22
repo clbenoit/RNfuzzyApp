@@ -1,12 +1,12 @@
 # server-volcano-plot.R
 
-runVolcano <- reactiveValues(runVolcanoValue = FALSE)
+runVolcano <- reactiveValues(runVolcanoValue = FALSE) # to precise the run button has not been clicked 
 
 
-output$CondvolcanoParams <- renderUI({
+output$CondvolcanoParams <- renderUI({ # if a DEA has been performed then shows the parameters 
   if (AnalysisRun$AnalysisRunValue){
     uiOutput("volcanoParams")
-  }else{
+  }else{     # if not error to do it
     sendSweetAlert(
       session = session,
       title = "ERROR",
@@ -19,7 +19,7 @@ output$CondvolcanoParams <- renderUI({
   
 })
 
-output$volcanoParams <- renderUI({
+output$volcanoParams <- renderUI({   # parameters
   tagList(
     sliderInput(
       "volcanoPointSize",
@@ -125,38 +125,38 @@ observeEvent({
   
 })
 
-# Check the `Generate` button, if the botton has been clicked, generate volcano plot 
-
+# when the botton has been clicked, generates volcano plot 
+# just like the ma plot, there is a bar plot connected to the volcano plot with raw counts
 observeEvent(input$makeVolcanoPlot, {
   yaxis <- "q.value"
   output$volcanoPloty <- renderPlotly({
-    validate(need(resultTable()[[yaxis]] != "", "No data for ploting."))
+    validate(need(resultTable()[[yaxis]] != "", "No data for ploting.")) # validation 
     req(input$makeVolcanoPlot)
     isolate({
       dt <- resultTable()
-      downCut <- input$CutFC[1]
+      downCut <- input$CutFC[1] # cuts of Log2FC
       upCut <- input$CutFC[2]
       dt$color <- "None"
       
-      tryCatch({
+      tryCatch({   # catch cutoffs 
         dt[dt$m.value <= downCut,]$color <- "Down"
-        dt[dt$m.value >= upCut,]$color <- "Up"
+        dt[dt$m.value >= upCut,]$color <- "Up"   
         dt[dt[[yaxis]] > input$Cutfdr,]$color <- "None"
       }, error = function(e) {
         sendSweetAlert(session = session, title = "ERROR", text = "No data was satisfied to your cut-off!")
       })
       
-      FCcut <- factor(dt$color)
+      FCcut <- factor(dt$color) # conversion as a factor to use it in the plot
       
       # link to bar plot
       key <- resultTable()$gene_id
-      p <- plot_ly(
-        dt,
+      p <- plot_ly( # plot
+        dt,  # data
         x = ~ m.value,
         y = ~ -log10(dt[[yaxis]]),
         type = "scatter",
         mode = "markers",
-        color = ~ FCcut,
+        color = ~ FCcut,  # color according to cut ofss
         colors = c(input$downColor, "black", input$upColor),
         marker = list(size = input$volcanoPointSize),
         hoverinfo = "text",
@@ -188,9 +188,9 @@ observeEvent(input$makeVolcanoPlot, {
             x = 0.5,
             y = 1.05
           ),
-          shapes = list(
+          shapes = list(   # lines of cut offs 
             list(
-              type = 'line',
+              type = 'line', #up log2fc cutoff
               y0 =  ~ min(-log10(dt[[yaxis]])),
               y1 =  ~ max(-log10(dt[[yaxis]])),
               x0 = upCut,
@@ -198,7 +198,7 @@ observeEvent(input$makeVolcanoPlot, {
               line = list(dash = 'dot', width = 2)
             ),
             list(
-              type = 'line',
+              type = 'line', # down log2fc cut off
               y0 =  ~ min(-log10(dt[[yaxis]])),
               y1 =  ~ max(-log10(dt[[yaxis]])),
               x0 = downCut,
@@ -206,7 +206,7 @@ observeEvent(input$makeVolcanoPlot, {
               line = list(dash = 'dot', width = 2)
             ),
             list(
-              type = 'line',
+              type = 'line',  # fdr cut off
               y0 = -log10(input$Cutfdr),
               y1 = -log10(input$Cutfdr),
               x0 =  ~ min(m.value),
@@ -218,7 +218,7 @@ observeEvent(input$makeVolcanoPlot, {
       p
     })
   })
-  runVolcano$runVolcanoValue <- input$makeVolcanoPlot
+  runVolcano$runVolcanoValue <- input$makeVolcanoPlot # validation run button has been clicked
 })
 
 
@@ -232,10 +232,10 @@ output$VolcanoBarPlot <- renderPlotly({
   ))
   
   gene_id <- eventdata$key
-  expression <-
+  expression <- # counts 
     var$CountData[row.names(var$CountData) == gene_id,]
   data <- var$CountData
-  dataGroups <- var$selectedgroups
+  dataGroups <- var$selectedgroups # according to selected groups
   expression <- t(expression[dataGroups != 0])
   
   xOrder <-
@@ -245,7 +245,7 @@ output$VolcanoBarPlot <- renderPlotly({
                 categoryarray = xOrderVector,
                 title = "")
   
-  plot_ly(
+  plot_ly( # plot
     x = ~ row.names(expression),
     y = ~ expression[, 1],
     color = as.factor(dataGroups),
@@ -265,22 +265,22 @@ output$VolcanoBarPlot <- renderPlotly({
 
 # Render table result
 
-output$resultTableVolc <- DT::renderDataTable({
+output$resultTableVolc <- DT::renderDataTable({ # full result table 
   if (nrow(resultTable()) == 0) {
     DT::datatable(resultTable())
   } else {
     if (length(input$Cutfdr) > 0) {
       fdrCut <- input$Cutfdr
-      volcT <- resultTable()
-      volcT <- volcT[which(volcT$estimatedDEG >0),]
-      volcT <- volcT[,-7]
+      volcT <- resultTable() # using of the tcc result table
+      volcT <- volcT[which(volcT$estimatedDEG >0),] # selection of the DEGs only 
+      volcT <- volcT[,-7] # deleting the column with 0 and 1 saying the gene is a DEG or not
       colnames(volcT) <- c("gene_id","BaseMean", "Log2FC", "PValue", "FDR", "Rank")
       
-    } else {
+    } else { # if no fdr cut off selected then it is set to 0
       fdrCut <- 0
     }
     
-    data <- var$norData
+    data <- var$norData # using normalized data
     gene_id <- row.names(data)
     data <- cbind(data, gene_id = gene_id)
     
@@ -289,7 +289,7 @@ output$resultTableVolc <- DT::renderDataTable({
     t <- DT::datatable(
       resultTable,
       filter = "bottom",
-      extensions = 'Buttons',
+      extensions = 'Buttons',   # download button 
       option = list(
         paging = TRUE,
         searching = TRUE,
@@ -304,7 +304,7 @@ output$resultTableVolc <- DT::renderDataTable({
           text = 'Download')),
         scrollX = TRUE,
         pageLength = 10,
-        searchHighlight = TRUE,
+        searchHighlight = TRUE,  # search bar 
         orderClasses = TRUE
         
       ),
@@ -315,7 +315,7 @@ output$resultTableVolc <- DT::renderDataTable({
         )
       ))
     
-    if (!is.na(sum(volcT$Log2FC))) {
+    if (!is.na(sum(volcT$Log2FC))) {   # coloring results according to cut offs 
       t   %>% formatStyle("gene_id", "Log2FC",
                           color = styleInterval(input$CutFC,
                                                 c(
@@ -332,17 +332,17 @@ output$resultTableVolc <- DT::renderDataTable({
 
 # final render 
 output$MainResultTableVolc <- renderUI({
-  if(runVolcano$runVolcanoValue){
+  if(runVolcano$runVolcanoValue){ # if the button has been clicked, it shows the result table
     tagList(fluidRow(column(
       12, DT::dataTableOutput('resultTableVolc') %>% withSpinner()
     )))} else {
-      helpText("Run Volcano to obtain Result Table.")
+      helpText("Run Volcano to obtain Result Table.") # if not, message to do it 
     }
 })
 
 ############################################################DOWN REGULATED##################################
 
-output$resultTabledown <- DT::renderDataTable({
+output$resultTabledown <- DT::renderDataTable({ # datatable render for downregulated genes
   sortedvolc <- var$result
   if (nrow(sortedvolc) == 0) {
     DT::datatable(sortedvolc)
@@ -414,7 +414,7 @@ output$resultTabledown <- DT::renderDataTable({
 
 ##########################################################UPREGULATED######################################
 
-output$resultTableup <- DT::renderDataTable({
+output$resultTableup <- DT::renderDataTable({ #datatable render for downregulated genes
   sortedvolc <- var$result
   if (nrow(sortedvolc) == 0) {
     DT::datatable(sortedvolc)
@@ -484,7 +484,7 @@ output$resultTableup <- DT::renderDataTable({
 
 # volcanoUI 
 output$volcanoUI <- renderUI({
-  if (length(var$groupList) > 2) {
+  if (length(var$groupList) > 2) {  # volcano plot is available for onyl 2 groups comparisons, if more, then error 
     sendSweetAlert(
       session = session,
       title = "ERROR",
@@ -494,7 +494,7 @@ output$volcanoUI <- renderUI({
     helpText("Volcano Plot is unavailable for multiple comparison now.")
   }else{
     
-    if(runVolcano$runVolcanoValue){
+    if(runVolcano$runVolcanoValue){ # if run button clicked, then shows plots 
       tagList(
         fluidRow(
           column(8, plotlyOutput("volcanoPloty") %>% withSpinner()),

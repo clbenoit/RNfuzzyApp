@@ -1,7 +1,9 @@
 # ui-volcano-plot.R
+
+
 fluidPage(fluidRow(column(
   3,
-  box(
+  box(                                       # parameter box
     title = tagList(icon("cogs"), "Volcano Plot Parameters"),
     solidHeader = TRUE,
     status = "primary",
@@ -11,29 +13,29 @@ fluidPage(fluidRow(column(
 ),
 column(
   9,
-  navbarPage("Results",
-             tabPanel(
+  navbarPage("Results",                     # result panels 
+             tabPanel(                      # volcano plot panel
                title = tagList(icon("area-chart"), "Volcano Plot"),
                solidHeader = TRUE,
                status = "info",
                width = NULL,
                uiOutput("volcanoUI")
              ),
-             tabPanel(
+             tabPanel(                      # all result table
                title = tagList(icon("table"), "Result Table"),
                solidHeader = TRUE,
                status = "info",
                width = NULL,
                uiOutput('MainResultTableVolc')
              ),
-             tabPanel(
+             tabPanel(                     # downregulated table
                title = tagList(icon("table"), "Downregulated Table"),
                solidHeader = TRUE,
                status = "info",
                width = NULL,
                DT::dataTableOutput('resultTabledown')
              ),
-             tabPanel(
+             tabPanel(                    # upregulated table
                title = tagList(icon("table"), "Upregulated Table"),
                solidHeader = TRUE,
                status = "info",

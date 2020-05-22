@@ -1,27 +1,28 @@
 #server-conversion.R
+# ID conversion tool 
 
-ConvRun <- reactiveValues(ConvRunValue = FALSE)
+ConvRun <- reactiveValues(ConvRunValue = FALSE)    #to precise the conversion is not done at this time
 
 
-observeEvent(input$convgo,{
+observeEvent(input$convgo,{      # if the validation butto is clicked 
   
   
   
-  inputids <- unlist(strsplit(input$inputids, split = '\n'))
-  conversion <- bitr(
-    geneID = inputids, 
-    fromType = input$inputtype,
-    toType = c('ENTREZID','ENSEMBL','SYMBOL'),
-    OrgDb = input$chosendatabase
+  inputids <- unlist(strsplit(input$inputids, split = '\n')) #takes the gene list 
+  conversion <- bitr(                          # convert the ids with this clusterProfiler bitr function 
+    geneID = inputids,                         # according ti the set of ids
+    fromType = input$inputtype,                # the input type
+    toType = c('ENTREZID','ENSEMBL','SYMBOL'), # all the types to convert to 
+    OrgDb = input$chosendatabase               # the organism
   )
   
   
   
-  conversion <- as.data.frame(conversion)
-  output$ConvResults <-  DT::renderDataTable({
+  conversion <- as.data.frame(conversion)      # convert the result as a data frame to allow the render
+  output$ConvResults <-  DT::renderDataTable({ # creation of the result table
   DT::datatable(
-    conversion,        
-    extensions = 'Buttons',
+    conversion,                                # data to add in the table
+    extensions = 'Buttons',                    # adding a download button in csv format
     option = list(
       paging = TRUE,
       searching = TRUE,
@@ -34,9 +35,9 @@ observeEvent(input$convgo,{
         buttons = list(extend='csv',
                        filename = "results_conversion"),
         text = 'Download')),
-      scrollX = TRUE,
-      pageLength = 10,
-      searchHighlight = TRUE,
+      scrollX = TRUE,                        # possible scroll as the length is 10
+      pageLength = 10,                       # size of the table
+      searchHighlight = TRUE,                # search bar 
       orderClasses = TRUE
       
     ),
@@ -44,20 +45,21 @@ observeEvent(input$convgo,{
     class = "display")
 }, server = FALSE)
   
-  ConvRun$ConvRunValue <- input$convgo
-  updateNavbarPage(session, "convtabs", "redirectconv")
+  ConvRun$ConvRunValue <- input$convgo      # to precise the validation button has been clicked
+  updateNavbarPage(session, "convtabs", "redirectconv") # automatic redirection from the Rmd panel 
+                                                        # to the result table panel
   
   
 })  
 
 # result table render
 
-output$ConversionResults <- renderUI({
+output$ConversionResults <- renderUI({      # verification, if the conversion has not been done, message to do it
   if(ConvRun$ConvRunValue){
     tagList(
       fluidRow(column(
-        12, dataTableOutput('ConvResults') %>% withSpinner()
-      )))} else {
+        12, dataTableOutput('ConvResults') %>% withSpinner() # if it is done, show the results
+      )))} else {                
         helpText("Run Conversion to obtain the Result Table.")
       }
 })

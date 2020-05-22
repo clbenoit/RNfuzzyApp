@@ -2,13 +2,13 @@
 
 
 
-observeEvent(input$uploadCountData, {
+observeEvent(input$uploadCountData, {   # when a table is being uploaded 
   tryCatch({
-    var$InputTable <-
+    var$InputTable <-    # assign the table as a data frame to this variable 
       data.frame(fread(input$uploadCountData$datapath), row.names = 1)
-    v$importActionValue <- FALSE
+    v$importActionValue = FALSE # precise no button has been clicked yet
   },
-  error = function(e) {
+  error = function(e) {  # error messages about the input table 
     sendSweetAlert(
       session = session,
       title = "Input data error!",
@@ -27,8 +27,8 @@ observeEvent(input$uploadCountData, {
     return()
   })
   
-  observeEvent(input$filterCount,{
-    if (input$filterCount != 0) {
+  observeEvent(input$filterCount,{   # when a filter of low count genes is set 
+    if (input$filterCount != 0) {  # automatically filter the origianl table and update the summary
       var$LowCountGenes <- var$InputTable[rowSums(var$InputTable >= as.numeric(input$filterCount)) == 0,]
       var$CountData <- var$InputTable[rowSums(var$InputTable >= as.numeric(input$filterCount)) > 0 , ]
     }else{
@@ -40,8 +40,8 @@ observeEvent(input$uploadCountData, {
 })
 
 
-observeEvent(input$confirmedGroupList, {
-  if (nrow(datasetInput()) == 0) {
+observeEvent(input$confirmedGroupList, { # when the groups are being corfimed
+  if (nrow(datasetInput()) == 0) { # if not table then error 
     sendSweetAlert(
       session = session,
       title = "ERROR",
@@ -50,7 +50,7 @@ observeEvent(input$confirmedGroupList, {
     )
     return()
   }
-  if (input$groupSelect == "") {
+  if (input$groupSelect == "") {  # if no groups, then error
     sendSweetAlert(
       session = session,
       title = "ERROR",
@@ -60,10 +60,10 @@ observeEvent(input$confirmedGroupList, {
     return()
   }
   
-  tryCatch({
+  tryCatch({ # if no errors : 
     
     group <- fread(input$groupSelect, header = FALSE)
-    var$groupList <-
+    var$groupList <-  # set the groups
       lapply(unique(group$V2), function(x) {
         group[group$V2 == x, ]$V1
       })
@@ -76,17 +76,17 @@ observeEvent(input$confirmedGroupList, {
       grep(x, colnames(df))
     }
     
-    for (i in 1:length(var$groupList)) {
+    for (i in 1:length(var$groupList)) { # assign replicates to groups
       data.list[unlist(lapply(var$groupList[[i]], convertion, df = var$CountData))] = names(var$groupList[i])
     }
 
-    var$selectedgroups <- data.list[!(data.list) == 0]
+    var$selectedgroups <- data.list[!(data.list) == 0] # validation that groups are not empty
     tmprem = match(as.character(rownames(var$CountData)[which(!(var$groupList%in%var$selectedgroups))]),colnames(var$CountData))
     tmpkeep = setdiff(1:ncol(var$CountData),tmprem)
-    var$CountData <- var$CountData[,tmpkeep]
+    var$CountData <- var$CountData[,tmpkeep] # updating the working data frame 
     
     
-    closeSweetAlert(session = session)
+    closeSweetAlert(session = session)  # no errors on groups 
     sendSweetAlert(
       session = session,
       title = "DONE",
@@ -94,9 +94,9 @@ observeEvent(input$confirmedGroupList, {
       type = "success"
     )
     
-    v$importActionValue <- input$confirmedGroupList
+    v$importActionValue <- input$confirmedGroupList # then the button has been clicked and its ok
   },
-  error = function(e) {
+  error = function(e) {  # errors on the formet
     sendSweetAlert(
       session = session,
       title = "ERROR",
@@ -114,6 +114,8 @@ observeEvent(input$confirmedGroupList, {
     )
     return()
   })
+  
+  # reformating data 
   groupd <- as.data.frame(group)
   rep <- groupd$V1
   group <- groupd$V2
@@ -123,25 +125,25 @@ observeEvent(input$confirmedGroupList, {
   
 })
 
-
+# save the updated table and associate a name to facilitate the use 
 datasetInput <- reactive({
   var$CountData
 })
 
 
 
-output$DataSummary <- renderUI({
+output$DataSummary <- renderUI({  # summary render
   odf <- var$InputTable
   dt <- datasetInput()
   orowCount <- nrow(odf)
-  if(input$filterCount == 0){
+  if(input$filterCount == 0){ # filtered and raw genes count
     rowCount <- orowCount
     filtCount <- 0
   }else{
     rowCount <- nrow(dt)
     filtCount <- (orowCount - rowCount)
   }
-  groupCount <- length(var$groupList)
+  groupCount <- length(var$groupList)       # groups count and setting 
   groupText <- sapply(var$groupList, length)
   if (length(groupText) > 0) {
     gText <- paste0(names(groupText), ": ", groupText, ';', collapse = "\n")
@@ -149,30 +151,28 @@ output$DataSummary <- renderUI({
     gText <- NULL
   }
   
-  data <- var$CountData
-  
-  tagList(
-    tipify(
+  tagList(     # set of info
+    tipify(    # actual count
       tags$p(tags$b("N", tags$sub("genes")), ":", rowCount),
       title = "Number of Genes",
       placement = "left"
     ),
-    tipify(
+    tipify(    # raw initial count
       tags$p(tags$b("N", tags$sub(" input genes")), ":", orowCount),
       title = "Number of Input Genes",
       placement = "left"
     ),
-    tipify(
+    tipify(   # filtered genes count
       tags$p(tags$b("N", tags$sub("filtered genes")), ":", filtCount),
       title = "Number of Filtered Genes",
       placement = "left"
     ),
-    tipify(
+    tipify(  # number of groups
       tags$p(tags$b("N", tags$sub("group")), ": ", groupCount),
       title = "Number of Groups",
       placement = "left"
     ),
-    tipify(
+    tipify(   # replciated per groups
       tags$p(tags$b("N", tags$sub("replicates")), ": ", gText),
       title = "Number of Replicates",
       placement = "left"
@@ -195,7 +195,7 @@ output$table <- DT::renderDataTable({
       scrollY = 400,
       scroller = TRUE,
       scrollX = TRUE,
-      searchHighlight = TRUE,
+      searchHighlight = TRUE, # search bar
       orderClasses = TRUE
     )
   )
@@ -205,9 +205,9 @@ output$table <- DT::renderDataTable({
 # Render DataTable of row data count
 
 output$showTable <- renderUI({
-  if (nrow(datasetInput()) == 0) {
+  if (nrow(datasetInput()) == 0) {  # if no uploaded table or empty, message
     tags$p("No data to show. Upload your dataset.")
-  } else {
+  } else {    # if not, render the table
     DT::dataTableOutput('table')
   }
 })
@@ -234,9 +234,9 @@ output$inputable <- DT::renderDataTable({
 # Render DataTable of row data count
 
 output$showInputTable <- renderUI({
-  if (nrow(datasetInput()) == 0) {
+  if (nrow(datasetInput()) == 0) {# if no uploaded table or empty, message
     tags$p("No data to show. Upload your dataset.")
-  } else {
+  } else { # if not, render the table
     DT::dataTableOutput('inputable')
   }
 })
@@ -263,10 +263,10 @@ output$filtable <- DT::renderDataTable({
 
 # Render DataTable of row data count
 
-output$showLowTable <- renderUI({
+output$showLowTable <- renderUI({ # if no uploaded table or empty, message
   if (is.data.frame(var$LowCountGenes) == FALSE) {
     tags$p("No Filtered data.")
-  } else {
+  } else { # if not, render the table
     DT::dataTableOutput('filtable')
   }
 })
@@ -274,27 +274,29 @@ output$showLowTable <- renderUI({
 
 v <- reactiveValues(importActionValue = FALSE)
 
+
+
 ################### BOXPLOT  #####################
 output$CountDistribBox <- renderPlotly({
   if (length(var$matrixcount) > 0) {
-    data <- var$matrixcount
+    data <- var$matrixcount    # set the data to use
     
-    cpm <- log2(data + 1)
+    cpm <- log2(data + 1)   # counts 
     cpm_stack <- data.frame(stack(cpm))
     
-    group <- data.frame("col" = rownames(var$groupdf),
+    group <- data.frame("col" = rownames(var$groupdf),  # with respect to groups
                  "group" = var$groupdf$group)
     
-    data <- left_join(cpm_stack, group, by = "col")
+    data <- left_join(cpm_stack, group, by = "col")  # to plot with respect to groups 
     data <- arrange(data, group)
     
-    p <- plot_ly(
+    p <- plot_ly(  # plot 
       data,
       x = ~ col,
       y = ~ value,
       type = "box",
       split = ~ group,
-      color = ~ group
+      color = ~ group  # color with respect to groups
     ) %>% layout(
       title = input$CountDistribTitle,
       xaxis = list(title = input$CountDistribXlab, categoryarray = "array", categoryarray = ~col),
@@ -311,11 +313,11 @@ output$CountDistribBox <- renderPlotly({
 
 # render UI 
 output$CountDistrib <- renderUI({
-  if (v$importActionValue) {
+  if (v$importActionValue) {  # if data where imported and everything is ok then it can provides to plots
     tagList(fluidRow(
       column(
         3,
-        textInput(
+        textInput(   # set of parameters 
           inputId = "CountDistribTitle",
           label = "Title",
           value = "Raw Count",
@@ -336,10 +338,10 @@ output$CountDistrib <- renderUI({
       ),
       column(
         9,
-        plotlyOutput("CountDistribBox") %>% withSpinner()
+        plotlyOutput("CountDistribBox") %>% withSpinner()  # render 
       )
     ))
-  } else {
+  } else {   # if no data then message 
     helpText("No data for ploting.")
   }
 })
@@ -347,9 +349,9 @@ output$CountDistrib <- renderUI({
 ################### HEATMAP #####################
 output$rawheatmap <- renderPlotly({
   if (length(var$matrixcount) > 0) {
-    data <- var$CountData
-    data <- data.frame(1 - cor(data, method = input$correlation))
-    heatmaply(
+    data <- var$CountData # data selection 
+    data <- data.frame(1 - cor(data, method = input$correlation)) # with the chosen method of correlation 
+    heatmaply( #heatmap
       data,
       hclust_method = "complete",
       labRow = rownames(data),
@@ -364,9 +366,9 @@ output$rawheatmap <- renderPlotly({
 
 # Render UI 
 output$clustUI <- renderUI({
-  if (v$importActionValue) {
+  if (v$importActionValue) { # if data and no errors then run parameters and plot
     tagList(fluidRow(
-      column(
+      column( #parameter
         3,
         selectInput(
           inputId = "correlation",
@@ -374,7 +376,7 @@ output$clustUI <- renderUI({
           choices = c("Spearman" = "spearman",
                       "Pearson" = "pearson")
         ),
-        tags$div(
+        tags$div(  # instruction
           HTML('<div class="panel panel-primary">
                     <div class="panel-heading"> <span style="padding-left:10px"><b> Distance measures </b> </span></div>
                   <div class="panel-body">
@@ -410,10 +412,10 @@ output$clustUI <- renderUI({
                   </div>
                   </div>'))
       ),
-      column(9, plotlyOutput("rawheatmap",height = 600, width = 800) %>% withSpinner()
+      column(9, plotlyOutput("rawheatmap",height = 600, width = 800) %>% withSpinner() # render heatmap
       )
     ))
-  } else {
+  } else { # if no data, then message 
     helpText("No data for ploting.")
   }
 })
@@ -423,18 +425,18 @@ output$clustUI <- renderUI({
 # 2D Plot 
 output$pcaPlotObject2d <- renderPlotly({
   if (length(var$matrixcount) > 0) {
-    data <- log1p(var$matrixcount)
-    data <- data[apply(data, 1, var) != 0, ]
-    if(!is.na(input$pcaTopGene) & input$pcaTopGene < nrow(data)){
+    data <- log1p(var$matrixcount) # data selection 
+    data <- data[apply(data, 1, var) != 0, ] # selection over counts 
+    if(!is.na(input$pcaTopGene) & input$pcaTopGene < nrow(data)){ # top genes to show 
       data <- t(data[order(apply(data, 1, var), decreasing = TRUE)[1:input$pcaTopGene], ])
     }
-    data.pca.all <- prcomp(data,center = T,scale. = T)
+    data.pca.all <- prcomp(data,center = T,scale. = T) #pca 
     data <- data.frame(data.pca.all$x)
     data$name <- rownames(data)
     group <- var$groupdf
     group$name <- rownames(var$groupdf)
-    data <- left_join(x = data, y = group, by = "name")
-    p <- plot_ly(
+    data <- left_join(x = data, y = group, by = "name") # to perform over groups 
+    p <- plot_ly(  # plot 
       data = data,
       x = ~ PC1,
       y = ~ PC2,
@@ -454,19 +456,19 @@ output$pcaPlotObject2d <- renderPlotly({
 # 3D Plot
 output$pcaPlotObject3d <- renderPlotly({
   if (length(var$matrixcount) > 0) {
-    data <- log1p(var$matrixcount)
-    data <- data[apply(data, 1, var) != 0, ]
+    data <- log1p(var$matrixcount) #data selection 
+    data <- data[apply(data, 1, var) != 0, ] # selection over counts
     if(!is.na(input$pcaTopGene) & input$pcaTopGene < nrow(data)){
-      data <- t(data[order(apply(data, 1, var), decreasing = TRUE)[1:input$pcaTopGene], ])
+      data <- t(data[order(apply(data, 1, var), decreasing = TRUE)[1:input$pcaTopGene], ]) # top genes to show 
     }
-    data.pca.all <- prcomp(data,center = T,scale. = T)
+    data.pca.all <- prcomp(data,center = T,scale. = T) # pca
     
     data <- data.frame(data.pca.all$x)
     data$name <- rownames(data)
     group <- var$groupdf
     group$name <- rownames(var$groupdf)
-    data <- left_join(x = data, y = group, by = "name")
-    p <- plot_ly(
+    data <- left_join(x = data, y = group, by = "name") # to perform the pca over groups
+    p <- plot_ly(   #plot
       data = data,
       x = ~ PC1,
       y = ~ PC2,
@@ -489,7 +491,7 @@ output$pcaPlotObject3d <- renderPlotly({
 output$pcaUI <- renderUI({
   if (v$importActionValue) {
     tagList(fluidRow(
-      column(
+      column(  # parameters
         3,
         numericInput(
           inputId = "pcaTopGene",
@@ -498,17 +500,17 @@ output$pcaUI <- renderUI({
           min = 2,
           step = 1
         ),
-        tags$div(
+        tags$div( #instructions
           HTML("Choose the number of genes for render. "))
       ),
       column(9,
-             tabsetPanel(
+             tabsetPanel(  # render plots 
                tabPanel(title = "2D Plot", plotlyOutput("pcaPlotObject2d", width = 800) %>% withSpinner()),
                tabPanel(title = "3D Plot", plotlyOutput("pcaPlotObject3d", width = 800) %>% withSpinner())
                
              ))
     ))
-  } else {
+  } else { # if no data, message
     helpText("No data for ploting.")
   }
 })

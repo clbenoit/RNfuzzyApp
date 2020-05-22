@@ -1,12 +1,12 @@
 # server-ma-plot.R
 
-runMA <- reactiveValues(runMAValues = FALSE)
+runMA <- reactiveValues(runMAValues = FALSE) # to precise the run button has not been clicked yet
 
 
 output$CondMAPlotParams <- renderUI({
-  if (AnalysisRun$AnalysisRunValue){
+  if (AnalysisRun$AnalysisRunValue){  # if a DEA has been performed, then show parameters
     uiOutput("MAPlotParams")
-  }else{
+  }else{                              # if not, error message to do it
     sendSweetAlert(
       session = session,
       title = "ERROR",
@@ -20,7 +20,7 @@ output$CondMAPlotParams <- renderUI({
 })
 
 
-observeEvent(input$sider, {
+    # parameters
   output$MAPlotParams <- renderUI({
     tagList(
       sliderInput(
@@ -58,7 +58,7 @@ observeEvent(input$sider, {
         ),
         options = list(`toggle-palette-more-text` = "Show more")
       ),
-      do.call(actionBttn,c(
+      do.call(actionBttn,c(   # run button 
         list(
           inputId = "makeMAPlot",
           label = "Generate MA Plot",
@@ -67,28 +67,28 @@ observeEvent(input$sider, {
       )
     )
   })
-})
 
 
 
-observeEvent(input$makeMAPlot, {
-  output$maplotly <- renderPlotly({
-    validate(need(resultTable()$a.value != "", "No MA values for ploting."))
+
+observeEvent(input$makeMAPlot, { # if run button has been clicked 
+  output$maplotly <- renderPlotly({ # plotting the ma plot
+    validate(need(resultTable()$a.value != "", "No MA values for ploting.")) # if basemean values allow it 
     
     isolate({
-      key <- resultTable()$gene_id
-      DEGcut <- cut(resultTable()$q.value, breaks = c(0, input$maFDR, 1))
+      key <- resultTable()$gene_id  # crating a key to accord the ma plot and the bar plot when a point is hovered
+      DEGcut <- cut(resultTable()$q.value, breaks = c(0, input$maFDR, 1)) # coloration of the ma plot according to the cut off
       
-      p <- plot_ly(
+      p <- plot_ly( # ma plot Log2FC with repect ot Basemean 
         data = resultTable(),
-        x = ~ a.value,
-        y = ~ m.value,
+        x = ~ a.value, # basemean
+        y = ~ m.value, # log2fc
         type = "scatter",
         mode = "markers",
-        color = ~ DEGcut,
+        color = ~ DEGcut, # color with respect to cut off
         colors = c(input$fdrColor, "#000000"),
-        marker = list(size = input$pointSize),
-        hoverinfo = "text+name",
+        marker = list(size = input$pointSize), # selected size of the points
+        hoverinfo = "text+name", # hover infos 
         text = ~ paste(
           "</br>Gene:",
           resultTable()$gene_id,
@@ -119,25 +119,26 @@ observeEvent(input$makeMAPlot, {
       p
     })
   })
-  runMA$runMAValues <- input$makeMAPlot
+  runMA$runMAValues <- input$makeMAPlot # run button has been clicked 
 })
 
 
 
-output$geneBarPlot <- renderPlotly({
+output$geneBarPlot <- renderPlotly({ # bar plot
   eventdata <- event_data("plotly_hover", source = "ma")
   validate(need(
     !is.null(eventdata),
     "Hover a gene to show its expression."
-  ))
+  )) # a bar blot of raw counts is appearign when a point of the ma plot is hovered
   
-  gene_id <- eventdata$key
+  gene_id <- eventdata$key # key bar plot 
   expression <-
     var$CountData[row.names(var$CountData) == gene_id, ]
-  data <- var$CountData
-  dataGroups <- var$selectedgroups
-  expression <- t(expression[dataGroups != 0])
+  data <- var$CountData # data selection 
+  dataGroups <- var$selectedgroups # selected groups 
+  expression <- t(expression[dataGroups != 0]) 
   
+  # orders to link 
   xOrder <-
     data.frame("name" = row.names(expression), "group" = dataGroups)
   xOrderVector <- unique(xOrder[order(xOrder$group),]$name)
@@ -145,7 +146,7 @@ output$geneBarPlot <- renderPlotly({
                 categoryarray = xOrderVector,
                 title = "")
   
-  plot_ly(
+  plot_ly( # plot of raw expression in groups
     x = ~ row.names(expression),
     y = ~ expression[, 1],
     color = as.factor(dataGroups),
@@ -165,7 +166,7 @@ output$geneBarPlot <- renderPlotly({
 
 
 output$resultTableInPlot <- DT::renderDataTable({
-  if (nrow(resultTable()) == 0) {
+  if (nrow(resultTable()) == 0) {   # render data table with colors according to cutoffs
     DT::datatable(resultTable())
   } else {
     if (length(input$maFDR) > 0) {
@@ -176,7 +177,7 @@ output$resultTableInPlot <- DT::renderDataTable({
       fdrColor <- "#B22222"
     }
     
-    DT::datatable(
+    DT::datatable(   # result table 
       resultTable(),
       colnames = c(
         "Gene Name",
@@ -191,7 +192,7 @@ output$resultTableInPlot <- DT::renderDataTable({
       caption = tags$caption(
         tags$li("Gene Name was colored according to FDR cut-off.")
       ),
-      extensions = 'Buttons',
+      extensions = 'Buttons',  # download buttong
       option = list(
         paging = TRUE,
         searching = TRUE,
@@ -206,17 +207,17 @@ output$resultTableInPlot <- DT::renderDataTable({
           text = 'Download')),
         scrollX = TRUE,
         pageLength = 10,
-        searchHighlight = TRUE,
+        searchHighlight = TRUE,  # search bar 
         orderClasses = TRUE
       )) %>% formatRound(
         columns = c("a.value",
                     "m.value",
                     "p.value",
                     "q.value"),
-        digits = 3
+        digits = 3  # digits after comma
       ) %>% formatStyle("gene_id",
                         "q.value",
-                        color = styleInterval(fdrCut, c(fdrColor, "")))
+                        color = styleInterval(fdrCut, c(fdrColor, ""))) # color according to cut off
   }
 },server = F)
 
@@ -233,7 +234,7 @@ output$maFDRpreview <- renderText({
 
 #main  plot output 
 output$MAPlotUI <- renderUI({
-  if (length(var$groupList) > 2) {
+  if (length(var$groupList) > 2) { # ma plot is only available for 2 groups comparisons, error if tryign ith more
     sendSweetAlert(
       session = session,
       title = "ERROR",
@@ -242,7 +243,7 @@ output$MAPlotUI <- renderUI({
     )
     helpText("MA Plot is unavailable for multiple comparison now.")
   }else{
-    if (runMA$runMAValues) {
+    if (runMA$runMAValues) { # if the run button has been clicked, then shows plots
       tagList(fluidRow(
         column(8, plotlyOutput("maplotly") %>% withSpinner()),
         column(4, plotlyOutput("geneBarPlot") %>% withSpinner())
@@ -256,7 +257,7 @@ output$MAPlotUI <- renderUI({
 
 observeEvent(input$makeMAPlot, {
   output$runMAPlot <- renderText({
-    if (resultTable()$a.value == "") {
+    if (resultTable()$a.value == "") { # if not basemean values, message 
       "No MA values for plotting."
     }
   })

@@ -108,14 +108,14 @@ observeEvent({
   upCount <-
     nrow(dtDEG[dtDEG$m.value >= upCut & dtDEG[["q.value"]] <= FDRCut,])
   
-  output$downPreview <- renderText({
+  output$downPreview <- renderText({ # render for downregulated count
     paste0("<font color=\"",
            input$downColor,
            "\"><b>",
            downCount,
            " genes</b></font>")
   })
-  output$upPreview <- renderText({
+  output$upPreview <- renderText({ # render for upregulated count
     paste0("<font color=\"",
            input$upColor,
            "\"><b>",
@@ -133,7 +133,7 @@ observeEvent(input$makeVolcanoPlot, {
     validate(need(resultTable()[[yaxis]] != "", "No data for ploting.")) # validation 
     req(input$makeVolcanoPlot)
     isolate({
-      dt <- resultTable()
+      dt <- resultTable() # shortcut to the data
       downCut <- input$CutFC[1] # cuts of Log2FC
       upCut <- input$CutFC[2]
       dt$color <- "None"
@@ -159,7 +159,7 @@ observeEvent(input$makeVolcanoPlot, {
         color = ~ FCcut,  # color according to cut ofss
         colors = c(input$downColor, "black", input$upColor),
         marker = list(size = input$volcanoPointSize),
-        hoverinfo = "text",
+        hoverinfo = "text",  # when hover over a point, the following info shows
         text = ~ paste(
           "</br>Gene:",
           resultTable()$gene_id,

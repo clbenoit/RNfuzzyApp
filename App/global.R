@@ -21,6 +21,12 @@ library(TCC)
 library(heatmaply)
 library(enrichR)
 library(clusterProfiler)
+library(clusterProfiler)
+library(org.Dm.eg.db)
+library(org.EcK12.eg.db)
+library(org.Ce.eg.db)
+library(org.Hs.eg.db)
+library(org.Mm.eg.db)
 
 # app theme
 

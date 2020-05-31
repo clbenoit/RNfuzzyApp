@@ -426,10 +426,7 @@ output$clustUI <- renderUI({
 output$pcaPlotObject2d <- renderPlotly({
   if (length(var$matrixcount) > 0) {
     data <- log1p(var$matrixcount) # data selection 
-    data <- data[apply(data, 1, var) != 0, ] # selection over counts 
-    if(!is.na(input$pcaTopGene) & input$pcaTopGene < nrow(data)){ # top genes to show 
-      data <- t(data[order(apply(data, 1, var), decreasing = TRUE)[1:input$pcaTopGene], ])
-    }
+    data <- t(data[apply(data, 1, var) != 0, ]) # selection over counts 
     data.pca.all <- prcomp(data,center = T,scale. = T) #pca 
     data <- data.frame(data.pca.all$x)
     data$name <- rownames(data)
@@ -457,10 +454,7 @@ output$pcaPlotObject2d <- renderPlotly({
 output$pcaPlotObject3d <- renderPlotly({
   if (length(var$matrixcount) > 0) {
     data <- log1p(var$matrixcount) #data selection 
-    data <- data[apply(data, 1, var) != 0, ] # selection over counts
-    if(!is.na(input$pcaTopGene) & input$pcaTopGene < nrow(data)){
-      data <- t(data[order(apply(data, 1, var), decreasing = TRUE)[1:input$pcaTopGene], ]) # top genes to show 
-    }
+    data <- t(data[apply(data, 1, var) != 0, ]) # selection over counts
     data.pca.all <- prcomp(data,center = T,scale. = T) # pca
     
     data <- data.frame(data.pca.all$x)
@@ -490,26 +484,10 @@ output$pcaPlotObject3d <- renderPlotly({
 # render pca
 output$pcaUI <- renderUI({
   if (v$importActionValue) {
-    tagList(fluidRow(
-      column(  # parameters
-        3,
-        numericInput(
-          inputId = "pcaTopGene",
-          label = "Top Gene",
-          value = 100,
-          min = 2,
-          step = 1
-        ),
-        tags$div( #instructions
-          HTML("Choose the number of genes for render. "))
-      ),
-      column(9,
              tabsetPanel(  # render plots 
                tabPanel(title = "2D Plot", plotlyOutput("pcaPlotObject2d", width = 800) %>% withSpinner()),
                tabPanel(title = "3D Plot", plotlyOutput("pcaPlotObject3d", width = 800) %>% withSpinner())
-               
-             ))
-    ))
+             )
   } else { # if no data, message
     helpText("No data for ploting.")
   }

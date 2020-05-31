@@ -90,10 +90,15 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
       res_enrich,
       x = ~(-log(P.value)),   
       y = ~reorder(Term,(-log(P.value))),
-      text = ~Term, 
       textposition = 'auto',
       type = "bar",    # bar chart
-      colors = "Reds"  # colors
+      colors = "Reds",  # colors
+      hoverinfo = "text",  # when hover over a point, the following info shows
+      text = ~ paste(
+        "</br>Term:",
+        Term,
+        "</br>Genes:",
+        Genes)
     )%>% layout(title = 'Statistics of the Enrichment',  # titles
                 yaxis = list(title = 'Enrichment'),
                 xaxis = list(title = '-log(P-value)'))

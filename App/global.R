@@ -1,35 +1,58 @@
 # global.R
-#libraries needed
+#libraries needed : installing automatically if not
 
-library(shiny)
-library(shinydashboard)
-library(dashboardthemes)
-library(shinycssloaders)
-library(shinythemes)
-library(shinyWidgets)
-library(shinyBS)
-library(rmarkdown)
-library(plotly)
-library(dplyr)
-library(DT)
-library(data.table)
-library(RColorBrewer)
-library(utils)
-library(tidyr)
-library(cluster)
-library(TCC)
-library(heatmaply)
-library(enrichR)
-library(clusterProfiler)
-library(clusterProfiler)
-library(org.Dm.eg.db)
-library(org.EcK12.eg.db)
-library(org.Ce.eg.db)
-library(org.Hs.eg.db)
-library(org.Mm.eg.db)
 
-# app theme
+# Packages
+usePackage <- function(p) 
+{
+  if (!is.element(p, installed.packages()[,1]))
+    install.packages(p, dep = TRUE)
+  require(p, character.only = TRUE)
+}
 
-# library(devtools)
-# install_github("nik01010/dashboardthemes")
+
+# BioCmanager packages
+BioCPackage <- function(p)
+{
+  if (!is.element(p, installed.packages()[,1]))
+    BiocManager::install(p, dep = TRUE)
+  require(p, character.only = TRUE)
+}
+
+
+
+usePackage("shiny")
+usePackage("shinydashboard")
+usePackage("shinycssloaders")
+usePackage("shinythemes")
+usePackage("shinyWidgets")
+usePackage("shinyBS")
+usePackage("rmarkdown")
+usePackage("plotly")
+usePackage("dplyr")
+usePackage("DT")
+usePackage("data.table")
+usePackage("RColorBrewer")
+usePackage("utils")
+usePackage("tidyr")
+usePackage("devtools")
+
+#theme 
+if (!is.element("dashboardthemes", installed.packages()[,1]))
+  install_github("nik01010/dashboardthemes")
+require("dashboardthemes", character.only = TRUE)
+
+
+BioCPackage("cluster")
+BioCPackage("TCC")
+BioCPackage("heatmaply")
+BioCPackage("enrichR")
+BioCPackage("clusterProfiler")
+BioCPackage("org.Dm.eg.db")
+BioCPackage("org.EcK12.eg.db")
+BioCPackage("org.Ce.eg.db")
+BioCPackage("org.Hs.eg.db")
+BioCPackage("org.Mm.eg.db")
+
+
 

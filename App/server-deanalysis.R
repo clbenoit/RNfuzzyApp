@@ -105,11 +105,23 @@ observeEvent(input$DEA, {           # when the run button is clicked
   var$tccObject <- tcc         # save the updated object 
   var$result <- getResult(tcc, sort = FALSE) %>% mutate_if(is.factor, as.character) # get the result of the calculation
   
-  var$result_a <- var$result[,-2]        # deleting the a value (Basemean) of the results
-  var$result_m <- var$result_a[,-2]      # deleting the m value (Log2FC) of the results
-  colnames(var$result_m) <- c("gene_id", "P Value", "FDR", "Rank", "estimatedDEG")
-  var$result_e <- var$result_m[which(var$result_m$estimatedDEG >0),] # selection of the DEGs
-  var$result_s <- var$result_e[,-5]      # deleting the column showing which one is a DEG and which one is not
+  if (length(var$groupList) == 2){
+    var$result_m <- var$result
+    colnames(var$result_m) <- c("gene_id","BaseMean", "Log2FC","P Value", "FDR", "Rank", "estimatedDEG")
+    var$result_e <- var$result[which(var$result_m$estimatedDEG >0),] # selection of the DEGs
+    var$result_s <- var$result_e[,-7]      # deleting the column showing which one is a DEG and which one is not
+  }
+  else{
+    var$result_a <- var$result[,-2]        # deleting the a value (Basemean) of the results
+    var$result_m <- var$result_a[,-2]      # deleting the m value (Log2FC) of the results
+    colnames(var$result_m) <- c("gene_id", "P Value", "FDR", "Rank", "estimatedDEG")
+    var$result_e <- var$result_m[which(var$result_m$estimatedDEG >0),] # selection of the DEGs
+    var$result_s <- var$result_e[,-5]      # deleting the column showing which one is a DEG and which one is not
+  }
+  
+
+
+
   var$norData <- tcc$getNormalizedData() # only the normalized data
   
   

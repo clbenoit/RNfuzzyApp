@@ -1,7 +1,7 @@
 # server-normalization.R
 
 
-AnalysisRun <- reactiveValues(AnalysisRunValue = FALSE) # to precise the run button has not been clicked
+AnalysisRun <- reactiveValues(AnalysisRunValue = FALSE)# to precise the run button has not been clicked
 
 
 
@@ -20,7 +20,34 @@ output$CondDEAParams <- renderUI({  # if a count data table has been uploaded th
 })
 
 
-output$DEAParams <- renderUI({     # set of paramters 
+output$DEAParams <- renderUI({ 
+  tagList(
+    selectInput(
+      "DEAmethod", "Analysis Method",
+      c( TCC = "tcc",
+         DESeq2 = "DESeq2",
+         edgeR = "edgeR")),
+    conditionalPanel(
+      condition = "input.DEAmethod == 'tcc'",
+      uiOutput("TCCParams")
+    ),
+    conditionalPanel(
+      condition = "input.DEAmethod == 'DESeq2'",
+      uiOutput("DESeq2Params")
+    ),
+    conditionalPanel(
+      condition = "input.DEAmethod == 'edgeR'",
+      uiOutput("edgeRParams")
+    ), 
+    do.call(actionBttn, c(           # run button 
+      list(
+        inputId = "DEA",
+        label = "Run Analysis",
+        icon = icon("play")
+      ))))
+})
+
+output$TCCParams <- renderUI({# set of paramters for tcc method
   tagList(
     selectInput(
       "normMethod",
@@ -39,7 +66,7 @@ output$DEAParams <- renderUI({     # set of paramters
     numericInput(
       inputId = "fdr",
       label = "FDR Cut-off",
-      min = 0.00001,
+      min = 0,
       value = 0.01,
       max = 1,
       step = 0.0001
@@ -50,17 +77,40 @@ output$DEAParams <- renderUI({     # set of paramters
       min = 0,
       max = 1,
       value = 0.05,
-      step = 0.05
-    ),
-    do.call(actionBttn, c(           # run button 
-      list(
-        inputId = "DEA",
-        label = "Run Analysis",
-        icon = icon("play")
-      )))
+      step = 0.01
+    )
   )
 })
 
+output$DESeq2Params <- renderUI({ # set of paramters for deseq2 method 
+  numericInput(
+    "deseq2cutoff",
+    "FDR Cut-Off",
+    min = 0,
+    max = 1,
+    value = 0.01
+  )
+})
+
+output$edgeRParams <- renderUI({ # set of paramters for edgeR method 
+  tagList(
+    selectInput(
+      "edgeRMethod",
+      "Normalization Method",
+      c("TMM" = "TMM",
+        "RLE" = "RLE",
+        "upperquartile" = "upperquartile",
+        "none" = "none")
+    ),
+    numericInput(
+      inputId = "edgeRfdr",
+      label = "FDR Cut-off",
+      min = 0,
+      value = 0.001,
+      max = 1,
+      step = 0.0001
+    ))
+})
 observeEvent(input$DEA, {           # when the run button is clicked 
   progressSweetAlert(               # progress bar 
     session = session,
@@ -70,6 +120,9 @@ observeEvent(input$DEA, {           # when the run button is clicked
     value = 0
   )
   
+
+  
+  if(input$DEAmethod == "tcc"){
   # Creation of a TCC Object 
   tcc <-                           
     new("TCC", var$CountData, var$selectedgroups)
@@ -107,22 +160,142 @@ observeEvent(input$DEA, {           # when the run button is clicked
   
   if (length(var$groupList) == 2){
     var$result_m <- var$result
-    colnames(var$result_m) <- c("gene_id","BaseMean", "Log2FC","P Value", "FDR", "Rank", "estimatedDEG")
+    colnames(var$result_m) <- c("gene_id","BaseMean", "Log2FC","P-Value", "FDR", "Rank", "estimatedDEG")
     var$result_e <- var$result[which(var$result_m$estimatedDEG >0),] # selection of the DEGs
     var$result_s <- var$result_e[,-7]      # deleting the column showing which one is a DEG and which one is not
   }
   else{
     var$result_a <- var$result[,-2]        # deleting the a value (Basemean) of the results
     var$result_m <- var$result_a[,-2]      # deleting the m value (Log2FC) of the results
-    colnames(var$result_m) <- c("gene_id", "P Value", "FDR", "Rank", "estimatedDEG")
+    colnames(var$result_m) <- c("gene_id", "P-Value", "FDR", "Rank", "estimatedDEG")
     var$result_e <- var$result_m[which(var$result_m$estimatedDEG >0),] # selection of the DEGs
     var$result_s <- var$result_e[,-5]      # deleting the column showing which one is a DEG and which one is not
   }
   
-
-
-
   var$norData <- tcc$getNormalizedData() # only the normalized data
+  var$DEAMETHOD <- 'tcc'
+  }
+  
+  
+  ######################################### deseq2 method #################################################
+  
+  
+ if(input$DEAmethod == "DESeq2"){
+  
+   tcc <-                           
+     new("TCC", var$CountData, var$selectedgroups)
+   var$tccObject <- tcc             # just to get the groups for pca 
+    
+   dds <- DESeqDataSetFromMatrix(countData=var$CountData, colData=var$groupdf, design=var$design)
+   
+   updateProgressBar(               # updating progress bar
+     session = session,
+     id = "DEAnalysisProgress",
+     title = "DE Analysis in progress...",
+     value = 25
+   )
+   
+   dds <- DESeq(dds)
+    
+    updateProgressBar(               # updating progress bar
+      session = session,
+      id = "DEAnalysisProgress",
+      title = "DE Analysis in progress...",
+      value = 50
+    )
+    var$result <- results(dds)
+    var$norData <- as.matrix(counts(dds, normalized = TRUE)) # normalization
+    var$result <- as.matrix(var$result)
+    var$result <- merge(var$result, var$norData, by="row.names")
+    names(var$result)[1] <- "gene_id"
+    var$result <- var$result[,-4] # supp lfcSE column
+    var$result <- var$result[,-4] # supp stat column
+    names(var$result)[5] <- 'q.value'
+    names(var$result)[2] <- 'a.value'
+    names(var$result)[3] <- 'm.value'
+    names(var$result)[4] <- 'p.value'
+
+
+    
+    if (length(var$groupList) != 2){
+      var$result <- var$result[,-2] # suppr basemean
+      var$result <- var$result[,-2] # supp log2fc
+    }
+    DESeq2DEGs <- var$result[which(var$result$q.value <= as.numeric(input$deseq2cutoff)),] 
+    
+    var$result["estimatedDEG"] = "0"
+    for (row in 1:nrow(var$result)){
+      if(var$result[row,'q.value'] <= as.numeric(input$deseq2cutoff)){
+        var$result[row, 'estimatedDEG'] = "1"
+      }else{ 
+        var$result[row,'estimatedDEG'] = "0"
+        }
+    }
+    var$DEAMETHOD <- 'deseq2'
+    }
+ 
+  ################################################ edgeR method ###############################################
+  
+  
+  if(input$DEAmethod == "edgeR"){     # formatting for edgeR'''
+    tcc <-                           
+      new("TCC", var$CountData, var$selectedgroups)
+    var$tccObject <- tcc             # just to get the groups for pca 
+    
+    dgList <- DGEList(counts=var$CountData, group = var$selectedgroups)
+    
+    updateProgressBar(               # updating progress bar
+      session = session,
+      id = "DEAnalysisProgress",
+      title = "DE Analysis in progress...",
+      value = 25
+    )
+    
+    dgList <- calcNormFactors(dgList, method=input$edgeRMethod)
+    
+    updateProgressBar(               # updating progress bar
+      session = session,
+      id = "DEAnalysisProgress",
+      title = "DE Analysis in progress...",
+      value = 50
+    )
+    
+    dgList <- estimateGLMCommonDisp(dgList,
+                                    method = "deviance", robust = TRUE,
+                                    subset = NULL)
+    design <- model.matrix(~var$selectedgroups)
+    fit <- glmFit(dgList, design)
+    lrt <- glmLRT(fit) 
+    var$result <- data.frame(row.names(lrt$table))
+    var$result['a.value'] <- lrt$table$logCPM
+    var$result['m.value'] <- lrt$table$logFC
+    var$result['p.value'] <- lrt$table$PValue
+    var$result['q.value'] <- p.adjust(var$result$p.value, method = 'fdr')
+    names(var$result)[1] <- "gene_id"
+    
+
+    
+
+    
+    if (length(var$groupList) != 2){
+      var$result <- var$result[,-1] # suppr log2fc
+      var$result <- var$result[,-1] # supp basemean
+    }
+    var$norData <- lrt$fitted.values
+    var$result["estimatedDEG"] = "0"
+    for (row in 1:nrow(var$result)){
+      if(var$result[row,'q.value'] <= as.numeric(input$edgeRfdr)){
+        var$result[row, 'estimatedDEG'] = "1"
+      }else{ 
+       var$result[row,'estimatedDEG'] = "0"
+      }}
+    edgeRDEGs <- var$result[which(var$result$q.value <= as.numeric(input$edgeRfdr)),] 
+    edgeRDEGs <- edgeRDEGs[,-4]
+    var$DEAMETHOD <- 'edgeR'
+
+   }
+
+    
   
   
   output$normresultTable <- DT::renderDataTable({  # normaliszed data table
@@ -157,7 +330,15 @@ observeEvent(input$DEA, {           # when the run button is clicked
     gene_id <- row.names(data)
     data <- cbind(data, gene_id = gene_id)
     
+    if(input$DEAmethod =="tcc"){
     resultTable <- merge(var$result_m, data, by = "gene_id")
+    }
+    if(input$DEAmethod == "edgeR"){
+      resultTable <- merge(var$result, data, by = "gene_id")
+    }
+    if(input$DEAmethod == "DESeq2"){
+      resultTable <- var$result
+    }
     
     DT::datatable(
       resultTable,        
@@ -172,7 +353,7 @@ observeEvent(input$DEA, {           # when the run button is clicked
         buttons = list(list(
           extend = 'collection',
           buttons = list(extend='csv',
-                         filename = "results_conversion"),
+                         filename = "results_dea"),
           text = 'Download')),
         scrollX = TRUE,
         pageLength = 10,
@@ -198,7 +379,15 @@ observeEvent(input$DEA, {           # when the run button is clicked
     data <- var$norData
     gene_id <- row.names(data)
     data <- cbind(data, gene_id = gene_id)
+    if(input$DEAmethod == 'tcc'){
     resultTable <- merge(var$result_s, data, by = "gene_id")
+    }
+    if(input$DEAmethod == "DESeq2"){
+      resultTable <- DESeq2DEGs
+    }
+    if(input$DEAmethod == "edgeR"){
+      resultTable <- merge(edgeRDEGs, data, by = "gene_id")
+    }
     
     DT::datatable(
       resultTable,        
@@ -225,14 +414,14 @@ observeEvent(input$DEA, {           # when the run button is clicked
       class = "display")
   }, server = FALSE)
   
-  closeSweetAlert(session = session)       # close alert precising the calculation od done
+  closeSweetAlert(session = session)       # close alert precising the calculation is done
   sendSweetAlert(session = session,
                  title = "DONE",
                  text = "DE Analysis was successfully performed.",
                  type = "success")
   
   
-  AnalysisRun$AnalysisRunValue <- input$DEA    # precise the run button has been clicked 
+  AnalysisRun$AnalysisRunValue <- input$DEA  # precise the run button has been clicked 
   updateNavbarPage(session, "tabs", "redirectres") # redirection to the full result table
   
 })
@@ -241,12 +430,11 @@ resultTable <- reactive({   # saving the updated results to plot furtherly
 })
 
 
-
 # results tables render
 
 
 output$NormResultTable <- renderUI({
-  if(AnalysisRun$AnalysisRunValue){     # if the calculation is done then show the tables 
+  if(AnalysisRun$AnalysisRunValue){ # if the calculation is done then show the tables 
     tagList(
       fluidRow(column(
         12, DT::dataTableOutput('normresultTable') %>% withSpinner()

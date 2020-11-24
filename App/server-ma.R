@@ -95,9 +95,7 @@ observeEvent(input$makeMAPlot, { # if run button has been clicked
           "</br>BaseMean (A value):",
           round(a.value, 4),
           "</br>Log2FC (M value):",
-          round(m.value, 4),
-          "</br>Rank:",
-          rank
+          round(m.value, 4)
         ),
         key =  ~ key,
         source = "ma"
@@ -166,28 +164,11 @@ output$geneBarPlot <- renderPlotly({ # bar plot
 
 
 output$resultTableInPlot <- DT::renderDataTable({
-  if (nrow(resultTable()) == 0) {   # render data table with colors according to cutoffs
-    DT::datatable(resultTable())
-  } else {
-    if (length(input$maFDR) > 0) {
       fdrCut <- input$maFDR
       fdrColor <- input$fdrColor
-    } else {
-      fdrCut <- 0
-      fdrColor <- "#B22222"
-    }
     
     DT::datatable(   # result table 
       resultTable(),
-      colnames = c(
-        "Gene Name",
-        "BaseMean (A Value)",
-        "Log2FC (M Value)",
-        "P Value",
-        "FDR",
-        "Rank",
-        "estimated DEG"
-      ),
       filter = "bottom",
       caption = tags$caption(
         tags$li("Gene Name was colored according to FDR cut-off.")
@@ -214,11 +195,11 @@ output$resultTableInPlot <- DT::renderDataTable({
                     "m.value",
                     "p.value",
                     "q.value"),
-        digits = 3  # digits after comma
+        digits = 10  # digits after comma
       ) %>% formatStyle("gene_id",
                         "q.value",
                         color = styleInterval(fdrCut, c(fdrColor, ""))) # color according to cut off
-  }
+
 },server = F)
 
 

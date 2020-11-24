@@ -122,6 +122,8 @@ observeEvent(input$confirmedGroupList, { # when the groups are being corfimed
   var$groupdf <- data.frame(group, row.names = rep)
   var$matrixcount <- as.matrix(var$CountData)
   var$CountData <- var$CountData[,which(colnames(var$CountData) == rownames(var$groupdf))]
+  var$design <- formula(as.formula(paste("~", paste(colnames(as.data.frame(group)), collapse = "+"))))
+  
   
 })
 

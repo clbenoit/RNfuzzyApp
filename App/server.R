@@ -37,6 +37,8 @@ shinyServer(function(input, output, session) { #all server files
     matrixcount = matrix(),              # matrix of CountData
     groupList = NULL,                    # list of the groups only
     selectedgroups = NULL,               # selected groups of the original data frame is not all are selected
+    design = NULL,                       # design for deseq2 and edgeR
+    DEAMETHOD = NULL,                    # chosen analysis method
     result = data.frame("Results will show here." = character(0)), #vmessage to put in the beginning when no input yet
     tccObject = NULL,                    # tcc object containing results of the tcc calculation 
     pcadata = NULL)                      # pca data 

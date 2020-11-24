@@ -168,9 +168,7 @@ observeEvent(input$makeVolcanoPlot, {
           "</br>p-value:",
           p.value,
           "</br>q-value:",
-          q.value,
-          "</br>Rank:",
-          rank
+          q.value
         ),
         key =  ~ key,
         source = "volcano"
@@ -266,25 +264,26 @@ output$VolcanoBarPlot <- renderPlotly({
 # Render table result
 
 output$resultTableVolc <- DT::renderDataTable({ # full result table 
+  method <- var$DEAMETHOD
   if (nrow(resultTable()) == 0) {
     DT::datatable(resultTable())
   } else {
-    if (length(input$Cutfdr) > 0) {
       fdrCut <- input$Cutfdr
-      volcT <- resultTable() # using of the tcc result table
+      volcT <- resultTable() # using of the  result table
       volcT <- volcT[which(volcT$estimatedDEG >0),] # selection of the DEGs only 
-      volcT <- volcT[,-7] # deleting the column with 0 and 1 saying the gene is a DEG or not
-      colnames(volcT) <- c("gene_id","BaseMean", "Log2FC", "PValue", "FDR", "Rank")
+      data <- var$norData # using normalized data
+      gene_id <- row.names(data)
+      data <- cbind(data, gene_id = gene_id)
       
-    } else { # if no fdr cut off selected then it is set to 0
-      fdrCut <- 0
+    if(method == "tcc"){
+      volcT <- volcT[,-7] # deleting the column with 0 and 1 saying the gene is a DEG or not
+      resultTable <- merge(volcT, data, by = "gene_id")
+    }else{
+      volcT <- volcT
+      resultTable <- volcT
+      
     }
-    
-    data <- var$norData # using normalized data
-    gene_id <- row.names(data)
-    data <- cbind(data, gene_id = gene_id)
-    
-    resultTable <- merge(volcT, data, by = "gene_id")
+
     
     t <- DT::datatable(
       resultTable,
@@ -315,13 +314,13 @@ output$resultTableVolc <- DT::renderDataTable({ # full result table
         )
       ))
     
-    if (!is.na(sum(volcT$Log2FC))) {   # coloring results according to cut offs 
-      t   %>% formatStyle("gene_id", "Log2FC",
+    if (!is.na(sum(volcT$m.value))) {   # coloring results according to cut offs 
+      t   %>% formatStyle("gene_id", "m.value",
                           color = styleInterval(input$CutFC,
                                                 c(
                                                   input$downColor, "black", input$upColor
                                                 ))) %>% formatStyle("gene_id",
-                                                                    "PValue",
+                                                                    "p.value",
                                                                     fontWeight = styleInterval(fdrCut, c("bold", "normal")))
     } else {
       t
@@ -344,28 +343,32 @@ output$MainResultTableVolc <- renderUI({
 
 output$resultTabledown <- DT::renderDataTable({ # datatable render for downregulated genes
   sortedvolc <- var$result
+  method <- var$DEAMETHOD
   if (nrow(sortedvolc) == 0) {
     DT::datatable(sortedvolc)
   } else {
-    if (length(input$Cutfdr) > 0) {
       downCut <- input$CutFC[1]
       upCut <- input$CutFC[2]
       fdrCut <- input$Cutfdr
       sortedvolc <- sortedvolc[sortedvolc$q.value < fdrCut,]
       sortedvolc <- sortedvolc[sortedvolc$m.value < downCut,]
-      sortedvolc <- sortedvolc[,-2]
       sortedvolc <- sortedvolc[which(sortedvolc$estimatedDEG >0),]
-      sortedvolc <- sortedvolc[,-6]
-      colnames(sortedvolc) <- c("gene_id", "Log2FC","PValue", "FDR", "Rank")
-      
-    } else {
-      fdrCut <- 0
-    }
+      if(method == 'tcc'){
+        sortedvolc <- sortedvolc[,-2]
+        sortedvolc <- sortedvolc[,-6]
+        downresultTable <- merge(sortedvolc, data, by = "gene_id")
+      }else{
+        if(method == "edgeR"){
+          sortedvolc <- sortedvolc[,-2]
+          sortedvolc <- sortedvolc[,-4]
+        }}
     data <- var$norData
     gene_id <- row.names(data)
     data <- cbind(data, gene_id = gene_id)
-    
-    downresultTable <- merge(sortedvolc, data, by = "gene_id")
+    method <- var$DEAMETHOD
+    downresultTable <- sortedvolc
+
+   
     
     t <- DT::datatable(
       downresultTable,
@@ -397,13 +400,13 @@ output$resultTabledown <- DT::renderDataTable({ # datatable render for downregul
         )
       ))
     
-    if (!is.na(sum(sortedvolc$Log2FC))) {
-      t   %>% formatStyle("gene_id", "Log2FC",
+    if (!is.na(sum(sortedvolc$m.value))) {
+      t   %>% formatStyle("gene_id", "m.value",
                           color = styleInterval(input$CutFC,
                                                 c(
                                                   input$downColor, "black", input$upColor
                                                 ))) %>% formatStyle("gene_id",
-                                                                    "PValue",
+                                                                    "p.value",
                                                                     fontWeight = styleInterval(fdrCut, c("bold", "normal")))
     } else {
       t
@@ -416,28 +419,32 @@ output$resultTabledown <- DT::renderDataTable({ # datatable render for downregul
 
 output$resultTableup <- DT::renderDataTable({ #datatable render for downregulated genes
   sortedvolc <- var$result
+  method <- var$DEAMETHOD
   if (nrow(sortedvolc) == 0) {
     DT::datatable(sortedvolc)
   } else {
-    if (length(input$Cutfdr) > 0) {
       downCut <- input$CutFC[1]
       upCut <- input$CutFC[2]
       fdrCut <- input$Cutfdr
       sortedvolc <- sortedvolc[sortedvolc$q.value < fdrCut,]
       sortedvolc <- sortedvolc[sortedvolc$m.value > upCut,]
-      sortedvolc <- sortedvolc[,-2]
       sortedvolc <- sortedvolc[which(sortedvolc$estimatedDEG >0),]
-      sortedvolc <- sortedvolc[,-6]
-      colnames(sortedvolc) <- c("gene_id", "Log2FC","PValue", "FDR", "Rank")
-      
-    } else {
-      fdrCut <- 0
-    }
+      if(method == 'tcc'){
+        sortedvolc <- sortedvolc[,-2]
+        sortedvolc <- sortedvolc[,-6]
+        downresultTable <- merge(sortedvolc, data, by = "gene_id")
+      }else{
+        if(method == "edgeR"){
+          sortedvolc <- sortedvolc[,-2]
+          sortedvolc <- sortedvolc[,-4]
+        }}
     data <- var$norData
     gene_id <- row.names(data)
     data <- cbind(data, gene_id = gene_id)
+    method <- var$DEAMETHOD
+    upresultTable <- sortedvolc
     
-    upresultTable <- merge(sortedvolc, data, by = "gene_id")
+    
     
     t <- DT::datatable(
       upresultTable,
@@ -468,13 +475,13 @@ output$resultTableup <- DT::renderDataTable({ #datatable render for downregulate
           "Please verify your Log2FC if changed from the default one."
         )))
     
-    if (!is.na(sum(sortedvolc$Log2FC))) {
-      t   %>% formatStyle("gene_id", "Log2FC",
+    if (!is.na(sum(sortedvolc$m.value))) {
+      t   %>% formatStyle("gene_id", "m.value",
                           color = styleInterval(input$CutFC,
                                                 c(
                                                   input$downColor, "black", input$upColor
                                                 ))) %>% formatStyle("gene_id",
-                                                                    "PValue",
+                                                                    "p.value",
                                                                     fontWeight = styleInterval(fdrCut, c("bold", "normal")))
     } else {
       t

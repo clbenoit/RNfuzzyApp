@@ -49,9 +49,13 @@ For each result, downloading png images and results is available.</br>
 
 <b> - Enrichment : </b></br>
 
-Giving a set of Symbols, this section provides you a GO Term enrichment with an associated graph. </br>
+Giving a set of ids, this section provides you a GO Term enrichment, Kegg and Wiki Pathways with an associated graph. </br>
+
+<b> - Orthology : </b></br>
+
+Giving a set of  ids, input and target organism, this section provides an orthologs search using gprofiler2 package. </br>
 
 <b> - Conversion : </b></br>
 
-Giving a set of Ensembl ids, Entrez ids or Symbol, this section provides a translation to other ids.
+Giving a set of  ids of choice, this section provides a translation to other ids using gprofiler2 package. 
 

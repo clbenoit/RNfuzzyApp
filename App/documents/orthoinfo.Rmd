@@ -1,5 +1,5 @@
 ---
-title: GO Enrichment informations
+title: Orthology search informations
 author: Haering Margaux, 2020, IBDM
 framework: bootstrap
 mode: selfcontained
@@ -36,11 +36,11 @@ g-table-intro h4 {
 
 
 
-## GO Enrichment
+## Orthology search
 ---
-The enrichment part is based on gProfileR. 
+The orthology search part is based on gProfileR. 
 
-To obtain your associated GO terms and/or KEGG/ Wiki Pathways with description in a nice table and graph, just paste a ids list.
+To obtain orthologs in a certain organism, just paste a list of ids, choose your input organism and your target organism. 
 
 
 
@@ -49,9 +49,6 @@ Paste a list of ids of interest
 
 
 
-- <u> Enrichment </u> </br>
-Choose the  enrichment you want and specify some parameters.
-(results are sorted from the most significant p-value to the least). 
 
 
 <br/>

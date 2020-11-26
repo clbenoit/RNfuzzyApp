@@ -8,17 +8,18 @@ observeEvent(input$convgo,{      # if the validation butto is clicked
   
   
   
-  inputids <- unlist(strsplit(input$inputids, split = '\n')) #takes the gene list 
-  conversion <- bitr(                          # convert the ids with this clusterProfiler bitr function 
-    geneID = inputids,                         # according ti the set of ids
-    fromType = input$inputtype,                # the input type
-    toType = c('ENTREZID','ENSEMBL','SYMBOL'), # all the types to convert to 
-    OrgDb = input$chosendatabase               # the organism
+  inputids <- unlist(strsplit(input$inputids, split = '\n')) 
+  conversion <- gconvert(                          #gprofiler2 package
+    inputids,                         
+    organism = input$chosendatabase,                
+    target = input$outputtype              
   )
   
   
   
-  conversion <- as.data.frame(conversion)      # convert the result as a data frame to allow the render
+  conversion <- conversion[,-1]
+  conversion <- conversion[,-2] 
+  conversion <- conversion[,-5]
   output$ConvResults <-  DT::renderDataTable({ # creation of the result table
   DT::datatable(
     conversion,                                # data to add in the table

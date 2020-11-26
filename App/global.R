@@ -20,6 +20,11 @@ BioCPackage <- function(p)
 }
 
 
+#theme 
+if (!is.element("dashboardthemes", installed.packages()[,1]))
+  install_github("nik01010/dashboardthemes")
+require("dashboardthemes", character.only = TRUE)
+
 
 usePackage("shiny")
 usePackage("shinydashboard")
@@ -37,22 +42,11 @@ usePackage("utils")
 usePackage("tidyr")
 usePackage("devtools")
 
-#theme 
-if (!is.element("dashboardthemes", installed.packages()[,1]))
-  install_github("nik01010/dashboardthemes")
-require("dashboardthemes", character.only = TRUE)
-
-
 BioCPackage("cluster")
 BioCPackage("TCC")
 BioCPackage("heatmaply")
-BioCPackage("enrichR")
-BioCPackage("clusterProfiler")
-BioCPackage("org.Dm.eg.db")
-BioCPackage("org.EcK12.eg.db")
-BioCPackage("org.Ce.eg.db")
-BioCPackage("org.Hs.eg.db")
-BioCPackage("org.Mm.eg.db")
+BioCPackage("gprofiler2")
+
 
 
 

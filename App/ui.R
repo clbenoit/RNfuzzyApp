@@ -38,9 +38,13 @@ tagList(dashboardPage(                  #the global app
           tabName = "pcaTab",
           icon = icon("bar-chart"))),
       menuItem(
-        "GO Enrichment",
+        "Enrichment",
         tabName = "enrichTab",
-        icon = icon("project-diagram")),
+        icon = icon("map-signs")),
+      menuItem(
+        "Orthology",
+        tabName = "orthoTab",
+        icon = icon("share-alt")),
       menuItem(
         "ID Conversion",
         tabName = "conversionTab",
@@ -85,6 +89,11 @@ tagList(dashboardPage(                  #the global app
       )$value),
       tabItem(tabName = "enrichTab", source(
         file = "ui-enrich.R",
+        local = TRUE,
+        encoding = "UTF-8"
+      )$value),
+      tabItem(tabName = "orthoTab", source(
+        file = "ui-ortho.R",
         local = TRUE,
         encoding = "UTF-8"
       )$value),

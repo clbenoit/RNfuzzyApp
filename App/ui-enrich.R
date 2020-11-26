@@ -10,26 +10,67 @@ fluidPage(fluidRow(column(
     status = "primary",
     tagList(                    # set of parameters
       textAreaInput(
-        "refseqids",
+        "list_ids",
         "Paste Gene List",
         rows = 5,
-        placeholder = "Input refseq ids, one gene per line."
-        
+        placeholder = "Input ids, one gene per line."
       ),
       selectInput(
-        "chosenGO",
-        "Choose your Enrichment",
-        c( "Biological Process" =  "GO_Biological_Process_2018",
-           "Molecular Fonction" =  "GO_Molecular_Function_2018",
-           "Cellular Component" =  "GO_Cellular_Component_2018")
+        "inputorg",
+        "Choose your Organism",
+        c("Drosophila melanogaster" = "dmelanogaster",
+          "Mus musculus" = "mmusculus",
+          "Homo sapiens" = "hsapiens", 
+          "Caenorhabditis elegans" = "celegans",
+          "Zebrafish" = "drerio",
+          "Aspergillus fumigatus Af293" = "afumigatus",
+          "Bonobo" = "ppaniscus",
+          "Cat" = "fcatus",
+          "Chicken" = "ggallus",
+          "Chimpanzee" = "ptroglodytes",
+          "Common Carp" = "ccarpio",
+          "Cow" = "btaurus",
+          "Dog" = "clfamiliaris",
+          "Dolphin" = "ttruncatus",
+          "Goat" = "chircus",
+          "Gorilla" = "ggorilla",
+          "Guppy" = "preticulata",
+          "Horse" = "ecaballus",
+          "Pig" = "sscrofa",
+          "Platypus" = "oanatinus",
+          "Rabbit" = "ocuniculus")
       ),
-      numericInput(
-        "topres",
-        "Top results",
-        min = 1,
-        max = 100,
-        value = 30,
-        step = 1
+      checkboxGroupInput(
+        "chosenEnrich",
+        "Choose your enrichment",
+        c("GO : Biological Processes" = "GO:BP",
+          "GO : Molecular Functions" = "GO:MF",
+          "GO : Cellular Components" = "GO:CC",
+          "KEGG Pathways" = "KEGG",
+          "Reactome" = "REAC",
+          "WikiPathways" = "WP"),
+        selected = c("GO:BP", "GO:MF", "GO:CC", "KEGG", "REAC","WP")
+      ),
+      selectInput(
+        "correction",
+        "Multiple testing correction",
+        c("gSCS threshold" = "gSCS",
+          "Benjamini-Hochberg FDR" = "fdr", 
+          "Bonferroni correction", "bonferroni")
+      ),
+      sliderInput(
+        "userpval_cutoff",
+        "Significant p-value threshold",
+        min = 0,
+        max = 1,
+        value = 0.05,
+        step = 0.01
+      ), 
+      selectInput(
+        "chosenscope",
+        "Statistical domain scope",
+        c("Only annotated genes" = "annotated",
+          "All known genes" = "known")
       )
     ),
     do.call(actionBttn, c(          # run button 
@@ -66,6 +107,6 @@ fluidPage(fluidRow(column(
                  width = NULL,
                  solidHeader = TRUE,
                  status = "primary",
-                 plotlyOutput('barenrich',height = 800)%>% withSpinner()
+                 uiOutput('EnrichBar',height = 1000)%>% withSpinner()
                )
     ))))

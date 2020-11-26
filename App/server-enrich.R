@@ -14,7 +14,7 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
   
   
   
-  geneset <- unlist(strsplit(input$refseqids, split = '\n')) # takes the gene set 
+  geneset <-unlist(strsplit(input$list_ids, split = '\n')) # takes the gene set
   
   updateProgressBar(              # update progress bar 
     session = session,
@@ -23,10 +23,15 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
     value = 50
   )
   
-  
-  res <- listEnrichrDbs()       # look up to available databases on Rnchir
-  res <- input$chosenGO         # chosen ontology to perform the enrichment 
-  enriched <- enrichr(geneset, res)  # the enrichment 
+  enrichement <- unlist(strsplit(input$chosenEnrich, split = '\n'))
+  res <- gost(geneset, 
+              organism = input$inputorg,
+              ordered_query = T,
+              user_threshold = input$userpval_cutoff,
+              correction_method = input$correction,
+              domain_scope = input$chosenscope, 
+              sources = enrichement,
+              significant = F)
   
   
   
@@ -38,14 +43,8 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
     value = 75
   )
   
-  res_enrich <- as.data.frame(enriched)   # result as data frame
-  res_enrich <- res_enrich[,-4]           # deleting useless columns to keep only the ones below
-  res_enrich <- res_enrich[,-4]
-  res_enrich <- res_enrich[,-4]
-  colnames(res_enrich) <- c("Term","Overlap","P.value","Odd.Ratio","Combined.Score","Genes")
-  res_enrich <- res_enrich[order(res_enrich[,3]),]   # class the results according to the pvalue
-  n <- as.numeric(input$topres)
-  res_enrich <- res_enrich[1:n,]
+  res_enrich <- as.data.frame(res$result)# result as data frame
+  res_enrich <- res_enrich[,-1]
   
   
   output$EnrichResultTable <-  DT::renderDataTable({   # result table
@@ -83,27 +82,13 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
                  text = "Enrichment was successfully performed.",
                  type = "success")
   
-  
+  ##########
   
   output$barenrich <- renderPlotly({     # bar chart of results using plotly  : term with respect of -log(p-value)
-    fig <- plot_ly(
-      res_enrich,
-      x = ~(-log(P.value)),   
-      y = ~reorder(Term,(-log(P.value))),
-      textposition = 'auto',
-      type = "bar",    # bar chart
-      colors = "Reds",  # colors
-      hoverinfo = "text",  # when hover over a point, the following info shows
-      text = ~ paste(
-        "</br>Term:",
-        Term,
-        "</br>Genes:",
-        Genes)
-    )%>% layout(title = 'Statistics of the Enrichment',  # titles
-                yaxis = list(title = 'Enrichment'),
-                xaxis = list(title = '-log(P-value)'))
+    p <- gostplot(res, capped = FALSE, interactive = TRUE
+                  )
     
-    fig
+    p
   })
   
   
@@ -114,11 +99,24 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
 output$EnrichResults <- renderUI({
   if(EnrichRun$EnrichRunValue){   # if the run button has been clicked, then show the results
     tagList(
-      fluidRow(column(
-        12, dataTableOutput('EnrichResultTable') %>% withSpinner()
-      )))} else {                 # if not message to do it 
+      fluidRow(
+        column(12, dataTableOutput('EnrichResultTable') %>% withSpinner())
+      ))
+    } else {                 # if not message to do it 
         helpText("Run Enrichment to obtain the Result Table.")
       }
+})
+
+output$EnrichBar <- renderUI({
+  if(EnrichRun$EnrichRunValue){
+    tagList(
+      fluidRow(
+        column(12, plotlyOutput("barenrich") %>% withSpinner())
+      )
+    )
+  }else{
+    helpText(("Run Enrichment to obtain the Result Table."))
+  }
 })
 
 

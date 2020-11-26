@@ -23,6 +23,9 @@ shinyServer(function(input, output, session) { #all server files
   source(file = "server-enrich.R",
          local = TRUE,
          encoding = "UTF-8")
+  source(file = "server-ortho.R",
+         local = TRUE, 
+         encoding = "UTF-8")
   source(file = "server-conversion.R",
          local = TRUE, 
          encoding = "UTF-8")

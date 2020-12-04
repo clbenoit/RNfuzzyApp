@@ -14,6 +14,10 @@ tagList(dashboardPage(                  #the global app
         tabName = "dataImport",
         icon = icon("eye")),
       menuItem(
+        "Time Series clustering",
+        tabName = "mfuzzTab",
+        icon = icon("line-chart")),
+      menuItem(
         "DE Analysis",
         icon = icon("flask"),
         menuSubItem(
@@ -59,6 +63,11 @@ tagList(dashboardPage(                  #the global app
     tabItems(                        #according menu items to their corresponding files
       tabItem(tabName = "dataImport", source(
         file = "ui-data-import.R",
+        local = TRUE,
+        encoding = "UTF-8"
+      )$value),                     #according menu items to their corresponding files
+      tabItem(tabName = "mfuzzTab", source(
+        file = "ui-mfuzz.R",
         local = TRUE,
         encoding = "UTF-8"
       )$value),

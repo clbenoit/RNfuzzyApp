@@ -40,7 +40,7 @@ observeEvent(input$uploadCountData, {   # when a table is being uploaded
 })
 
 
-observeEvent(input$confirmedGroupList, { # when the groups are being corfimed
+observeEvent(input$confirmedGroupList, { # when the groups are being confimed
   if (nrow(datasetInput()) == 0) { # if not table then error 
     sendSweetAlert(
       session = session,

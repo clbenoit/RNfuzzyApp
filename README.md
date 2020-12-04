@@ -25,8 +25,9 @@ RNApp is an application to analyse aligned RNA-seq data.</br>
 
 - Perform soft clustering on time series data using Mfuzz. </br> 
 With help to choose the number of clusters.
+- clusters table automatically downloaded.
 
-</br> 
+
 <b>PART II : Analysis</b>
 ---
 3 analysis methods are proposed, TCC, DESeq2 or edgeR </br>

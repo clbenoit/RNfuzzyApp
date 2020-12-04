@@ -9,7 +9,7 @@ RNApp is an application to analyse aligned RNA-seq data.</br>
 
 
 
-<b>PART I : Upload data and visualization</b>
+<b>PART Ia : Upload data and visualization</b>
 ---
 
 - Upload your data as described above </br>
@@ -20,7 +20,13 @@ RNApp is an application to analyse aligned RNA-seq data.</br>
     - PCA ( 2D and 3D plots)</br>
 
 
+<b>PART Ib : Upload data and visualization</b>
+---
 
+- Perform soft clustering on time series data using Mfuzz. </br> 
+With help to choose the number of clusters.
+
+</br> 
 <b>PART II : Analysis</b>
 ---
 3 analysis methods are proposed, TCC, DESeq2 or edgeR </br>

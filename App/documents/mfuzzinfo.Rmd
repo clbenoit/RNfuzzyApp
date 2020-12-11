@@ -39,6 +39,7 @@ g-table-intro h4 {
 ## Mfuzz clustering
 ---
 Mfuzz is a Clustering tool for  RNAseq data using fuzzy c-means clustering.  </br>
+It performs soft clustering of genes based on their expression values using the fuzzy c-means algorithm. </br>
 By uploading a csv file of gene expression per time points, you can obtain this kind of plots : 
 
 <p align="center">
@@ -53,7 +54,7 @@ To help choosing the number of clusters, there are two methods, the <b> inertia 
 The inertia method consists on choosing the number of clusters corresponding to the point where the inertia drop gets minimal. </br>
 
 - <b> Elbow Method </b></br>
-The elbow method consists on  choosing the number of clusters corresponding to the point where the line forms a elbow. </br>
+The elbow method consists on plotting the Within Sum of Squared (WSS) along the number of clusters. The <i> right </i> number of clusters corresponds to the point where the line forms a elbow. </br>
 
 - <b> Checking overlap </b></br>
 If the number of clusters is too big, some clusters can overlap. </br>
@@ -61,7 +62,7 @@ This can be checked in the overlap PCA. </br>
 
 ### <u> Mfuzz Plots </u> </br>
 
-The plots are showing automatically and a R environment "clusters_list.rda" is saved on your computer's desktop. </br>
+The plots are showing automatically and a dowload button is available where a R environment "clusters_list.rda" is saved on your computer's desktop. </br>
 You can open the environment on R, and the list will be accessible by  "clusters_list". 
 <br/>
 <br/>

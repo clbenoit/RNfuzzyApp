@@ -272,14 +272,13 @@ observeEvent(input$DEA, {           # when the run button is clicked
     var$result['p.value'] <- lrt$table$PValue
     var$result['q.value'] <- p.adjust(var$result$p.value, method = 'fdr')
     names(var$result)[1] <- "gene_id"
-    
 
     
 
     
     if (length(var$groupList) != 2){
-      var$result <- var$result[,-1] # suppr log2fc
-      var$result <- var$result[,-1] # supp basemean
+      var$result <- var$result[,-2] # suppr log2fc
+      var$result <- var$result[,-2] # supp basemean
     }
     var$norData <- lrt$fitted.values
     var$result["estimatedDEG"] = "0"
@@ -327,13 +326,15 @@ observeEvent(input$DEA, {           # when the run button is clicked
   
   output$fullresultTable <- DT::renderDataTable({   # full results table where genes under the cut off are colored in red
     data <- var$norData
-    gene_id <- row.names(data)
-    data <- cbind(data, gene_id = gene_id)
-    
+
     if(input$DEAmethod =="tcc"){
+      gene_id <- row.names(data)
+      data <- cbind(data, gene_id = gene_id)
     resultTable <- merge(var$result_m, data, by = "gene_id")
     }
     if(input$DEAmethod == "edgeR"){
+      data <- as.data.frame(data)
+      data['gene_id'] <- row.names(data)
       resultTable <- merge(var$result, data, by = "gene_id")
     }
     if(input$DEAmethod == "DESeq2"){

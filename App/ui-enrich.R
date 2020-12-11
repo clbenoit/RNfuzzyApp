@@ -15,6 +15,14 @@ fluidPage(fluidRow(column(
         rows = 5,
         placeholder = "Input ids, one gene per line."
       ),
+      sliderInput(
+        "topres_enrich",
+        "Top results to show",
+        min = 1,
+        max = 50,
+        value = 10,
+        step = 1
+      ),
       selectInput(
         "inputorg",
         "Choose your Organism",
@@ -101,6 +109,13 @@ fluidPage(fluidRow(column(
                  solidHeader = TRUE,
                  status = "primary",
                  uiOutput('EnrichResults')
+               ),
+               tabPanel(  # bar chart panel 
+                 title = tagList(icon("braille"), "Enrichment Distribution"),
+                 width = NULL,
+                 solidHeader = TRUE,
+                 status = "primary",
+                 uiOutput('EnrichDist',height = 1000)%>% withSpinner()
                ),
                tabPanel(  # bar chart panel 
                  title = tagList(icon("braille"), "Bar Chart"),

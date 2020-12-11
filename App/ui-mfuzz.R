@@ -70,7 +70,7 @@ navbarPage("Mfuzz clustering",
                                     </div>')),
                         sliderInput(
                           "maxclass",
-                          "Max classes to show ",
+                          "Max clusters to show ",
                           min = 2,
                           max = 40,
                           value = 20,
@@ -116,9 +116,15 @@ navbarPage("Mfuzz clustering",
                       uiOutput("overlap")))
            )),
            tabPanel(
-             title = tagList(icon("dice-four"), "  Mfuzz Plots"),
+             title = tagList(icon("dice-three"), "  Mfuzz Plots"),
              fluidPage(
                fluidRow(column(12,
                                uiOutput("mfuzz")
-           )))))
+           )))),
+              tabPanel(
+                title = tagList(icon("dice-four"), "Cluster Enrichment"),
+                fluidPage(
+                  fluidRow(column(12, 
+                                  uiOutput("mfenrichement")))
+                )))
                               

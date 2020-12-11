@@ -1,5 +1,6 @@
 #server-mfuzz.R
 
+MFEnrichRun <- reactiveValues(MFEnrichRunValue = FALSE) # to precise the run button has not been clicked
 
 observeEvent(input$mfuzzCountData, {   # when a table is being uploaded 
   tryCatch({
@@ -120,7 +121,6 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
     Ptmp
   })
   
-
   
 
   output$mfuzz_plots <- renderPlot({
@@ -132,15 +132,161 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
     }
     fuzz <- mfuzz.plot(mfdata.s,cl=N_cl,mfrow = mfrow, time.labels = var$timepoints,new.window = F)
     fuzz
+
+  })
+  
+  output$mfuzzbutton <- renderUI({
+    actionButton(
+      "dlmfuzz",
+      "Download clusters lists"
+    )
+  })
+  
+  observeEvent(input$dlmfuzz,{
     clusters_list<- acore(mfdata.s,N_cl, min.acore = 0)
     save(list = "clusters_list", file = "~/Desktop/clusters_list.rda")
+    
   })
   
   
+  output$clus_enrich <- renderUI({
+                      box(
+                        title = tagList(icon("cogs"),"Parameters"),
+                        solidHeader = T,
+                        status = "primary",
+                        width = NULL,
+                        sliderInput(
+                          "whichclust",
+                          "Cluster to enrich",
+                          min = 1,
+                          max = as.numeric(input$inertiaclass),
+                          value = 1,
+                          step = 1
+                      ),
+                      sliderInput(
+                        "topres",
+                        "Top results to show",
+                        min = 1,
+                        max = 50,
+                        value = 10,
+                        step = 1
+                      ),
+                      selectInput(
+                        "mforg",
+                        "Choose your Organism",
+                        c("Drosophila melanogaster" = "dmelanogaster",
+                          "Mus musculus" = "mmusculus",
+                          "Homo sapiens" = "hsapiens", 
+                          "Caenorhabditis elegans" = "celegans",
+                          "Zebrafish" = "drerio",
+                          "Aspergillus fumigatus Af293" = "afumigatus",
+                          "Bonobo" = "ppaniscus",
+                          "Cat" = "fcatus",
+                          "Chicken" = "ggallus",
+                          "Chimpanzee" = "ptroglodytes",
+                          "Common Carp" = "ccarpio",
+                          "Cow" = "btaurus",
+                          "Dog" = "clfamiliaris",
+                          "Dolphin" = "ttruncatus",
+                          "Goat" = "chircus",
+                          "Gorilla" = "ggorilla",
+                          "Guppy" = "preticulata",
+                          "Horse" = "ecaballus",
+                          "Pig" = "sscrofa",
+                          "Platypus" = "oanatinus",
+                          "Rabbit" = "ocuniculus")
+                      ),
+                      checkboxGroupInput(
+                        "mfEnrich",
+                        "Choose your enrichment",
+                        c("GO : Biological Processes" = "GO:BP",
+                          "GO : Molecular Functions" = "GO:MF",
+                          "GO : Cellular Components" = "GO:CC",
+                          "KEGG Pathways" = "KEGG",
+                          "Reactome" = "REAC",
+                          "WikiPathways" = "WP"),
+                        selected = c("GO:BP", "GO:MF", "GO:CC", "KEGG", "REAC","WP")
+                      ),
+                      do.call(actionBttn, c(          # run button 
+                        list(
+                          inputId = "mfenrichmentgo",
+                          label = "Enrich",
+                          icon = icon("play")
+                        )))
+                      )
   })
+  
 
+  
+  
+  observeEvent(input$mfenrichmentgo,{
+      clusters_list<- acore(mfdata.s,N_cl, min.acore = 0)
+      geneset <-as.character(sapply(clusters_list[as.numeric(input$whichclust)],"[[", 1 )) # takes the gene set of the chosen cluster
+      enrichement <- unlist(strsplit(input$mfEnrich, split = '\n'))
+      res <- gost(geneset, 
+                  organism = input$mforg,
+                  ordered_query = T,
+                  user_threshold = 0.05,
+                  correction_method = "g_SCS",
+                  domain_scope = "annotated", 
+                  sources = enrichement,
+                  numeric_ns = "ENTREZGENE",
+                  significant = F)
+      res_mf_enrich <- as.data.frame(res$result)# result as data frame
+      res_mf_enrich <- res_mf_enrich[,-1]
+      res_mf_enrich <- res_mf_enrich[1:as.numeric(input$topres),]
+      
+      MFEnrichRun$MFEnrichRunValue <- input$mfenrichmentgo   # precise the run button has been clicked
+      
+      output$mf_enrichdt <-  DT::renderDataTable({   # result table
+        DT::datatable(
+          res_mf_enrich,        
+          extensions = 'Buttons',    # download button 
+          option = list(
+            paging = TRUE,
+            searching = TRUE,
+            fixedColumns = TRUE,
+            autoWidth = TRUE,
+            ordering = TRUE,
+            dom = 'Bfrtip',
+            buttons = list(list(
+              extend = 'collection',
+              buttons = list(extend='csv',
+                             filename = "cluster_enrichment"),
+              text = 'Download')),
+            scrollX = TRUE,
+            pageLength = 10,
+            searchHighlight = TRUE,     # search bar 
+            orderClasses = TRUE
+            
+          ),
+          
+          class = "display")
+      }, server = FALSE)
+      
+      
+      output$mf_barplot <- renderPlotly({
+        data <- res_mf_enrich
+        fig <- plot_ly(
+          data,
+          x = ~p_value,
+          y = ~term_name,
+          type = "bar",
+          color = ~factor(source)
+          
+        )
+        fig
+      })
+      
+  } 
+               )
+  
+  
+  
+  
 
-
+  
+  })
 
 })
 
@@ -167,11 +313,45 @@ output$overlap <- renderUI({
       }
 })
 
+
+
+
 output$mfuzz <- renderUI({
   if (nrow(var$mfuzzTable) != 0){    
     tagList(
-      fluidRow(column(12, plotOutput('mfuzz_plots',height = 700) %>% withSpinner()
+      fluidRow(column(12, uiOutput("mfuzzbutton"),
+                      plotOutput('mfuzz_plots',height = 700) %>% withSpinner()
       )))} else {                      
         helpText("input a count matrix first.")
       }
+})
+
+output$mf_enrich <- renderUI({
+  if(MFEnrichRun$MFEnrichRunValue){
+    tagList(
+      fluidRow(
+        column(12, dataTableOutput("mf_enrichdt") %>% withSpinner())
+      )
+    )} else {                      
+      helpText("Compute Mfuzz plots before, adn select your parameters")
+    }
+})
+
+output$mfenrichement <- renderUI({
+  navbarPage("Cluster Enrichment", 
+             tabPanel(
+               title = tagList(icon("dice-one"), "Enrichment"),
+               width = NULL,
+               solidHeader = T,
+               status = "primary",
+               tagList(
+                  fluidRow(
+                    column(3, uiOutput("clus_enrich")),
+                    column(9,uiOutput("mf_enrich") %>% withSpinner())
+))),
+tabPanel(title = tagList(icon("dice-two"), "Bar Plot"),
+         width = NULL,
+         solidHeader = T,
+         status = "primary",
+         plotlyOutput("mf_barplot")))
 })

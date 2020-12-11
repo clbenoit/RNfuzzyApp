@@ -45,6 +45,7 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
   
   res_enrich <- as.data.frame(res$result)# result as data frame
   res_enrich <- res_enrich[,-1]
+  res_enrich <- res_enrich[1:as.numeric(input$topres_enrich),]
   
   
   output$EnrichResultTable <-  DT::renderDataTable({   # result table
@@ -84,13 +85,25 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
   
   ##########
   
-  output$barenrich <- renderPlotly({     # bar chart of results using plotly  : term with respect of -log(p-value)
+  output$distribenrich <- renderPlotly({     # bar chart of results using plotly  : term with respect of -log(p-value)
     p <- gostplot(res, capped = FALSE, interactive = TRUE
                   )
     
     p
   })
   
+  
+  output$EnrichBarPlot <- renderPlotly({
+    fig <- plot_ly(
+      res_enrich,
+      x = ~p_value,
+      y = ~term_name,
+      type = "bar",
+      color = ~factor(source)
+      
+    )
+    fig
+  })
   
 })
 
@@ -107,11 +120,11 @@ output$EnrichResults <- renderUI({
       }
 })
 
-output$EnrichBar <- renderUI({
+output$EnrichDist <- renderUI({
   if(EnrichRun$EnrichRunValue){
     tagList(
       fluidRow(
-        column(12, plotlyOutput("barenrich") %>% withSpinner())
+        column(12, plotlyOutput("distribenrich") %>% withSpinner())
       )
     )
   }else{
@@ -119,6 +132,17 @@ output$EnrichBar <- renderUI({
   }
 })
 
+output$EnrichBar <- renderUI({
+  if(EnrichRun$EnrichRunValue){
+    tagList(
+      fluidRow(
+        column(12, plotlyOutput("EnrichBarPlot") %>% withSpinner())
+      )
+    )
+  }else{
+    helpText(("Run Enrichment to obtain the Result Table."))
+  }
+})
 
 
 

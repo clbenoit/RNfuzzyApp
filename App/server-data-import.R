@@ -340,7 +340,7 @@ output$CountDistrib <- renderUI({
       ),
       column(
         9,
-        plotlyOutput("CountDistribBox") %>% withSpinner()  # render 
+        plotlyOutput("CountDistribBox", height = 800) %>% withSpinner()  # render 
       )
     ))
   } else {   # if no data then message 

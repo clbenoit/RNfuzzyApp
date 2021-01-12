@@ -83,7 +83,11 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
     mfdata.s <- standardise(mfdata)
     m1 <- mestimate(mfdata.s)
     cent <- input$inertiaclass
-    N_cl<- mfuzz(mfdata.s, centers=cent, m = m1)
+    i=0
+    for (i in 0:9){
+      N_cl<- mfuzz(mfdata.s, centers=cent, m = m1)
+      i = i + 1
+    }
     ov <- overlap(N_cl)
     
   }

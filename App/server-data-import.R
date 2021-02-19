@@ -302,7 +302,7 @@ output$CountDistribBox <- renderPlotly({
     ) %>% layout(
       title = input$CountDistribTitle,
       xaxis = list(title = input$CountDistribXlab, categoryarray = "array", categoryarray = ~col),
-      yaxis = list(title = input$CountDistribYlab)
+      yaxis = list(title = "log<sub>2</sub>(Count + 1)")
     )
     p
   } else {
@@ -330,12 +330,6 @@ output$CountDistrib <- renderUI({
           label = "X label",
           value = "Sample",
           placeholder = "Sample"
-        ),
-        textInput(
-          inputId = "CountDistribYlab",
-          label = "Y label",
-          value = "log<sub>2</sub>(Count + 1)",
-          placeholder = "log<sub>2</sub>(Count + 1)"
         )
       ),
       column(

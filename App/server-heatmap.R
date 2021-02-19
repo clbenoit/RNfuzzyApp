@@ -60,6 +60,26 @@ output$HeatParams <- renderUI({               # set of parameters
       max = 100,
       step = 1
     ),
+    textInput(
+      inputId = "heatX",
+      label = "X label",
+      value = "Genes",
+      placeholder = "Genes"
+    ),
+    textInput(
+      inputId = "heatY",
+      label = "Y label",
+      value = "Conditions",
+      placeholder = "Conditions"
+    ),
+    sliderInput(
+      inputId = "heatheight",
+      label = "Plot Height",
+      value = 800,
+      min = 400,
+      max = 1600, 
+      step = 50
+    ),
     tagList(
       selectInput(
         "heatmapColor",
@@ -96,14 +116,21 @@ output$HeatParams <- renderUI({               # set of parameters
 output$heatmapSelectGene <- renderUI({
   switch(
     input$heatmapGeneSelectType,
-    "By list" = textAreaInput(
+    "By list" = tagList(
+      textAreaInput(
       "heatmapTextList",
       "Paste Gene List",
       rows = 5,
       placeholder = "Input gene's name (first column in the dataset), one gene per line."
     ),
+    textInput(
+      inputId = "heattitle",
+      label = "Plot Title",
+      value = "Title",
+      placeholder = "Heatmap title"
+    )
+    ),
     "By FDR" =
-      tagList(
         numericInput(
           inputId = "heatmapFDR",
           label = "FDR Cut-off",
@@ -111,9 +138,8 @@ output$heatmapSelectGene <- renderUI({
           value = 0.001,
           max = 0.01,
           step = 0.0001
-        ),
+        )
       )
-  )
 })
 
 
@@ -168,7 +194,7 @@ observeEvent(input$heatmapRun, {
   if (input$heatmapGeneSelectType == "By list") {  # if gene selection is by list, find these genes in the global list of gene from the input table
     selectedListForHeatmap <-
       row.names(data) %in% unlist(strsplit(x = input$heatmapTextList, split = '[\r\n]'))
-    heatmapTitle <- "Heatmap of specific genes"
+    heatmapTitle <- input$heattitle
   }
   
   if (input$heatmapGeneSelectType == "By FDR") { # if gene selection is by fdr cut off 
@@ -176,11 +202,13 @@ observeEvent(input$heatmapRun, {
     selectedListForHeatmap <-     # it justs select the genes respecting the cut off
       row.names(data) %in% resultTable()[resultTable()$q.value <= input$heatmapFDR,]$gene_id
     heatmapTitle <-
-      paste0("Heatmap of gene expression (q.value < ",  # title of the heatmap accoring to the fdr cut off
+      paste0("Heatmap of gene expression : q.value < ",  # title of the heatmap accoring to the fdr cut off
              input$heatmapFDR,
              ", ",
              sum(selectedListForHeatmap),
-             "DEGs)")
+             "DEGs (",
+             input$heatmapDist, " and ", input$heatmapCluster, ")"
+             )
   }
   
   data <- data[selectedListForHeatmap, ]  # updating selected data
@@ -208,8 +236,6 @@ observeEvent(input$heatmapRun, {
   cute$gene_id <- rownames(cute)
   colnames(cute) <- c("cluster","gene_id")
   rownames(cute) <- NULL
-  runHeatmap$height <- 600  # size of the heatmap
-  
   output$heatmap <- renderPlotly({    # heatmap
     
     p <- heatmaply(
@@ -218,8 +244,8 @@ observeEvent(input$heatmapRun, {
       k_col = input$clusterswanted,# clusters wanted
       dist_method = input$heatmapDist, # distance method
       hclust_method = input$heatmapCluster, # agglomeration method
-      xlab = "Gene",
-      ylab = "Sample",
+      xlab = input$heatX,
+      ylab = input$heatY,
       main = heatmapTitle,    # title
       margins = c(150, 100, 40, 20),
       dendrogram = "column",   # add a dendrogram on the columns (genes)
@@ -285,7 +311,7 @@ observeEvent(input$heatmapRun, {
 
 output$heatmapPlot <- renderUI({
   if (runHeatmap$runHeatmapValue) {   # if the run button  has been clicked, then it shows the heatmap
-    plotlyOutput("heatmap", height = runHeatmap$height) %>% withSpinner()
+    plotlyOutput("heatmap", height = input$heatheight) %>% withSpinner()
   }
   else{                               # if not, message to do it
     helpText("Enter parameters to plot the heatmap first.")

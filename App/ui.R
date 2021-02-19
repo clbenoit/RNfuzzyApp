@@ -14,10 +14,6 @@ tagList(dashboardPage(                  #the global app
         tabName = "dataImport",
         icon = icon("eye")),
       menuItem(
-        "Time Series clustering",
-        tabName = "mfuzzTab",
-        icon = icon("line-chart")),
-      menuItem(
         "DE Analysis",
         icon = icon("flask"),
         menuSubItem(
@@ -41,6 +37,10 @@ tagList(dashboardPage(                  #the global app
           "PCA",
           tabName = "pcaTab",
           icon = icon("bar-chart"))),
+      menuItem(
+        "Time Series clustering",
+        tabName = "mfuzzTab",
+        icon = icon("line-chart")),
       menuItem(
         "Enrichment",
         tabName = "enrichTab",

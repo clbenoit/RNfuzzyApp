@@ -1,12 +1,10 @@
 # Define server of the app
+options(shiny.maxRequestSize = 10*1024^2)
 
 shinyServer(function(input, output, session) { #all server files 
   
   source(file = "server-data-import.R",
          local = TRUE,
-         encoding = "UTF-8")
-  source(file = "server-mfuzz.R",
-         local = TRUE, 
          encoding = "UTF-8")
   source(file = "server-deanalysis.R",
          local = TRUE,
@@ -22,6 +20,9 @@ shinyServer(function(input, output, session) { #all server files
          encoding = "UTF-8")
   source(file = "server-pca.R",
          local = TRUE,
+         encoding = "UTF-8")
+  source(file = "server-mfuzz.R",
+         local = TRUE, 
          encoding = "UTF-8")
   source(file = "server-enrich.R",
          local = TRUE,

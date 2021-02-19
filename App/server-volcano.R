@@ -45,6 +45,14 @@ output$volcanoParams <- renderUI({   # parameters
       max = 0.01,
       step = 0.0001
     ),
+    numericInput(
+      inputId = "volcheight",
+      label = "Plot Height",
+      value = 800,
+      min = 400,
+      max = 1600, 
+      step = 50
+    ),
     spectrumInput(
       inputId = "downColor",
       label = tagList("Down-regulated in G2" ,htmlOutput("downPreview")),
@@ -504,8 +512,8 @@ output$volcanoUI <- renderUI({
     if(runVolcano$runVolcanoValue){ # if run button clicked, then shows plots 
       tagList(
         fluidRow(
-          column(8, plotlyOutput("volcanoPloty") %>% withSpinner()),
-          column(4, plotlyOutput("VolcanoBarPlot") %>% withSpinner())
+          column(8, plotlyOutput("volcanoPloty", height = input$volcheight) %>% withSpinner()),
+          column(4, plotlyOutput("VolcanoBarPlot", height = input$volcheight) %>% withSpinner())
         )
       )
     } else {

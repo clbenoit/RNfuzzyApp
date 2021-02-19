@@ -28,6 +28,7 @@ observeEvent(input$mfuzzCountData, {   # when a table is being uploaded
   })
   
   var$mfuzzTable <- var$mfuzzTable[rowSums(var$mfuzzTable >= 1) > 0 , ]
+  print(var$mfuzzTable)
   var$timepoints <- as.vector(colnames(var$mfuzzTable))
   
   output$inertia_plot <-renderPlotly({
@@ -75,7 +76,7 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
     
     #save it to a temp file so ti doesn't clutter up the blog directory
     tmp <- tempfile()
-    write.table(test_data,file=tmp, sep='\t', quote = F, col.names=NA)
+    write.table(test_data,file=tmp, sep='\t', col.names=NA)
     #read it back in as an expression set
     
     mfdata <- table2eset(file=tmp)
@@ -129,9 +130,11 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
   output$mfuzz_plots <- renderPlot({
     
     if(input$inertiaclass < 10){
-      mfrow <- c(3,4)
+      mfrow <- c(4,3)
+      var$heightplot <- 1200
     }else{
-      mfrow <- c(5,4)
+      mfrow <- c(10,3)
+      var$heightplot <- 3600
     }
     fuzz <- mfuzz.plot(mfdata.s,cl=N_cl,mfrow = mfrow, time.labels = var$timepoints,new.window = F)
     fuzz
@@ -152,6 +155,7 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
   })
   
   
+
   output$clus_enrich <- renderUI({
                       box(
                         title = tagList(icon("cogs"),"Parameters"),
@@ -323,7 +327,7 @@ output$mfuzz <- renderUI({
   if (nrow(var$mfuzzTable) != 0){    
     tagList(
       fluidRow(column(12, uiOutput("mfuzzbutton"),
-                      plotOutput('mfuzz_plots',height = 700) %>% withSpinner()
+                      plotOutput('mfuzz_plots',height = var$heightplot) %>% withSpinner()
       )))} else {                      
         helpText("input a count matrix first.")
       }

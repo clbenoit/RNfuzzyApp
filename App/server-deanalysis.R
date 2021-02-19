@@ -210,11 +210,10 @@ observeEvent(input$DEA, {           # when the run button is clicked
     names(var$result)[1] <- "gene_id"
     var$result <- var$result[,-4] # supp lfcSE column
     var$result <- var$result[,-4] # supp stat column
-    names(var$result)[5] <- 'q.value'
     names(var$result)[2] <- 'a.value'
     names(var$result)[3] <- 'm.value'
     names(var$result)[4] <- 'p.value'
-
+    names(var$result)[5] <- 'q.value'
 
     
     if (length(var$groupList) != 2){
@@ -222,14 +221,15 @@ observeEvent(input$DEA, {           # when the run button is clicked
       var$result <- var$result[,-2] # supp log2fc
     }
     DESeq2DEGs <- var$result[which(var$result$q.value <= as.numeric(input$deseq2cutoff)),] 
-    
     var$result["estimatedDEG"] = "0"
+    var$result <- var$result[complete.cases(var$result), ]
+    
     for (row in 1:nrow(var$result)){
       if(var$result[row,'q.value'] <= as.numeric(input$deseq2cutoff)){
         var$result[row, 'estimatedDEG'] = "1"
       }else{ 
         var$result[row,'estimatedDEG'] = "0"
-        }
+      }
     }
     var$DEAMETHOD <- 'deseq2'
     }

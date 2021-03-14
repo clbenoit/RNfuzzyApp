@@ -28,7 +28,6 @@ observeEvent(input$mfuzzCountData, {   # when a table is being uploaded
   })
   
   var$mfuzzTable <- var$mfuzzTable[rowSums(var$mfuzzTable >= 1) > 0 , ]
-  print(var$mfuzzTable)
   var$timepoints <- as.vector(colnames(var$mfuzzTable))
   
   output$inertia_plot <-renderPlotly({
@@ -232,7 +231,6 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
       enrichement <- unlist(strsplit(input$mfEnrich, split = '\n'))
       res <- gost(geneset, 
                   organism = input$mforg,
-                  ordered_query = T,
                   user_threshold = 0.05,
                   correction_method = "g_SCS",
                   domain_scope = "annotated", 
@@ -241,13 +239,25 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
                   significant = F)
       res_mf_enrich <- as.data.frame(res$result)# result as data frame
       res_mf_enrich <- res_mf_enrich[,-1]
+      res_mf_enrich <- res_mf_enrich[order(res_mf_enrich[,2]),]
       res_mf_enrich <- res_mf_enrich[1:as.numeric(input$topres),]
+      res_mf_enrich <- res_mf_enrich[,-1]
+      res_mf_enrich <- res_mf_enrich[,-2]
+      res_mf_enrich <- res_mf_enrich[,-2]
+      res_mf_enrich <- res_mf_enrich[,-2]
+      res_mf_enrich <- res_mf_enrich[,-2]
+      res_mf_enrich <- res_mf_enrich[,-2]
+      res_mf_enrich <- res_mf_enrich[,-5]
+      res_mf_enrich <- res_mf_enrich[,-5]
+
       
       MFEnrichRun$MFEnrichRunValue <- input$mfenrichmentgo   # precise the run button has been clicked
       
       output$mf_enrichdt <-  DT::renderDataTable({   # result table
+        data <- res_mf_enrich
+        colnames(data) <- c("P Value","Term_id", "Enrichment","Term_name", "Parents")
         DT::datatable(
-          res_mf_enrich,        
+          data,        
           extensions = 'Buttons',    # download button 
           option = list(
             paging = TRUE,
@@ -271,12 +281,21 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
           class = "display")
       }, server = FALSE)
       
+      output$mf_manhattan <- renderPlotly({
+        data <- res
+        fig <- gostplot(
+          data,
+          capped = T,
+          interactive = T
+        )
+        fig
+      })
       
       output$mf_barplot <- renderPlotly({
         data <- res_mf_enrich
         fig <- plot_ly(
           data,
-          x = ~p_value,
+          x = ~(-log10(p_value)),
           y = ~term_name,
           type = "bar",
           color = ~factor(source)
@@ -284,6 +303,9 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
         )
         fig
       })
+      
+      
+
       
   } 
                )
@@ -337,10 +359,12 @@ output$mf_enrich <- renderUI({
   if(MFEnrichRun$MFEnrichRunValue){
     tagList(
       fluidRow(
+        column(12, plotlyOutput("mf_manhattan") %>% withSpinner()),
         column(12, dataTableOutput("mf_enrichdt") %>% withSpinner())
+
       )
     )} else {                      
-      helpText("Compute Mfuzz plots before, adn select your parameters")
+      helpText("Compute Mfuzz plots before, and select your parameters")
     }
 })
 
@@ -360,5 +384,7 @@ tabPanel(title = tagList(icon("dice-two"), "Bar Plot"),
          width = NULL,
          solidHeader = T,
          status = "primary",
-         plotlyOutput("mf_barplot")))
+         plotlyOutput("mf_barplot"))
+
+)
 })

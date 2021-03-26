@@ -149,7 +149,10 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
   
   observeEvent(input$dlmfuzz,{
     clusters_list<- acore(mfdata.s,N_cl, min.acore = 0)
-    save(list = "clusters_list", file = "~/Desktop/clusters_list.rda")
+    for (i in 1:length(clusters_list)){
+      write.table(clusters_list[i],
+                  file = paste0("~/Desktop/", paste("cluster", i, "txt", sep = ".")), sep = "\t", row.names = F)
+    }
     
   })
   

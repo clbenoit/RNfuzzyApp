@@ -62,7 +62,8 @@ This can be checked in the overlap PCA. </br>
 
 ### <u> Mfuzz Plots </u> </br>
 
-The plots are showing automatically and a dowload button is available where a R environment "clusters_list.rda" is saved on your computer's desktop. </br>
-You can open the environment on R, and the list will be accessible by  "clusters_list". 
+The plots are showing automatically and a download button is available where files of clusters with membership values will be saved on your computer's desktop. </br>
+You will obtain as many file as the number of clusters you have. 
+We recommend to previously create a specific folder and modify line 154 of server-mfuzz.r file to include the folder.
 <br/>
 <br/>

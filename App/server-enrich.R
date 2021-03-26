@@ -45,12 +45,23 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
   
   res_enrich <- as.data.frame(res$result)# result as data frame
   res_enrich <- res_enrich[,-1]
+  res_enrich <- res_enrich[order(res_enrich[,2]),]
   res_enrich <- res_enrich[1:as.numeric(input$topres_enrich),]
+  res_enrich <- res_enrich[,-1]
+  res_enrich <- res_enrich[,-2]
+  res_enrich <- res_enrich[,-2]
+  res_enrich <- res_enrich[,-2]
+  res_enrich <- res_enrich[,-2]
+  res_enrich <- res_enrich[,-2]
+  res_enrich <- res_enrich[,-5]
+  res_enrich <- res_enrich[,-5]
   
   
   output$EnrichResultTable <-  DT::renderDataTable({   # result table
+    enrich_data <- res_enrich
+    colnames(enrich_data) <- c("P Value","Term_id", "Enrichment","Term_name", "Parents")
     DT::datatable(
-      res_enrich,        
+      enrich_data,
       extensions = 'Buttons',    # download button 
       option = list(
         paging = TRUE,
@@ -113,23 +124,12 @@ output$EnrichResults <- renderUI({
   if(EnrichRun$EnrichRunValue){   # if the run button has been clicked, then show the results
     tagList(
       fluidRow(
+        column(12, plotlyOutput("distribenrich") %>% withSpinner()),
         column(12, dataTableOutput('EnrichResultTable') %>% withSpinner())
       ))
     } else {                 # if not message to do it 
         helpText("Run Enrichment to obtain the Result Table.")
       }
-})
-
-output$EnrichDist <- renderUI({
-  if(EnrichRun$EnrichRunValue){
-    tagList(
-      fluidRow(
-        column(12, plotlyOutput("distribenrich") %>% withSpinner())
-      )
-    )
-  }else{
-    helpText(("Run Enrichment to obtain the Result Table."))
-  }
 })
 
 output$EnrichBar <- renderUI({

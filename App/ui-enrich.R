@@ -111,13 +111,6 @@ fluidPage(fluidRow(column(
                  uiOutput('EnrichResults')
                ),
                tabPanel(  # bar chart panel 
-                 title = tagList(icon("braille"), "Enrichment Distribution"),
-                 width = NULL,
-                 solidHeader = TRUE,
-                 status = "primary",
-                 uiOutput('EnrichDist',height = 1000)%>% withSpinner()
-               ),
-               tabPanel(  # bar chart panel 
                  title = tagList(icon("braille"), "Bar Chart"),
                  width = NULL,
                  solidHeader = TRUE,

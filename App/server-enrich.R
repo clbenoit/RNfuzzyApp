@@ -97,7 +97,9 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
   ##########
   
   output$distribenrich <- renderPlotly({     # bar chart of results using plotly  : term with respect of -log(p-value)
-    p <- gostplot(res, capped = FALSE, interactive = TRUE
+    p <- gostplot(res, 
+                  capped = T, 
+                  interactive = TRUE
                   )
     
     p

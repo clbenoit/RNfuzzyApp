@@ -481,8 +481,8 @@ output$pcaPlotObject3d <- renderPlotly({
 output$pcaUI <- renderUI({
   if (v$importActionValue) {
              tabsetPanel(  # render plots 
-               tabPanel(title = "2D Plot", plotlyOutput("pcaPlotObject2d", width = 800) %>% withSpinner()),
-               tabPanel(title = "3D Plot", plotlyOutput("pcaPlotObject3d", width = 800) %>% withSpinner())
+               tabPanel(title = "2D Plot", plotlyOutput("pcaPlotObject2d", width = 1200, height = 600) %>% withSpinner()),
+               tabPanel(title = "3D Plot", plotlyOutput("pcaPlotObject3d", width = 1200, height = 600) %>% withSpinner())
              )
   } else { # if no data, message
     helpText("No data for ploting.")

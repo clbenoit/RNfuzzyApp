@@ -146,6 +146,12 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
       "Download clusters lists"
     )
   })
+  output$mfuzzcorebutton <- renderUI({
+    actionButton(
+      "dlcoremfuzz",
+      "Download core clusters lists"
+    )
+  })
   
   observeEvent(input$dlmfuzz,{
     clusters_list<- acore(mfdata.s,N_cl, min.acore = 0)
@@ -156,6 +162,15 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
     
   })
   
+  observeEvent(input$dlcoremfuzz,{
+    core_clusters_list <- acore(mfdata.s, N_cl, min.acore = 0.7)
+    for (i in 1:length(core_clusters_list)){
+      write.table(core_clusters_list[i],
+                  file = paste0("~/Desktop/", paste("core_cluster", i, "txt", sep = ".")), sep = "\t", row.names = F)
+    }
+    
+  })
+
   
 
   output$clus_enrich <- renderUI({
@@ -352,6 +367,7 @@ output$mfuzz <- renderUI({
   if (nrow(var$mfuzzTable) != 0){    
     tagList(
       fluidRow(column(12, uiOutput("mfuzzbutton"),
+                      uiOutput("mfuzzcorebutton"),
                       plotOutput('mfuzz_plots',height = var$heightplot) %>% withSpinner()
       )))} else {                      
         helpText("input a count matrix first.")

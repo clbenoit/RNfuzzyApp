@@ -228,8 +228,12 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
                           "GO : Cellular Components" = "GO:CC",
                           "KEGG Pathways" = "KEGG",
                           "Reactome" = "REAC",
-                          "WikiPathways" = "WP"),
-                        selected = c("GO:BP", "GO:MF", "GO:CC", "KEGG", "REAC","WP")
+                          "WikiPathways" = "WP",
+                          "TRANSFAC" = "TF",
+                          "MirTarBase" = "MIRNA",
+                          "Human Phenotype Ontology" = "HP",
+                          "Human Protein Atlas" = "HPA",
+                          "CORUM" = "CORUM")
                       ),
                       do.call(actionBttn, c(          # run button 
                         list(

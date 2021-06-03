@@ -109,21 +109,93 @@ output$D3pca <- renderPlotly({       # same in 3D
 })
 
 
+output$normheatmap <- renderPlotly({
+  data <- var$norData
+  if (length(data) > 0) {
+    data <- data.frame(1 - cor(data, method = input$correlation)) # with the chosen method of correlation 
+    heatmaply( #heatmap
+      data,
+      hclust_method = "complete",
+      labRow = rownames(data),
+      labCol = colnames(data),
+      colors = rev(RdYlGn(500))
+    )
+    
+  }else {
+    return()
+  }
+})
+
 # Render 2D Plot UI 
 output$D2PlotUI <- renderUI({
   if (runPCA$runPCAValue) {                    # if the pca run button has been clicked 
-    plotlyOutput("D2pca") %>% withSpinner()    # it shows the 2D pca
+    plotlyOutput("D2pca", width = 1200, height = 600) %>% withSpinner()    # it shows the 2D pca
   } else {                                     # if not, it just precise to run it 
-    helpText("Click [Run PCA] to compute first.")
+    helpText("Click [Run PCA] first.")
   }
 })
 
 # Render 3D Plot UI 
 output$D3PlotUI <- renderUI({
   if (runPCA$runPCAValue) {
-    plotlyOutput("D3pca") %>% withSpinner()
+    plotlyOutput("D3pca", width = 1200, height = 600) %>% withSpinner()
   } else {
-    helpText("Click [Run PCA] to compute first.")
+    helpText("Click [Run PCA] first.")
+  }
+})
+
+output$normclust <- renderUI({
+  if(AnalysisRun$AnalysisRunValue) { # if data and no errors then run parameters and plot
+    tagList(fluidRow(
+      column( #parameter
+        3,
+        selectInput(
+          inputId = "correlation",
+          label = "Distance Measure",
+          choices = c("Spearman" = "spearman",
+                      "Pearson" = "pearson")
+        ),
+        tags$div(  # instruction
+          HTML('<div class="panel panel-primary">
+                    <div class="panel-heading"> <span style="padding-left:10px"><b> Distance measures </b> </span></div>
+                  <div class="panel-body">
+                  <style type="text/css">
+                  .tg {
+                  border-collapse: collapse;
+                  border-spacing: 0;
+                  border: none;
+                  }
+                  .tg td {
+                  font-family: Arial, sans-serif;
+                  font-size: 14px;
+                  padding: 10px 5px;
+                  border-style: solid;
+                  border-width: 0px;
+                  overflow: hidden;
+                  word-break: normal;
+                  }
+                  .tg .tg-s6z2 {
+                  text-align: center
+                  }
+                  </style>
+                  <table class="tg">
+                  <tr>
+                  <th class="tg-031e"> <span class="label label-primary"> Spearman </span></th>
+                  <th class="tg-031e"> Spearman distance is a square of Euclidean distance between two rank vectors.
+                  </tr>
+                  <tr>
+                  <th class="tg-031e"> <span class="label label-primary"> Pearson</span></th>
+                  <th class="tg-031e"> Pearson correlation measures the degree of a linear relationship between two profiles.
+                  </tr>
+                  </table>
+                  </div>
+                  </div>'))
+      ),
+      column(9, plotlyOutput("normheatmap",height = 600, width = 800) %>% withSpinner() # render heatmap
+      )
+    ))
+  } else { # if no data, then message 
+    helpText("Run normalization and DEA before.")
   }
 })
 

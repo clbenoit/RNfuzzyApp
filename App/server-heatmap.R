@@ -264,6 +264,9 @@ observeEvent(input$heatmapRun, {
   heatdata <- heatdata[,-5]     #
   resultTable <- merge(cute, heatdata, by = "gene_id")
   resultTable <- merge(resultTable, data, by = "gene_id")
+  resultTable <- resultTable[order(resultTable[,2]),]
+  rownames(resultTable) <- resultTable[,1]
+  resultTable <- resultTable[,-1]
   
   
   #result table 

@@ -20,7 +20,11 @@ column(
              tabPanel(       # 3D pca panel
                tagList(icon("cube"), "PCA Plot (3D)"),
                       uiOutput("D3PlotUI")
-               )
+               ),
+             tabPanel(        # norm sample heatmap
+               tagList(icon("sitemap"), 'Normalized Samples Heatmap'),
+               uiOutput("normclust")
+             )
              
   )
 ))

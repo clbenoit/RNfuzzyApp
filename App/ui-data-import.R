@@ -5,7 +5,7 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization", # theme for navba
            tabPanel(
              title = tagList(icon("table"), "Data"),
              fluidPage(
-               fluidRow(column(3,
+               fluidRow(column(4,
                                box(        # uplaod data box
                                  title = tagList(icon("cloud-upload"), "Upload"),
                                  solidHeader = T,
@@ -63,7 +63,7 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization", # theme for navba
                   </div>'))
                                )),
                         
-                        column(3,
+                        column(4,
                                box(     # filtering box
                                  title = tagList(icon("filter"), "Filter Low Count Genes"),
                                  solidHeader = TRUE, 
@@ -106,7 +106,7 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization", # theme for navba
                                    icon = icon("play"))
                                )
                                )),
-                        column(3,
+                        column(4,
                                box(            # info about group assignement box
                                  title = tagList(icon("question"), "About Groups"),
                                  solidHeader = TRUE,

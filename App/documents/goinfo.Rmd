@@ -40,7 +40,7 @@ g-table-intro h4 {
 ---
 The enrichment part is based on gProfileR. 
 
-To obtain your associated GO terms and/or KEGG/ Wiki Pathways with description in a nice table and graph, just paste a ids list.
+To obtain your associated GO terms and/or KEGG/Wiki Pathways/Reactome/TRANSFAC/Human Atlas/CORUM/MirTarBase enrichment  with description in a nice table and graph, just paste a ids list.
 
 
 

@@ -2,10 +2,11 @@
 
 ---
 
-RNApp is an application to analyse aligned RNA-seq data.</br>
+RNFuzzApp is an application to analyse aligned RNA-seq data and do fuzzy clustering.</br>
 </br>
 - First proceed to a quality control, an alignment and a count (FeatureCounts for example).</br>
 - Upload a count csv or tsv table where the first column is composed of genes' names.
+- Mfuzz soft clustering asks for a mean table if you have replicates.
 
 
 
@@ -51,7 +52,15 @@ For each result, downloading png images and results is available.</br>
 - Heatmap and clustering </br>
 - PCA ( 2D and 3D plots)</br>
 
-<b> PART III : Enrichment & Conversion </b>
+<b> PART III : Mfuzz soft clustering </b>
+---
+
+Given a csv table of mean counts per timepoints, Mfuzz generates fuzzy clustering regarding the chosen number of clusters. 
+Methods are present to help the user choose the numer of clusters, and the time series plots will be generated. 
+Also available : enrichment for a chosen cluster.
+
+
+<b> PART IV : Enrichment & Conversion </b>
 ---
 
 <b> - Enrichment : </b></br>

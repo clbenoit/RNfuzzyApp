@@ -4,7 +4,7 @@
 
 tagList(dashboardPage(                  #the global app
   dashboardHeader(                      #header of the app
-    title = span(tagList(icon("react"),"RNApp : a RNA-seq Analysis App")),
+    title = span(tagList(icon("react"),"RNFuzzyApp : a RNA-seq Analysis App")),
     titleWidth = 500),
   dashboardSidebar(                     #side menu and its items
     sidebarMenu(

@@ -258,7 +258,7 @@ observeEvent(input$inertiaclass,{   # when a filter of low count genes is set
                   domain_scope = "annotated", 
                   sources = enrichement,
                   numeric_ns = "ENTREZGENE",
-                  significant = F)
+                  significant = T)
       res_mf_enrich <- as.data.frame(res$result)# result as data frame
       res_mf_enrich <- res_mf_enrich[,-1]
       res_mf_enrich <- res_mf_enrich[order(res_mf_enrich[,2]),]

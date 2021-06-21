@@ -31,7 +31,7 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
               correction_method = input$correction,
               domain_scope = input$chosenscope, 
               sources = enrichement,
-              significant = F)
+              significant = T)
   
   
   

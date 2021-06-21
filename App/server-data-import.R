@@ -422,8 +422,9 @@ output$clustUI <- renderUI({
 output$pcaPlotObject2d <- renderPlotly({
   if (length(var$matrixcount) > 0) {
     data <- log1p(var$matrixcount) # data selection 
-    data <- t(data[apply(data, 1, var) != 0, ]) # selection over counts 
-    data.pca.all <- prcomp(data,center = T,scale. = T) #pca 
+    data <- data[apply(data, 1, var) != 0, ] # selection over counts 
+    data <- t(data[order(apply(data, 1, var), decreasing = TRUE)[1:100], ])
+    data.pca.all <- prcomp(data,center = T, scale. = T) #pca 
     data <- data.frame(data.pca.all$x)
     data$name <- rownames(data)
     group <- var$groupdf

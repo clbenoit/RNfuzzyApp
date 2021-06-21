@@ -45,7 +45,7 @@ observeEvent(input$pcRun, {              # when the run button is clicked
   runPCA$runPCAValue <- input$pcRun      # precise the button has been clicked
   data <- var$norData                    # use normalized data
   data <- data[var$result$q.value <= input$pcFDR,]  # selection of genes with respect of the selected fdr cut-off
-  data <- t(log1p(data))                 # transform data
+  data <- t(log1p(data))
   data.pca <- prcomp(data[, apply(data, 2, var) != 0], #pca
                      center = T,
                      scale. = T)
@@ -56,12 +56,11 @@ observeEvent(input$pcRun, {              # when the run button is clicked
 # 2D plotly object
 output$D2pca <- renderPlotly({          
   if (length(var$pcadata) > 0) {
-    tcc <- var$tccObject
     data.pca <- var$pcadata
-    data <- data.frame(data.pca$x)      # conversion to a data frame 
+    data <- data.frame(data.pca$x)
     data$name <- rownames(data)
-    group <- tcc$group
-    group$name <- rownames(group)
+    group <- var$groupdf
+    group$name <- rownames(var$groupdf)
     data <- left_join(x = data, y = group, by = "name") # to perform a pca over the groups 
     p <- plot_ly(
       data = data,
@@ -110,14 +109,13 @@ output$D3pca <- renderPlotly({       # same in 3D
 
 
 output$normheatmap <- renderPlotly({
-  data <- var$norData
-  if (length(data) > 0) {
-    data <- data.frame(1 - cor(data, method = input$correlation)) # with the chosen method of correlation 
+  if (length(var$norData) > 0) {
+    data_norm <- data.frame(1 - cor(var$norData, method = input$correlation)) # with the chosen method of correlation 
     heatmaply( #heatmap
-      data,
+      data_norm,
       hclust_method = "complete",
-      labRow = rownames(data),
-      labCol = colnames(data),
+      labRow = rownames(data_norm),
+      labCol = colnames(data_norm),
       colors = rev(RdYlGn(500))
     )
     

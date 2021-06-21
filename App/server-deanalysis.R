@@ -312,7 +312,7 @@ observeEvent(input$DEA, {           # when the run button is clicked
         buttons = list(list(
           extend = 'collection',
           buttons = list(extend='csv',
-                         filename = "results_conversion"),
+                         filename = "results_norm_data"),
           text = 'Download')),
         scrollX = TRUE,
         pageLength = 10,
@@ -403,7 +403,7 @@ observeEvent(input$DEA, {           # when the run button is clicked
         buttons = list(list(
           extend = 'collection',
           buttons = list(extend='csv',
-                         filename = "results_conversion"),
+                         filename = "results_DEGs"),
           text = 'Download')),
         scrollX = TRUE,
         pageLength = 10,

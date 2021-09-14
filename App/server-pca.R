@@ -21,6 +21,7 @@ output$CondPCAParams <- renderUI({              # if a DEA has not been performe
 
 output$PCAParams <- renderUI({                # set of paramters 
   tagList(
+    tipify(
     numericInput(
       inputId = "pcFDR",
       label = "FDR Cut-off",
@@ -29,7 +30,22 @@ output$PCAParams <- renderUI({                # set of paramters
       max = 0.01,
       step = 0.001
     ),
-    
+    title = "The fdr cut off can be lowered from the analysis in the pca",
+    placement = "bottom"
+  ),
+  
+  tipify(
+    numericInput(
+      inputId = "firstTopGenes",
+      label = "Top Genes Selection",
+      value = 100,
+      min = -1,
+      step = 1
+    ),
+    title = "Leave it empty to use all the genes in the table, or choose yourfirst top genes to plot the pca",
+    placement = "bottom"
+    ),
+  helpText(HTML(" To plot the PCA, data are tranformed to log and one can choose to represent all genes or just the chosen top genes")),
     do.call(actionBttn, c(                 # run button 
       list(
         inputId = "pcRun",
@@ -45,7 +61,13 @@ observeEvent(input$pcRun, {              # when the run button is clicked
   runPCA$runPCAValue <- input$pcRun      # precise the button has been clicked
   data <- var$norData                    # use normalized data
   data <- data[var$result$q.value <= input$pcFDR,]  # selection of genes with respect of the selected fdr cut-off
-  data <- t(log1p(data))
+  data <- log1p(data)
+  if (!is.na(input$firstTopGenes) & input$firstTopGenes < nrow(data)) {
+    data <- t(data[order(apply(data, 1, var), decreasing = TRUE)[1:input$firstTopGenes], ])
+  }
+  else {
+    data <- t(data)
+  }
   data.pca <- prcomp(data[, apply(data, 2, var) != 0], #pca
                      center = T,
                      scale. = T)

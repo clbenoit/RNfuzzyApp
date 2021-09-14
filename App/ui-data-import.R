@@ -112,8 +112,9 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization", # theme for navba
                                  solidHeader = TRUE,
                                  status = "primary",
                                  width = NULL,
-                                 helpText(HTML(' Enter only groups you want to study, 
-                                               not necessarily every groups of your data.')
+                                 helpText(HTML("Enter only groups you want to study, 
+                                               not necessarily every groups of your data.
+                                               Don't forget to declare your groups as named in your table. ")
                                           
                                  )
                                ),

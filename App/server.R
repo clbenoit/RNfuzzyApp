@@ -1,5 +1,5 @@
 # Define server of the app
-options(shiny.maxRequestSize = 10*1024^2)
+options(shiny.maxRequestSize = 30*1024^2) # maximum size up to 30MB
 
 shinyServer(function(input, output, session) { #all server files 
   

@@ -76,7 +76,7 @@ observeEvent(input$makeMAPlot, { # if run button has been clicked
     validate(need(resultTable()$a.value != "", "No MA values for ploting.")) # if basemean values allow it 
     
     isolate({
-      key <- resultTable()$gene_id  # crating a key to accord the ma plot and the bar plot when a point is hovered
+      key <- resultTable()$gene_id  # creating a key to accord the ma plot and the bar plot when a point is hovered
       DEGcut <- cut(resultTable()$q.value, breaks = c(0, input$maFDR, 1)) # coloration of the ma plot according to the cut off
       
       p <- plot_ly( # ma plot Log2FC with repect ot Basemean 

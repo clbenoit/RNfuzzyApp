@@ -45,6 +45,6 @@ To convert your ids, just : </br>
     - choose your output type </br>
     - paste your gene list </br>
   
-And boom here are your translation. 
+And boom here are your translations. 
 
 

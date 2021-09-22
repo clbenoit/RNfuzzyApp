@@ -2,27 +2,28 @@
 
 ---
 
-RNFuzzyApp is an application to analyse aligned RNA-seq data and do fuzzy clustering.</br>
+RNFuzzyApp is an application to analyse aligned RNA-seq data and do fuzzy clustering. It runs within the R environment and you will need R (version x.x or higher) for executing it. </br>
 </br>
 
 
-- First proceed to a quality control, an alignment and a count (FeatureCounts for example). Input table is geneIDS as rows and conditions/covariates as columns. </br>
+- As input, you need read counts, which you can get after performing quality control, mapping to genome and then performing read counting (e.g. using FeatureCounts). As input, please provide a table with geneIDs followed by the read counts of the conditions/covariates. </br>
 
 <b> Installation </b>
 --- 
 
-- Installation requiere running <b> runApp('path/rna-seq-analysis-app-master-App/App') </b> in R and all requiered packages will automatically install. </br>
+- open R
+- for installing, type the R command <b> runApp('path/rna-seq-analysis-app-master-App/App') </b> in R and all requiered packages will automatically install. </br>
 - Upload a count csv or tsv table where the first column is composed of genes' names (can be Symbols, EnsembleIds, FlybaseIDs, ...). </br> 
 - Example tables are available in test_data/.</br>
-- Mfuzz soft clustering asks for a  table of same above composition but mean only if you have replicates.
-
+- for soft clustering using , you will need the same type of table (gene IDs, but this time followed by the normalized read counts of the different time-points (or conditions)). Mfuzz does not accept replicates. We recommend to take the mean of the nromalized replicates as input. 
 
 
 <b>PART Ia : Upload data and visualization</b>
 ---
 
-- Upload your data as described above, assign your groups </br>
-- Visualize the data across :</br>
+- Upload your data as described above </br> 
+- Assign your groups </br>
+- Visualize raw data across :</br>
     - result table</br>
     - Count distribution (bar plot)</br>
     - Hierarchical clustering (heatmap)</br>

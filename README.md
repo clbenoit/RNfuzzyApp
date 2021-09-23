@@ -2,7 +2,7 @@
 
 ---
 
-RNFuzzyApp is an application to analyse aligned RNA-seq data and do fuzzy clustering. It runs within the R environment and you will need R (version x.x or higher) for executing it. </br>
+RNFuzzyApp is an application to analyse aligned RNA-seq data and do fuzzy clustering. It runs within the R environment and you will need R (version 4.0 or higher) for executing it. </br>
 </br>
 
 

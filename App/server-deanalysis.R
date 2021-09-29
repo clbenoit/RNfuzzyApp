@@ -120,12 +120,13 @@ observeEvent(input$DEA, {           # when the run button is clicked
     value = 0
   )
   
-
+  var$newData <- var$CountData
   
   if(input$DEAmethod == "tcc"){
+
   # Creation of a TCC Object 
   tcc <-                           
-    new("TCC", var$CountData, var$selectedgroups)
+    new("TCC", var$newData, var$selectedgroups)
   var$tccObject <- tcc             # save the object
 
   
@@ -158,7 +159,7 @@ observeEvent(input$DEA, {           # when the run button is clicked
   var$tccObject <- tcc         # save the updated object 
   var$result <- getResult(tcc, sort = FALSE) %>% mutate_if(is.factor, as.character) # get the result of the calculation
   
-  if (length(var$groupList) == 2){
+  if (length(var$groupList2) == 2){
     var$result_m <- var$result
     colnames(var$result_m) <- c("gene_id","BaseMean", "Log2FC","P-Value", "FDR", "Rank", "estimatedDEG")
     var$result_e <- var$result[which(var$result_m$estimatedDEG >0),] # selection of the DEGs
@@ -181,12 +182,11 @@ observeEvent(input$DEA, {           # when the run button is clicked
   
   
  if(input$DEAmethod == "DESeq2"){
-  
+
    tcc <-                           
-     new("TCC", var$CountData, var$selectedgroups)
+     new("TCC", var$newData, var$selectedgroups)
    var$tccObject <- tcc             # just to get the groups for pca 
-    
-   dds <- DESeqDataSetFromMatrix(countData=var$CountData, colData=var$groupdf, design=var$design)
+   dds <- DESeqDataSetFromMatrix(countData=var$newData, colData=var$select, design=var$design)
    
    updateProgressBar(               # updating progress bar
      session = session,
@@ -203,34 +203,33 @@ observeEvent(input$DEA, {           # when the run button is clicked
       title = "DE Analysis in progress...",
       value = 50
     )
-    var$result <- results(dds)
+    var$resultz <- results(dds)
     var$norData <- as.matrix(counts(dds, normalized = TRUE)) # normalization
-    var$result <- as.matrix(var$result)
-    var$result <- merge(var$result, var$norData, by="row.names")
-    names(var$result)[1] <- "gene_id"
-    var$result <- var$result[,-4] # supp lfcSE column
-    var$result <- var$result[,-4] # supp stat column
-    names(var$result)[2] <- 'a.value'
-    names(var$result)[3] <- 'm.value'
-    names(var$result)[4] <- 'p.value'
-    names(var$result)[5] <- 'q.value'
+    var$resultz <- as.matrix(var$resultz)
+    var$result <- data.frame(var$resultz[,1], row.names = rownames(var$resultz))
+    var$result['m.value'] <- var$resultz[,2]
+    var$result['p.value'] <- var$resultz[,6]
+    var$result['q.value'] <- p.adjust(var$resultz[,6], method = 'fdr')
+    names(var$result)[1] <- "a.value"
 
     
-    if (length(var$groupList) != 2){
-      var$result <- var$result[,-2] # suppr basemean
-      var$result <- var$result[,-2] # supp log2fc
+    if (length(var$groupList2) != 2){
+      var$result <- var$result[,-1] # suppr basemean
+      var$result <- var$result[,-1] # supp log2fc
     }
-    DESeq2DEGs <- var$result[which(var$result$q.value <= as.numeric(input$deseq2cutoff)),] 
+
+    var$DESeq2DEGs <- var$result[which(var$result$q.value <= as.numeric(input$deseq2cutoff)),] 
     var$result["estimatedDEG"] = "0"
     var$result <- var$result[complete.cases(var$result), ]
-    
     for (row in 1:nrow(var$result)){
       if(var$result[row,'q.value'] <= as.numeric(input$deseq2cutoff)){
         var$result[row, 'estimatedDEG'] = "1"
       }else{ 
         var$result[row,'estimatedDEG'] = "0"
       }
+      
     }
+
     var$DEAMETHOD <- 'deseq2'
     }
  
@@ -239,10 +238,10 @@ observeEvent(input$DEA, {           # when the run button is clicked
   
   if(input$DEAmethod == "edgeR"){     # formatting for edgeR'''
     tcc <-                           
-      new("TCC", var$CountData, var$selectedgroups)
+      new("TCC", var$newData, var$selectedgroups)
     var$tccObject <- tcc             # just to get the groups for pca 
     
-    dgList <- DGEList(counts=var$CountData, group = var$selectedgroups)
+    dgList <- DGEList(counts=var$newData, group = var$selectedgroups)
     
     updateProgressBar(               # updating progress bar
       session = session,
@@ -276,7 +275,7 @@ observeEvent(input$DEA, {           # when the run button is clicked
     
 
     
-    if (length(var$groupList) != 2){
+    if (length(var$groupList2) != 2){
       var$result <- var$result[,-2] # suppr log2fc
       var$result <- var$result[,-2] # supp basemean
     }
@@ -288,8 +287,8 @@ observeEvent(input$DEA, {           # when the run button is clicked
       }else{ 
        var$result[row,'estimatedDEG'] = "0"
       }}
-    edgeRDEGs <- var$result[which(var$result$q.value <= as.numeric(input$edgeRfdr)),] 
-    edgeRDEGs <- edgeRDEGs[,-4]
+    var$edgeRDEGs <- var$result[which(var$result$q.value <= as.numeric(input$edgeRfdr)),] 
+    var$edgeRDEGs <- var$edgeRDEGs[,-4]
     var$DEAMETHOD <- 'edgeR'
 
    }
@@ -338,7 +337,9 @@ observeEvent(input$DEA, {           # when the run button is clicked
       resultTable <- merge(var$result, data, by = "gene_id")
     }
     if(input$DEAmethod == "DESeq2"){
-      resultTable <- var$result
+      data <- as.data.frame(data)
+      resultTable <- merge(var$result, var$norData, by="row.names")
+      names(resultTable)[1] <-'gene_id'
     }
     
     DT::datatable(
@@ -378,16 +379,19 @@ observeEvent(input$DEA, {           # when the run button is clicked
   
   output$sortedresultTable <- DT::renderDataTable({            # only DEGs table 
     data <- var$norData
-    gene_id <- row.names(data)
-    data <- cbind(data, gene_id = gene_id)
     if(input$DEAmethod == 'tcc'){
+      gene_id <- row.names(data)
+      data <- cbind(data, gene_id = gene_id)
     resultTable <- merge(var$result_s, data, by = "gene_id")
     }
     if(input$DEAmethod == "DESeq2"){
-      resultTable <- DESeq2DEGs
+      resultTable <- merge(var$DESeq2DEGs,data, by = "row.names")
+      names(resultTable[1]) <- 'gene_id'
     }
     if(input$DEAmethod == "edgeR"){
-      resultTable <- merge(edgeRDEGs, data, by = "gene_id")
+      gene_id <- row.names(data)
+      data <- cbind(data, gene_id = gene_id)
+      resultTable <- merge(var$edgeRDEGs, data, by = "gene_id")
     }
     
     DT::datatable(

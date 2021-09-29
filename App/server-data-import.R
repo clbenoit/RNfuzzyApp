@@ -6,27 +6,39 @@ observeEvent(input$uploadCountData, {   # when a table is being uploaded
   tryCatch({
     var$InputTable <-    # assign the table as a data frame to this variable 
       data.frame(fread(input$uploadCountData$datapath), row.names = 1)
-    v$importActionValue = FALSE # precise no button has been clicked yet
-  },
-  error = function(e) {  # error messages about the input table 
-    sendSweetAlert(
-      session = session,
-      title = "Input data error!",
-      text = as.character(message(e)),
-      type = "error"
-    )
-    return()
-  },
-  warning = function(w) {
-    sendSweetAlert(
-      session = session,
-      title = "Input data warning!",
-      text = "Error in dataset",
-      type = "warning"
-    )
-    return()
-  })
-  
+    var$control <- FALSE
+    var$sampleid <- colnames(var$InputTable)
+    var$groupdfs <- do.call(rbind,strsplit(var$sampleid,"_",fixed=TRUE))
+    var$rep <- var$groupdfs[,1]
+    var$cond_id <- var$groupdfs[,2]
+    var$matrixcount <- as.matrix(var$InputTable)
+    var$CountData <- var$InputTable[,which(colnames(var$InputTable) == rownames(var$groupdfs))]
+
+    
+    
+    updateSelectizeInput(session,"data_samples", 
+                         choices=var$cond_id,selected=var$cond_id)
+},
+error = function(e) {  # error messages about the input table 
+  sendSweetAlert(
+    session = session,
+    title = "Input data error!",
+    text = as.character(message(e)),
+    type = "error"
+  )
+  return()
+},
+warning = function(w) {
+  sendSweetAlert(
+    session = session,
+    title = "Input data warning!",
+    text = "Error in dataset",
+    type = "warning"
+  )
+  return()
+})
+
+      
   observeEvent(input$filterCount,{   # when a filter of low count genes is set 
     if (input$filterCount != 0) {  # automatically filter the origianl table and update the summary
       var$LowCountGenes <- var$InputTable[rowSums(var$InputTable >= as.numeric(input$filterCount)) == 0,]
@@ -35,104 +47,77 @@ observeEvent(input$uploadCountData, {   # when a table is being uploaded
       var$CountData <- var$InputTable
       var$LowCountGenes <- "No filtered data."
     }
+    
+
   })
+
+  group <- as.data.frame(var$groupdfs) 
+  var$groupdf <- as.data.frame(group$V2, row.names = var$sample_id)
+  colnames(var$groupdf) <- "group"
+  var$groupList <-  # set the groups
+    lapply(unique(group$V2), function(x) {
+      group[group$V2 == x, ]$V1
+    })
   
-})
-
-
-observeEvent(input$confirmedGroupList, { # when the groups are being confimed
-  if (nrow(datasetInput()) == 0) { # if not table then error 
-    sendSweetAlert(
-      session = session,
-      title = "ERROR",
-      text = "Please input count data table!",
-      type = "error"
-    )
-    return()
-  }
-  if (input$groupSelect == "") {  # if no groups, then error
-    sendSweetAlert(
-      session = session,
-      title = "ERROR",
-      text = "Please input group information!",
-      type = "error"
-    )
-    return()
+  names(var$groupList) <- unique(group$V2)
+  data.list <- rep(0, ncol(var$CountData))
+  
+  
+  # Convert the input of group information to a specific format for normalization.
+  convertion <- function(x, df) {
+    grep(x, colnames(df))
   }
   
-  tryCatch({ # if no errors : 
-    
-    group <- fread(input$groupSelect, header = FALSE)
-    var$groupList <-  # set the groups
-      lapply(unique(group$V2), function(x) {
-        group[group$V2 == x, ]$V1
-      })
-    names(var$groupList) <- unique(group$V2)
-    data.list <- rep(0, ncol(var$CountData))
-
-    
-    # Convert the input of group information to a specific format for normalization.
-    convertion <- function(x, df) {
-      grep(x, colnames(df))
-    }
-    
-    for (i in 1:length(var$groupList)) { # assign replicates to groups
-      data.list[unlist(lapply(var$groupList[[i]], convertion, df = var$CountData))] = names(var$groupList[i])
-    }
-
-    var$selectedgroups <- data.list[!(data.list) == 0] # validation that groups are not empty
-    tmprem = match(as.character(rownames(var$CountData)[which(!(var$groupList%in%var$selectedgroups))]),colnames(var$CountData))
-    tmpkeep = setdiff(1:ncol(var$CountData),tmprem)
-    var$CountData <- var$CountData[,tmpkeep] # updating the working data frame 
-    
-    
-    closeSweetAlert(session = session)  # no errors on groups 
-    sendSweetAlert(
-      session = session,
-      title = "DONE",
-      text = "Group labels were successfully assigned.",
-      type = "success"
-    )
-    
-    v$importActionValue <- input$confirmedGroupList # then the button has been clicked and its ok
-  },
-  error = function(e) {  # errors on the formet
-    sendSweetAlert(
-      session = session,
-      title = "ERROR",
-      text = "Check your group information format!",
-      type = "error"
-    )
-    return()
-  },
-  warning = function(w) {
-    sendSweetAlert(
-      session = session,
-      title = "Group error!",
-      text = "Check your group information format!",
-      type = "error"
-    )
-    return()
-  })
+  for (i in 1:length(var$groupList)) { # assign replicates to groups
+    data.list[unlist(lapply(var$groupList[[i]], convertion, df = var$CountData))] = names(var$groupList[i])
+  }
   
-  # reformating data 
-  groupd <- as.data.frame(group)
-  rep <- groupd$V1
-  group <- groupd$V2
-  var$groupdf <- data.frame(group, row.names = rep)
-  var$matrixcount <- as.matrix(var$CountData)
-  var$CountData <- var$CountData[,which(colnames(var$CountData) == rownames(var$groupdf))]
+observeEvent(input$data_samples,{
+  if(!(input$data_samples[1]=="")) {
+  var$selectedsamples <- input$data_samples
+  tmprem = match(as.character(var$sampleid[which(!(var$cond_id%in%var$selectedsamples))]),colnames(var$CountData))
+  tmpkeep = setdiff(1:ncol(var$CountData),tmprem)
+  var$CountData = var$CountData[,tmpkeep]
+  
+  #################################################################
+  var$sampleid2 <- colnames(var$CountData)
+  var$actualgroups <- do.call(rbind,strsplit(var$sampleid2,"_",fixed=TRUE))
+  var$group2 <- var$actualgroups[,1]
+  var$cond_id2 <- var$actualgroups[,2]
+  group2 <- as.data.frame(var$actualgroups) 
+  group2$V1 <- var$sampleid2
+  var$select <- as.data.frame(group2$V2, row.names =  colnames(var$CountData))
+  colnames(var$select) <- "group"
+  group <- var$cond_id2
   var$design <- formula(as.formula(paste("~", paste(colnames(as.data.frame(group)), collapse = "+"))))
-  
-  
-})
+  var$groupList2 <-  # set the groups
+    lapply(unique(group2$V2), function(x) {
+      group2[group2$V2 == x, ]$V1
+    })
 
+  names(var$groupList2) <- unique(group2$V2)
+  data.list2 <- rep(0, ncol(var$CountData))
+  convertion <- function(x, df) {
+    grep(x, colnames(df))
+  }
+  for (i in 1:length(var$groupList2)) { # assign replicates to groups
+    data.list2[unlist(lapply(var$groupList2[[i]], convertion, df = var$CountData))] = names(var$groupList2[i])
+  }
+  
+  var$selectedgroups <- data.list2
+  
+
+  ######################################################
+ 
+}})
+
+var$control <- TRUE
+
+})
 # save the updated table and associate a name to facilitate the use 
 datasetInput <- reactive({
   var$CountData
 })
-
-
 
 output$DataSummary <- renderUI({  # summary render
   odf <- var$InputTable
@@ -145,8 +130,8 @@ output$DataSummary <- renderUI({  # summary render
     rowCount <- nrow(dt)
     filtCount <- (orowCount - rowCount)
   }
-  groupCount <- length(var$groupList)       # groups count and setting 
-  groupText <- sapply(var$groupList, length)
+  groupCount <- length(var$groupList2)       # groups count and setting 
+  groupText <- sapply(var$groupList2, length)
   if (length(groupText) > 0) {
     gText <- paste0(names(groupText), ": ", groupText, ';', collapse = "\n")
   } else {
@@ -171,16 +156,21 @@ output$DataSummary <- renderUI({  # summary render
     ),
     tipify(  # number of groups
       tags$p(tags$b("N", tags$sub("group")), ": ", groupCount),
-      title = "Number of Groups",
+      title = " Number of Groups",
       placement = "left"
     ),
     tipify(   # replciated per groups
       tags$p(tags$b("N", tags$sub("replicates")), ": ", gText),
-      title = "Number of Replicates",
+      title = " Number of Replicates",
       placement = "left"
     )
   )
 })
+
+
+
+
+
 
 
 # Render a table of raw count data
@@ -286,8 +276,8 @@ output$CountDistribBox <- renderPlotly({
     cpm <- log2(data + 1)   # counts 
     cpm_stack <- data.frame(stack(cpm))
     
-    group <- data.frame("col" = rownames(var$groupdf),  # with respect to groups
-                 "group" = var$groupdf$group)
+    group <- data.frame("col" = rownames(var$select),  # with respect to groups
+                 "group" = var$select$group)
     
     data <- left_join(cpm_stack, group, by = "col")  # to plot with respect to groups 
     data <- arrange(data, group)
@@ -315,7 +305,7 @@ output$CountDistribBox <- renderPlotly({
 
 # render UI 
 output$CountDistrib <- renderUI({
-  if (v$importActionValue) {  # if data where imported and everything is ok then it can provides to plots
+  if (var$control) {  # if data where imported and everything is ok then it can provides to plots
     tagList(fluidRow(
       column(
         3,
@@ -362,7 +352,7 @@ output$rawheatmap <- renderPlotly({
 
 # Render UI 
 output$clustUI <- renderUI({
-  if (v$importActionValue) { # if data and no errors then run parameters and plot
+  if (var$control) { # if data and no errors then run parameters and plot
     tagList(fluidRow(
       column( #parameter
         3,
@@ -427,8 +417,8 @@ output$pcaPlotObject2d <- renderPlotly({
     data.pca.all <- prcomp(data,center = T, scale. = T) #pca 
     data <- data.frame(data.pca.all$x)
     data$name <- rownames(data)
-    group <- var$groupdf
-    group$name <- rownames(var$groupdf)
+    group <- var$select
+    group$name <- rownames(var$select)
     data <- left_join(x = data, y = group, by = "name") # to perform over groups 
     p <- plot_ly(  # plot 
       data = data,
@@ -456,8 +446,8 @@ output$pcaPlotObject3d <- renderPlotly({
     
     data <- data.frame(data.pca.all$x)
     data$name <- rownames(data)
-    group <- var$groupdf
-    group$name <- rownames(var$groupdf)
+    group <- var$select
+    group$name <- rownames(var$select)
     data <- left_join(x = data, y = group, by = "name") # to perform the pca over groups
     p <- plot_ly(   #plot
       data = data,
@@ -480,7 +470,7 @@ output$pcaPlotObject3d <- renderPlotly({
 
 # render pca
 output$pcaUI <- renderUI({
-  if (v$importActionValue) {
+  if (var$control) {
              tabsetPanel(  # render plots 
                tabPanel(title = "2D Plot", plotlyOutput("pcaPlotObject2d", width = 1200, height = 600) %>% withSpinner()),
                tabPanel(title = "3D Plot", plotlyOutput("pcaPlotObject3d", width = 1200, height = 600) %>% withSpinner())

@@ -7,7 +7,7 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization", # theme for navba
              fluidPage(
                fluidRow(column(4,
                                box(        # uplaod data box
-                                 title = tagList(icon("cloud-upload"), "Upload"),
+                                 title = tagList(icon("cloud-upload-alt"), "Upload"),
                                  solidHeader = T,
                                  status = "primary",
                                  width = NULL,
@@ -83,41 +83,11 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization", # theme for navba
                                  solidHeader = TRUE,
                                  status = "primary",
                                  width = NULL,
-                                 textAreaInput(
-                                   "groupSelect",
-                                   "Input your group info",
-                                   rows = 6,
-                                   placeholder = paste( #example
-                                     "rep1,Group1",
-                                     "rep2,Group1",
-                                     "rep1,Group2",
-                                     "rep2,Group2",
-                                     "rep1,Group3",
-                                     "rep2,Group3",
-                                     sep = '\n'
-                                   )
-                                 )),
-                               
-                               
-                               do.call(actionBttn, c(      # run button to confirm groups
-                                 list(
-                                   inputId = "confirmedGroupList",
-                                   label = "Assign Group Label",
-                                   icon = icon("play"))
-                               )
+                                 selectizeInput("data_samples", label="Select Samples",
+                                                choices=NULL,
+                                                multiple=TRUE)
                                )),
                         column(4,
-                               box(            # info about group assignement box
-                                 title = tagList(icon("question"), "About Groups"),
-                                 solidHeader = TRUE,
-                                 status = "primary",
-                                 width = NULL,
-                                 helpText(HTML("Enter only groups you want to study, 
-                                               not necessarily every groups of your data.
-                                               Don't forget to declare your groups as named in your table. ")
-                                          
-                                 )
-                               ),
                                box(           # summary of upload table box
                                  title = tagList(icon("file-alt"), "Summary"),
                                  solidHeader = TRUE,
@@ -127,25 +97,25 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization", # theme for navba
                                
                                
                                
-                        ))),
+                        )),
              tabBox(                  # panels of different tables box
                title = "",
                width = NULL,
                tabPanel(              # final table of selected genes
-                 title = tagList(icon("bar-chart"), "Actual Table"),
+                 title = tagList(icon("chart-bar"), "Actual Table"),
                  uiOutput("showTable")
                ),
                tabPanel(             # raw input table
-                 title = tagList(icon("bar-chart"), "Input Table"),
+                 title = tagList(icon("chart-bar"), "Input Table"),
                  uiOutput("showInputTable")
                ),
                tabPanel(             # table of filtered datz
-                 title = tagList(icon("bar-chart"), "Filtered Table"),
+                 title = tagList(icon("chart-bar"), "Filtered Table"),
                  uiOutput("showLowTable")
                )
-             )),
+             ))),
            tabPanel(   # panel of the count distribution bar chart
-             title = tagList(icon("bar-chart"), "Count Distribution"),
+             title = tagList(icon("chart-bar"), "Count Distribution"),
                     uiOutput("CountDistrib")
              ),
            tabPanel(  # panel of groups heatmap 
@@ -155,5 +125,4 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization", # theme for navba
            tabPanel(   # panel of PCA
              title = tagList(icon("object-group"), "PCA"),
                     uiOutput("pcaUI")
-             )
-)
+             ))

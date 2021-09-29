@@ -76,7 +76,11 @@ observeEvent(input$makeMAPlot, { # if run button has been clicked
     validate(need(resultTable()$a.value != "", "No MA values for ploting.")) # if basemean values allow it 
     
     isolate({
-      key <- resultTable()$gene_id  # creating a key to accord the ma plot and the bar plot when a point is hovered
+      if(var$DEAMETHOD == 'deseq2'){
+        key <- row.names(resultTable())
+      }else{
+        key <- resultTable()$gene_id
+      }
       DEGcut <- cut(resultTable()$q.value, breaks = c(0, input$maFDR, 1)) # coloration of the ma plot according to the cut off
       
       p <- plot_ly( # ma plot Log2FC with repect ot Basemean 
@@ -131,8 +135,8 @@ output$geneBarPlot <- renderPlotly({ # bar plot
   
   gene_id <- eventdata$key # key bar plot 
   expression <-
-    var$CountData[row.names(var$CountData) == gene_id, ]
-  data <- var$CountData # data selection 
+    var$newData[row.names(var$newData) == gene_id, ]
+  data <- var$newData # data selection 
   dataGroups <- var$selectedgroups # selected groups 
   expression <- t(expression[dataGroups != 0]) 
   
@@ -215,15 +219,7 @@ output$maFDRpreview <- renderText({
 
 #main  plot output 
 output$MAPlotUI <- renderUI({
-  if (length(var$groupList) > 2) { # ma plot is only available for 2 groups comparisons, error if tryign ith more
-    sendSweetAlert(
-      session = session,
-      title = "ERROR",
-      text = "MA Plot is unavailable for multiple comparison now.",
-      type = "info"
-    )
-    helpText("MA Plot is unavailable for multiple comparison now.")
-  }else{
+  if (length(var$groupList2) || length(var$groupList3) == 2) { # ma plot is only available for 2 groups comparisons, error if tryign ith more
     if (runMA$runMAValues) { # if the run button has been clicked, then shows plots
       tagList(fluidRow(
         column(8, plotlyOutput("maplotly") %>% withSpinner()),
@@ -231,7 +227,16 @@ output$MAPlotUI <- renderUI({
       ))
     } else {
       helpText("Please click [Generate MA Plot] first.")
-    }}
+    }
+  }else{
+    sendSweetAlert(
+      session = session,
+      title = "ERROR",
+      text = "MA Plot is unavailable for multiple comparison now.",
+      type = "info"
+    )
+    helpText("MA Plot is unavailable for multiple comparison now.")
+}
 })
 
 

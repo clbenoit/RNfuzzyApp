@@ -1,13 +1,13 @@
 # ui-normalization.R
 
-fluidPage(useSweetAlert(), fluidRow(column(
+fluidPage(fluidRow(column(
   3,
   box(                   # parameter box
     title = tagList(icon("cogs"), "Parameters"),
     width = NULL,
     solidHeader = TRUE,
     status = "primary",
-    uiOutput("CondDEAParams")
+    uiOutput("DEAParams")
     )),
   
   #result table 

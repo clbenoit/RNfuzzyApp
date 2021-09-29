@@ -14,7 +14,7 @@ column(
   9,
   navbarPage("Results",               # result panels
              tabPanel(                # MA plot panel
-               title = tagList(icon("line-chart"), "MA plot"),
+               title = tagList(icon("chart-line"), "MA plot"),
                width = NULL,
                solidHeader = TRUE,
                status = "info", 

@@ -157,7 +157,11 @@ observeEvent(input$makeVolcanoPlot, {
       FCcut <- factor(dt$color) # conversion as a factor to use it in the plot
       
       # link to bar plot
+      if(var$DEAMETHOD == 'deseq2'){
+        key <- row.names(resultTable())
+      }else{
       key <- resultTable()$gene_id
+      }
       p <- plot_ly( # plot
         dt,  # data
         x = ~ m.value,
@@ -239,8 +243,8 @@ output$VolcanoBarPlot <- renderPlotly({
   
   gene_id <- eventdata$key
   expression <- # counts 
-    var$CountData[row.names(var$CountData) == gene_id,]
-  data <- var$CountData
+    var$newData[row.names(var$newData) == gene_id,]
+  data <- var$newData
   dataGroups <- var$selectedgroups # according to selected groups
   expression <- t(expression[dataGroups != 0])
   
@@ -499,15 +503,7 @@ output$resultTableup <- DT::renderDataTable({ #datatable render for downregulate
 
 # volcanoUI 
 output$volcanoUI <- renderUI({
-  if (length(var$groupList) > 2) {  # volcano plot is available for onyl 2 groups comparisons, if more, then error 
-    sendSweetAlert(
-      session = session,
-      title = "ERROR",
-      text = "Volcano Plot is unavailable for multiple comparison now.",
-      type = "info"
-    )
-    helpText("Volcano Plot is unavailable for multiple comparison now.")
-  }else{
+  if (length(var$groupList2) || length(var$groupList3) == 2)  {
     
     if(runVolcano$runVolcanoValue){ # if run button clicked, then shows plots 
       tagList(
@@ -518,6 +514,13 @@ output$volcanoUI <- renderUI({
       )
     } else {
       helpText("Please click [Generate Volcano Plot] first.")
-    }}
+  }}else{  # volcano plot is available for onyl 2 groups comparisons, if more, then error 
+    sendSweetAlert(
+      session = session,
+      title = "ERROR",
+      text = "Volcano Plot is unavailable for multiple comparison now.",
+      type = "info"
+    )
+    helpText("Volcano Plot is unavailable for multiple comparison now.")}
   
 })

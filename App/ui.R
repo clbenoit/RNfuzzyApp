@@ -21,26 +21,29 @@ tagList(dashboardPage(                  #the global app
           tabName = "deanalysisTab",
           icon = icon("calculator")),
         menuSubItem(
-          "MA Plot",
-          tabName = "maTab",
-          icon = icon("line-chart")),
-        menuSubItem(
-          "Volcano Plot",
-          tabName = "volcanoplotTab",
-          icon = icon("area-chart")),
-
-        menuSubItem(
           "Heatmap",
           tabName = "heatmapTab",
           icon = icon("delicious")),
         menuSubItem(
           "PCA",
           tabName = "pcaTab",
-          icon = icon("bar-chart"))),
+          icon = icon("chart-bar")),
+        menuSubItem(
+          "Filter Data",
+          tabName = "filterTab",
+          icon = icon("filter")),
+        menuSubItem(
+          "MA Plot",
+          tabName = "maTab",
+          icon = icon("chart-line")),
+        menuSubItem(
+          "Volcano Plot",
+          tabName = "volcanoplotTab",
+          icon = icon("chart-area"))),
       menuItem(
         "Time Series clustering",
         tabName = "mfuzzTab",
-        icon = icon("line-chart")),
+        icon = icon("chart-line")),
       menuItem(
         "Enrichment",
         tabName = "enrichTab",
@@ -76,16 +79,6 @@ tagList(dashboardPage(                  #the global app
         local = TRUE,
         encoding = "UTF-8"
       )$value),
-      tabItem(tabName = "maTab", source(
-        file = "ui-ma.R",
-        local = TRUE,
-        encoding = "UTF-8"
-      )$value),
-      tabItem(tabName = "volcanoplotTab", source(
-        file = "ui-volcano.R",
-        local = TRUE,
-        encoding = "UTF-8"
-      )$value),
       tabItem(tabName = "heatmapTab", source(
         file = "ui-heatmap.R",
         local = TRUE,
@@ -93,6 +86,21 @@ tagList(dashboardPage(                  #the global app
       )$value),
       tabItem(tabName = "pcaTab", source(
         file = "ui-pca.R",
+        local = TRUE,
+        encoding = "UTF-8"
+      )$value),
+      tabItem(tabName = "filterTab", source(
+        file = "ui-filter.R",
+        local = TRUE,
+        encoding = "UTF-8"
+      )$value),
+      tabItem(tabName = "maTab", source(
+        file = "ui-ma.R",
+        local = TRUE,
+        encoding = "UTF-8"
+      )$value),
+      tabItem(tabName = "volcanoplotTab", source(
+        file = "ui-volcano.R",
         local = TRUE,
         encoding = "UTF-8"
       )$value),

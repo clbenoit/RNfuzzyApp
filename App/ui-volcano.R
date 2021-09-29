@@ -15,7 +15,7 @@ column(
   9,
   navbarPage("Results",                     # result panels 
              tabPanel(                      # volcano plot panel
-               title = tagList(icon("area-chart"), "Volcano Plot"),
+               title = tagList(icon("chart-area"), "Volcano Plot"),
                solidHeader = TRUE,
                status = "info",
                width = NULL,

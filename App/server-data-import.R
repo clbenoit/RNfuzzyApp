@@ -9,6 +9,7 @@ observeEvent(input$uploadCountData, {   # when a table is being uploaded
     var$control <- FALSE
     var$sampleid <- colnames(var$InputTable)
     var$groupdfs <- do.call(rbind,strsplit(var$sampleid,"_",fixed=TRUE))
+    var$groupdfs <- var$groupdfs[,c(2,1)]
     var$rep <- var$groupdfs[,1]
     var$cond_id <- var$groupdfs[,2]
     var$matrixcount <- as.matrix(var$InputTable)
@@ -52,6 +53,7 @@ warning = function(w) {
   })
 
   group <- as.data.frame(var$groupdfs) 
+  group$V1 <- var$sampleid
   var$groupdf <- as.data.frame(group$V2, row.names = var$sample_id)
   colnames(var$groupdf) <- "group"
   var$groupList <-  # set the groups
@@ -82,6 +84,7 @@ observeEvent(input$data_samples,{
   #################################################################
   var$sampleid2 <- colnames(var$CountData)
   var$actualgroups <- do.call(rbind,strsplit(var$sampleid2,"_",fixed=TRUE))
+  var$actualgroups <- var$actualgroups[,c(2,1)]
   var$group2 <- var$actualgroups[,1]
   var$cond_id2 <- var$actualgroups[,2]
   group2 <- as.data.frame(var$actualgroups) 

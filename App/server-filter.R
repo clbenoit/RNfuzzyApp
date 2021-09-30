@@ -47,6 +47,7 @@ observeEvent(input$filter_samples,{
   var$newData = var$newData[,tmpkeep2]
   var$sampleid3 <- colnames(var$norData)
   var$actualgroups2 <- do.call(rbind,strsplit(var$sampleid3,"_",fixed=TRUE))
+  var$actualgroups2 <- var$actualgroups2[,c(2,1)]
   var$group3 <- var$actualgroups2[,1]
   var$cond_id3 <- var$actualgroups2[,2]
   group3 <- as.data.frame(var$actualgroups2) 
@@ -70,6 +71,7 @@ observeEvent(input$filter_samples,{
   
   var$sampleid4 <- colnames(var$newData)
   var$actualgroups3 <- do.call(rbind,strsplit(var$sampleid4,"_",fixed=TRUE))
+  var$actualgroups3 <- var$actualgroups3[,c(2,1)]
   var$groupd2 <- as.data.frame(var$actualgroups3)
   group <- var$cond_id3
   var$select3 <- as.data.frame(group3$V2, row.names =  colnames(var$newData))

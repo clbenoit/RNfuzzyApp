@@ -273,8 +273,8 @@ v <- reactiveValues(importActionValue = FALSE)
 
 ################### BOXPLOT  #####################
 output$CountDistribBox <- renderPlotly({
-  if (length(var$matrixcount) > 0) {
-    data <- var$matrixcount    # set the data to use
+  if (length(var$CountData) > 0) {
+    data <- as.matrix(var$CountData)    # set the data to use
     
     cpm <- log2(data + 1)   # counts 
     cpm_stack <- data.frame(stack(cpm))
@@ -337,7 +337,7 @@ output$CountDistrib <- renderUI({
 
 ################### HEATMAP #####################
 output$rawheatmap <- renderPlotly({
-  if (length(var$matrixcount) > 0) {
+  if (length(var$CountData) > 0) {
     data <- var$CountData # data selection 
     data <- data.frame(1 - cor(data, method = input$correlation)) # with the chosen method of correlation 
     heatmaply( #heatmap
@@ -413,8 +413,9 @@ output$clustUI <- renderUI({
 
 # 2D Plot 
 output$pcaPlotObject2d <- renderPlotly({
-  if (length(var$matrixcount) > 0) {
-    data <- log1p(var$matrixcount) # data selection 
+  if (length(var$CountData) > 0) {
+    data <- as.matrix(var$CountData)
+    data <- log1p(data) # data selection 
     data <- data[apply(data, 1, var) != 0, ] # selection over counts 
     data <- t(data[order(apply(data, 1, var), decreasing = TRUE)[1:100], ])
     data.pca.all <- prcomp(data,center = T, scale. = T) #pca 
@@ -442,8 +443,9 @@ output$pcaPlotObject2d <- renderPlotly({
 
 # 3D Plot
 output$pcaPlotObject3d <- renderPlotly({
-  if (length(var$matrixcount) > 0) {
-    data <- log1p(var$matrixcount) #data selection 
+  if (length(var$CountData) > 0) {
+    data <- as.matrix(var$CountData)
+    data <- log1p(data) # data selection 
     data <- t(data[apply(data, 1, var) != 0, ]) # selection over counts
     data.pca.all <- prcomp(data,center = T,scale. = T) # pca
     

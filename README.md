@@ -6,7 +6,7 @@ RNFuzzyApp is an application to analyse aligned RNA-seq data and do fuzzy cluste
 </br>
 
 
-- First proceed to a quality control, an alignment and a count (FeatureCounts for example). Input table is geneIDS as rows and conditions/covariates as columns. </br>
+- First proceed to a quality control, an alignment and a count (FeatureCounts for example). Input table is geneIDS as rows and conditions/covariates as columns named as condition_replicate. </br>
 
 <b> Installation </b>
 ---

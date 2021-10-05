@@ -41,6 +41,7 @@ usePackage("data.table")
 usePackage("RColorBrewer")
 usePackage("utils")
 usePackage("tidyr")
+usePackage("remotes")
 usePackage("devtools")
 
 BioCPackage("cluster")

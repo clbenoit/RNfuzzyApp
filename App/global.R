@@ -20,12 +20,7 @@ BioCPackage <- function(p)
   require(p, character.only = TRUE)
 }
 
-
 #theme 
-if (!is.element("dashboardthemes", installed.packages()[,1]))
-  install_github("nik01010/dashboardthemes")
-require("dashboardthemes", character.only = TRUE)
-
 
 usePackage("shiny")
 usePackage("shinydashboard")
@@ -41,7 +36,7 @@ usePackage("data.table")
 usePackage("RColorBrewer")
 usePackage("utils")
 usePackage("tidyr")
-usePackage("remotes")
+usePackage("dashboardthemes")
 usePackage("devtools")
 
 BioCPackage("cluster")

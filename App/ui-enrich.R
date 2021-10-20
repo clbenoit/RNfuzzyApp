@@ -8,82 +8,81 @@ fluidPage(fluidRow(column(
     width = NULL,
     solidHeader = TRUE,
     status = "primary",
-    tagList(                    # set of parameters
-      textAreaInput(
-        "list_ids",
-        "Paste Gene List",
-        rows = 5,
-        placeholder = "Input ids, one gene per line."
-      ),
-      sliderInput(
-        "topres_enrich",
-        "Top results to show",
-        min = 1,
-        max = 50,
-        value = 10,
-        step = 1
-      ),
-      selectInput(
-        "inputorg",
-        "Choose your Organism",
-        c("Drosophila melanogaster" = "dmelanogaster",
-          "Mus musculus" = "mmusculus",
-          "Homo sapiens" = "hsapiens", 
-          "Caenorhabditis elegans" = "celegans",
-          "Zebrafish" = "drerio",
-          "Aspergillus fumigatus Af293" = "afumigatus",
-          "Bonobo" = "ppaniscus",
-          "Cat" = "fcatus",
-          "Chicken" = "ggallus",
-          "Chimpanzee" = "ptroglodytes",
-          "Common Carp" = "ccarpio",
-          "Cow" = "btaurus",
-          "Dog" = "clfamiliaris",
-          "Dolphin" = "ttruncatus",
-          "Goat" = "chircus",
-          "Gorilla" = "ggorilla",
-          "Guppy" = "preticulata",
-          "Horse" = "ecaballus",
-          "Pig" = "sscrofa",
-          "Platypus" = "oanatinus",
-          "Rabbit" = "ocuniculus")
-      ),
-      checkboxGroupInput(
-        "chosenEnrich",
-        "Choose your enrichment",
-        c("GO : Biological Processes" = "GO:BP",
-          "GO : Molecular Functions" = "GO:MF",
-          "GO : Cellular Components" = "GO:CC",
-          "KEGG Pathways" = "KEGG",
-          "Reactome" = "REAC",
-          "WikiPathways" = "WP",
-          "TRANSFAC" = "TF",
-          "MirTarBase" = "MIRNA",
-          "Human Phenotype Ontology" = "HP",
-          "Human Protein Atlas" = "HPA",
-          "CORUM" = "CORUM")
-      ),
-      selectInput(
-        "correction",
-        "Multiple testing correction",
-        c("gSCS threshold" = "gSCS",
-          "Benjamini-Hochberg FDR" = "fdr", 
-          "Bonferroni correction", "bonferroni")
-      ),
-      sliderInput(
-        "userpval_cutoff",
-        "Significant p-value threshold",
-        min = 0,
-        max = 1,
-        value = 0.05,
-        step = 0.01
-      ), 
-      selectInput(
-        "chosenscope",
-        "Statistical domain scope",
-        c("Only annotated genes" = "annotated",
-          "All known genes" = "known")
-      )
+    tagList(
+    uiOutput('EnrichParams'),
+    textAreaInput(
+      "list_ids",
+      "Paste Gene List",
+      rows = 5,
+    ),
+    sliderInput(
+      "topres_enrich",
+      "Top results to show",
+      min = 1,
+      max = 50,
+      value = 10,
+      step = 1
+    ),
+    selectInput(
+      "inputorg",
+      "Choose your Organism",
+      c("Drosophila melanogaster" = "dmelanogaster",
+        "Mus musculus" = "mmusculus",
+        "Homo sapiens" = "hsapiens", 
+        "Caenorhabditis elegans" = "celegans",
+        "Zebrafish" = "drerio",
+        "Aspergillus fumigatus Af293" = "afumigatus",
+        "Bonobo" = "ppaniscus",
+        "Cat" = "fcatus",
+        "Chicken" = "ggallus",
+        "Chimpanzee" = "ptroglodytes",
+        "Common Carp" = "ccarpio",
+        "Cow" = "btaurus",
+        "Dog" = "clfamiliaris",
+        "Dolphin" = "ttruncatus",
+        "Goat" = "chircus",
+        "Gorilla" = "ggorilla",
+        "Guppy" = "preticulata",
+        "Horse" = "ecaballus",
+        "Pig" = "sscrofa",
+        "Platypus" = "oanatinus",
+        "Rabbit" = "ocuniculus")
+    ),
+    checkboxGroupInput(
+      "chosenEnrich",
+      "Choose your enrichment",
+      c("GO : Biological Processes" = "GO:BP",
+        "GO : Molecular Functions" = "GO:MF",
+        "GO : Cellular Components" = "GO:CC",
+        "KEGG Pathways" = "KEGG",
+        "Reactome" = "REAC",
+        "WikiPathways" = "WP",
+        "TRANSFAC" = "TF",
+        "MirTarBase" = "MIRNA",
+        "Human Phenotype Ontology" = "HP",
+        "Human Protein Atlas" = "HPA",
+        "CORUM" = "CORUM")
+    ),
+    selectInput(
+      "correction",
+      "Multiple testing correction",
+      c("gSCS threshold" = "gSCS",
+        "Benjamini-Hochberg FDR" = "fdr", 
+        "Bonferroni correction", "bonferroni")
+    ),
+    sliderInput(
+      "userpval_cutoff",
+      "Significant p-value threshold",
+      min = 0,
+      max = 1,
+      value = 0.05,
+      step = 0.01
+    ), 
+    selectInput(
+      "chosenscope",
+      "Statistical domain scope",
+      c("Only annotated genes" = "annotated",
+        "All known genes" = "known")
     ),
     do.call(actionBttn, c(          # run button 
       list(
@@ -91,7 +90,7 @@ fluidPage(fluidRow(column(
         label = "Enrich",
         icon = icon("play")
       )))
-  )),
+  ))),
   
   #result table 
   column(

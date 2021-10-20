@@ -38,6 +38,7 @@ usePackage("utils")
 usePackage("tidyr")
 usePackage("dashboardthemes")
 usePackage("devtools")
+usePackage("stringr")
 
 BioCPackage("cluster")
 BioCPackage("TCC")

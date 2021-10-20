@@ -3,6 +3,35 @@
 EnrichRun <- reactiveValues(EnrichRunValue = FALSE) # to precise the run button has not been clicked
 
 
+output$enrichparDEGs <- renderUI({    # set of parameters
+    radioButtons(
+      'selectDEGs',
+      'Select DEGs from your original DEA ?',
+      choices = c('yes','no'),
+      selected = 'no')
+})
+
+
+observeEvent(input$selectDEGs,{
+  if (input$selectDEGs == 'yes'){
+    data_selec <- as.vector(var$genelist)
+    updateTextAreaInput(
+      session = getDefaultReactiveDomain(),
+      "list_ids",
+      "Paste Gene List",
+      value = data_selec
+    )
+  }else{
+    updateTextAreaInput(
+      session = getDefaultReactiveDomain(),
+      "list_ids",
+      "Paste Gene List",
+      placeholder = 'paste your gene set one per row'
+    )
+  }
+})
+
+
 observeEvent(input$enrichmentgo,{  # when the button is clicked 
   progressSweetAlert(              # progress bar 
     session = session,
@@ -13,8 +42,11 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
   )
   
   
-  
-  geneset <-unlist(strsplit(input$list_ids, split = '\n')) # takes the gene set
+  if(input$selectDEGs == 'yes'){
+  geneset <-unlist(strsplit(input$list_ids, split = ',')) # takes the gene set
+  }else{
+    geneset <-unlist(strsplit(input$list_ids, split = '\n')) # takes the gene set
+  }
   
   updateProgressBar(              # update progress bar 
     session = session,
@@ -119,6 +151,14 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
   })
   
 })
+
+output$EnrichParams <- renderUI({
+  if(AnalysisRun$AnalysisRunValue){    # if the calculation is done then show the params with DEGs
+      uiOutput('enrichparDEGs')
+      }
+})
+
+
 
 # result table render
 

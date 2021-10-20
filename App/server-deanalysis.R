@@ -174,6 +174,7 @@ observeEvent(input$DEA, {           # when the run button is clicked
   }
   
   var$norData <- tcc$getNormalizedData() # only the normalized data
+  var$genelist <- var$result_s[,1]
   var$DEAMETHOD <- 'tcc'
   }
   
@@ -229,7 +230,7 @@ observeEvent(input$DEA, {           # when the run button is clicked
       }
       
     }
-
+    var$genelist <- rownames(var$DESeq2DEGs)
     var$DEAMETHOD <- 'deseq2'
     }
  
@@ -289,13 +290,12 @@ observeEvent(input$DEA, {           # when the run button is clicked
       }}
     var$edgeRDEGs <- var$result[which(var$result$q.value <= as.numeric(input$edgeRfdr)),] 
     var$edgeRDEGs <- var$edgeRDEGs[,-4]
+    var$genelist <- var$edgeRDEGs[,1]
     var$DEAMETHOD <- 'edgeR'
 
-   }
+  }
 
-    
-  
-  
+
   output$normresultTable <- DT::renderDataTable({  # normaliszed data table
     data <- var$norData
     DT::datatable(
@@ -436,6 +436,16 @@ resultTable <- reactive({   # saving the updated results to plot furtherly
 
 
 # results tables render
+
+output$genelist <- renderUI({
+  if(AnalysisRun$AnalysisRunValue){ # if the calculation is done then show the tables 
+    tagList(
+      fluidRow(column(
+        12, DT::dataTableOutput('genelistTable') %>% withSpinner()
+      )))} else {                       # if not, message to do it 
+        helpText("Run Normalization to obtain Result Table.")
+      }
+})
 
 
 output$NormResultTable <- renderUI({

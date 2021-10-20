@@ -81,8 +81,8 @@ output$D2pca <- renderPlotly({
     data.pca <- var$pcadata
     data <- data.frame(data.pca$x)
     data$name <- rownames(data)
-    group <- var$groupdf
-    group$name <- rownames(var$groupdf)
+    group <- var$select
+    group$name <- rownames(var$select)
     data <- left_join(x = data, y = group, by = "name") # to perform a pca over the groups 
     p <- plot_ly(
       data = data,
@@ -104,12 +104,11 @@ output$D2pca <- renderPlotly({
 #  3D plotly object       
 output$D3pca <- renderPlotly({       # same in 3D 
   if (length(var$pcadata) > 0) {
-    tcc <- var$tccObject
     data.pca <- var$pcadata
     data <- data.frame(data.pca$x)
     data$name <- rownames(data)
-    group <- tcc$group
-    group$name <- rownames(group)
+    group <- var$select
+    group$name <- rownames(var$select)
     data <- left_join(x = data, y = group, by = "name")
     p <- plot_ly(
       data = data,

@@ -186,8 +186,6 @@ observeEvent(input$DEA, {           # when the run button is clicked
    tcc <-                           
      new("TCC", var$newData, var$selectedgroups)
    var$tccObject <- tcc             # just to get the groups for pca 
-   print(var$select)
-   print(var$design)
    dds <- DESeqDataSetFromMatrix(countData=var$newData, colData=var$select, design=var$design)
    
    updateProgressBar(               # updating progress bar

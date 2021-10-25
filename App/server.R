@@ -9,10 +9,10 @@ shinyServer(function(input, output, session) { #all server files
   source(file = "server-deanalysis.R",
          local = TRUE,
          encoding = "UTF-8")
-  source(file = "server-heatmap.R",
+  source(file = "server-pca.R",
          local = TRUE,
          encoding = "UTF-8")
-  source(file = "server-pca.R",
+  source(file = "server-heatmap.R",
          local = TRUE,
          encoding = "UTF-8")
   source(file = "server-filter.R",

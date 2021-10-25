@@ -21,13 +21,13 @@ tagList(dashboardPage(                  #the global app
           tabName = "deanalysisTab",
           icon = icon("calculator")),
         menuSubItem(
-          "Heatmap",
-          tabName = "heatmapTab",
-          icon = icon("delicious")),
-        menuSubItem(
           "PCA",
           tabName = "pcaTab",
           icon = icon("chart-bar")),
+        menuSubItem(
+          "Heatmap",
+          tabName = "heatmapTab",
+          icon = icon("delicious")),
         menuSubItem(
           "Filter Data",
           tabName = "filterTab",
@@ -79,13 +79,13 @@ tagList(dashboardPage(                  #the global app
         local = TRUE,
         encoding = "UTF-8"
       )$value),
-      tabItem(tabName = "heatmapTab", source(
-        file = "ui-heatmap.R",
+      tabItem(tabName = "pcaTab", source(
+        file = "ui-pca.R",
         local = TRUE,
         encoding = "UTF-8"
       )$value),
-      tabItem(tabName = "pcaTab", source(
-        file = "ui-pca.R",
+      tabItem(tabName = "heatmapTab", source(
+        file = "ui-heatmap.R",
         local = TRUE,
         encoding = "UTF-8"
       )$value),

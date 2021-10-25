@@ -43,7 +43,7 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
   
   
   if(input$selectDEGs == 'yes'){
-  geneset <-unlist(strsplit(input$list_ids, split = ',')) # takes the gene set
+    geneset <-unlist(strsplit(input$list_ids, split = ',')) # takes the gene set
   }else{
     geneset <-unlist(strsplit(input$list_ids, split = '\n')) # takes the gene set
   }
@@ -63,7 +63,7 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
               correction_method = input$correction,
               domain_scope = input$chosenscope, 
               sources = enrichement,
-              significant = T)
+              significant = F)
   
   
   

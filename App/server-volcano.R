@@ -356,6 +356,9 @@ output$MainResultTableVolc <- renderUI({
 output$resultTabledown <- DT::renderDataTable({ # datatable render for downregulated genes
   sortedvolc <- var$result
   method <- var$DEAMETHOD
+  data <- var$norData
+  gene_id <- row.names(data)
+  data <- cbind(data, gene_id = gene_id)
   if (nrow(sortedvolc) == 0) {
     DT::datatable(sortedvolc)
   } else {
@@ -374,10 +377,7 @@ output$resultTabledown <- DT::renderDataTable({ # datatable render for downregul
           sortedvolc <- sortedvolc[,-2]
           sortedvolc <- sortedvolc[,-4]
         }}
-    data <- var$norData
-    gene_id <- row.names(data)
-    data <- cbind(data, gene_id = gene_id)
-    method <- var$DEAMETHOD
+
     downresultTable <- sortedvolc
 
    
@@ -432,6 +432,9 @@ output$resultTabledown <- DT::renderDataTable({ # datatable render for downregul
 output$resultTableup <- DT::renderDataTable({ #datatable render for downregulated genes
   sortedvolc <- var$result
   method <- var$DEAMETHOD
+  data <- var$norData
+  gene_id <- row.names(data)
+  data <- cbind(data, gene_id = gene_id)
   if (nrow(sortedvolc) == 0) {
     DT::datatable(sortedvolc)
   } else {
@@ -450,10 +453,7 @@ output$resultTableup <- DT::renderDataTable({ #datatable render for downregulate
           sortedvolc <- sortedvolc[,-2]
           sortedvolc <- sortedvolc[,-4]
         }}
-    data <- var$norData
-    gene_id <- row.names(data)
-    data <- cbind(data, gene_id = gene_id)
-    method <- var$DEAMETHOD
+
     upresultTable <- sortedvolc
     
     

@@ -1,8 +1,6 @@
 # server-filter.R
 
 
-
-
 output$condFilter<- renderUI({
   
   if (AnalysisRun$AnalysisRunValue){  # if a DEA has been performed, then show parameters
@@ -16,6 +14,13 @@ output$condFilter<- renderUI({
         list(
           inputId = "confirmed2groups",
           label = "Confirm groups",
+          icon = icon("play")
+        ))
+      ),
+      do.call(actionBttn,c(   # run button 
+        list(
+          inputId = "resetButton",
+          label = "Reset Groups",
           icon = icon("play")
         ))
       )
@@ -34,10 +39,21 @@ output$condFilter<- renderUI({
   
 })
 
-
+observeEvent(input$resetButton,{
+  tagList(
+  updateSelectInput(
+    session = getDefaultReactiveDomain(),
+    'filter_samples',
+    label="Select Samples",
+    choices=var$cond_id2,
+    selected = var$cond_id2),
+  helpText(HTML("Choose the 2 groups you want to study for a two groups comparison : MA plot and Volcano plot"))
+  )
+  var$norData <- var$norDT
+  
+})
 
 observeEvent(input$filter_samples,{
-
   selectedsamples <- input$filter_samples
   tmprem = match(as.character(var$sampleid2[which(!(var$cond_id2%in%selectedsamples))]),colnames(var$norData))
   tmpkeep = setdiff(1:ncol(var$norData),tmprem)
@@ -77,7 +93,7 @@ observeEvent(input$filter_samples,{
   var$select3 <- as.data.frame(group3$V2, row.names =  colnames(var$newData))
   colnames(var$select3) <-"group"
   var$design2 <- formula(as.formula(paste("~", paste(colnames(as.data.frame(group)), collapse = "+"))))
-  })
+})
 
 
 observeEvent(input$confirmed2groups, {
@@ -261,9 +277,8 @@ resultTable <- reactive({   # saving the updated results to plot furtherly
 })
 
 output$filterTable <-  DT::renderDataTable({ 
-
-  data <- var$norData
-  
+data <- var$norData
+    
   if(input$DEAmethod =="tcc"){
     gene_id <- row.names(data)
     data <- cbind(data, gene_id = gene_id)
@@ -276,7 +291,7 @@ output$filterTable <-  DT::renderDataTable({
   }
   if(input$DEAmethod == "DESeq2"){
     data <- as.data.frame(data)
-    resultTable <- merge(var$result, var$norData, by="row.names")
+    resultTable <- merge(var$result, data, by="row.names")
     names(resultTable)[1] <-'gene_id'
   }
   
@@ -319,15 +334,16 @@ output$filterTable <-  DT::renderDataTable({
 
 
 output$filterTableDEG <- DT::renderDataTable({ 
+
+    data <- var$norData
   
-  data <- var$norData
   if(input$DEAmethod == 'tcc'){
     gene_id <- row.names(data)
     data <- cbind(data, gene_id = gene_id)
     resultTable <- merge(var$result_s, data, by = "gene_id")
   }
   if(input$DEAmethod == "DESeq2"){
-    resultTable <- merge(var$DESeq2DEGs,data, by = "row.names")
+    resultTable <- merge(var$DESeq2DEGs, data, by = "row.names")
     names(resultTable[1]) <- 'gene_id'
   }
   if(input$DEAmethod == "edgeR"){

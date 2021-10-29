@@ -174,6 +174,7 @@ observeEvent(input$DEA, {           # when the run button is clicked
   }
   
   var$norData <- tcc$getNormalizedData() # only the normalized data
+  var$norDT <- var$norData
   var$genelist <- var$result_s[,1]
   var$DEAMETHOD <- 'tcc'
   }
@@ -206,6 +207,7 @@ observeEvent(input$DEA, {           # when the run button is clicked
     )
     var$resultz <- results(dds)
     var$norData <- as.matrix(counts(dds, normalized = TRUE)) # normalization
+    var$norDT <- var$norData
     var$resultz <- as.matrix(var$resultz)
     var$result <- data.frame(var$resultz[,1], row.names = rownames(var$resultz))
     var$result['m.value'] <- var$resultz[,2]
@@ -284,6 +286,7 @@ observeEvent(input$DEA, {           # when the run button is clicked
       var$result <- var$result[,-2] # supp basemean
     }
     var$norData <- lrt$fitted.values
+    var$norDT <- var$norData
     var$result["estimatedDEG"] = "0"
     for (row in 1:nrow(var$result)){
       if(var$result[row,'q.value'] <= as.numeric(input$edgeRfdr)){

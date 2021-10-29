@@ -17,6 +17,7 @@ output$condFilter<- renderUI({
           icon = icon("play")
         ))
       ),
+      helpText(HTML("Reset groups to come back to the original normalized table and choose other groups")),
       do.call(actionBttn,c(   # run button 
         list(
           inputId = "resetButton",

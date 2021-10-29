@@ -136,7 +136,7 @@ output$geneBarPlot <- renderPlotly({ # bar plot
   gene_id <- eventdata$key # key bar plot 
   expression <-
     var$newData[row.names(var$newData) == gene_id, ]
-  data <- var$newData # data selection 
+  data <- var$norData # data selection 
   dataGroups <- var$selectedgroups # selected groups 
   expression <- t(expression[dataGroups != 0]) 
   
@@ -160,7 +160,7 @@ output$geneBarPlot <- renderPlotly({ # bar plot
   ) %>%
     layout(
       xaxis = xform,
-      yaxis = list(title = "Raw Count"),
+      yaxis = list(title = "Normalized Count"),
       title = colnames(expression)
     )
 })

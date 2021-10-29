@@ -244,7 +244,7 @@ output$VolcanoBarPlot <- renderPlotly({
   gene_id <- eventdata$key
   expression <- # counts 
     var$newData[row.names(var$newData) == gene_id,]
-  data <- var$newData
+  data <- var$norData
   dataGroups <- var$selectedgroups # according to selected groups
   expression <- t(expression[dataGroups != 0])
   
@@ -267,7 +267,7 @@ output$VolcanoBarPlot <- renderPlotly({
   ) %>%
     layout(
       xaxis = xform,
-      yaxis = list(title = "Raw Count"),
+      yaxis = list(title = "Normalized Count"),
       title = colnames(expression)
     )
 })

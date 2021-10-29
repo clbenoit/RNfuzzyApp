@@ -10,7 +10,14 @@ box(                   # parameter box
   width = NULL,
   solidHeader = TRUE,
   status = "primary",
-  uiOutput('condFilter')
+  uiOutput('condFilter'),
+  do.call(actionBttn,c(   # run button 
+    list(
+      inputId = "resetButton",
+      label = "Reset Groups",
+      icon = icon("play")
+    ))
+  )
 
 )),
 column(9,

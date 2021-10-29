@@ -230,6 +230,9 @@ observeEvent(input$DEA, {           # when the run button is clicked
       }
       
     }
+
+    gene_id <- row.names(var$DESeq2DEGs)
+    var$DESeq2DEGs <- cbind(var$DESeq2DEGs, gene_id = gene_id)
     var$genelist <- rownames(var$DESeq2DEGs)
     var$DEAMETHOD <- 'deseq2'
     }
@@ -338,7 +341,7 @@ observeEvent(input$DEA, {           # when the run button is clicked
     }
     if(input$DEAmethod == "DESeq2"){
       data <- as.data.frame(data)
-      resultTable <- merge(var$result, var$norData, by="row.names")
+      resultTable <- merge(var$result, data, by="row.names")
       names(resultTable)[1] <-'gene_id'
     }
     
@@ -385,7 +388,9 @@ observeEvent(input$DEA, {           # when the run button is clicked
     resultTable <- merge(var$result_s, data, by = "gene_id")
     }
     if(input$DEAmethod == "DESeq2"){
-      resultTable <- merge(var$DESeq2DEGs,data, by = "row.names")
+      gene_id <- row.names(data)
+      data <- cbind(data, gene_id = gene_id)
+      resultTable <- merge(var$DESeq2DEGs,data, by = "gene_id")
       names(resultTable[1]) <- 'gene_id'
     }
     if(input$DEAmethod == "edgeR"){

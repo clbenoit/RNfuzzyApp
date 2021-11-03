@@ -1,6 +1,6 @@
 # server-filter.R
 
-
+FilterRun <- reactiveValues(FilterRunValue = FALSE)# to precise the run button has not been clicked
 output$condFilter<- renderUI({
   
   if (AnalysisRun$AnalysisRunValue){  # if a DEA has been performed, then show parameters
@@ -154,6 +154,7 @@ observeEvent(input$confirmed2groups, {
       var$result_s <- var$result_e[,-7]      # deleting the column showing which one is a DEG and which one is not
     
     var$norData <- tcc$getNormalizedData() # only the normalized data
+    var$filter_genelist <- var$result_s[,1]
     var$DEAMETHOD <- 'tcc'
   }
   
@@ -195,6 +196,7 @@ observeEvent(input$confirmed2groups, {
     var$DESeq2DEGs <- var$result[which(var$result$q.value <= as.numeric(input$deseq2cutoff)),] 
     var$result["estimatedDEG"] = "0"
     var$result <- var$result[complete.cases(var$result), ]
+    var$filter_genelist <- rownames(var$DESeq2DEGs)
     
     for (row in 1:nrow(var$result)){
       if(var$result[row,'q.value'] <= as.numeric(input$deseq2cutoff)){
@@ -255,6 +257,7 @@ observeEvent(input$confirmed2groups, {
     var$edgeRDEGs <- var$result[which(var$result$q.value <= as.numeric(input$edgeRfdr)),] 
     var$edgeRDEGs <- var$edgeRDEGs[,-4]
     var$DEAMETHOD <- 'edgeR'
+    var$filter_genelist <- var$edgeRDEGs[,1]
   }
     
     closeSweetAlert(session = session)       # close alert precising the calculation is done
@@ -272,6 +275,7 @@ observeEvent(input$confirmed2groups, {
     helpText("You must choose 2 groups only.")
   }
   
+  FilterRun$FilterRunValue <- input$confirmed2groups  # precise the run button has been clicked 
 })
 
 resultTable <- reactive({   # saving the updated results to plot furtherly 

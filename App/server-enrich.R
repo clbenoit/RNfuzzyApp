@@ -11,6 +11,13 @@ output$enrichparDEGs <- renderUI({    # set of parameters
       selected = 'no')
 })
 
+output$enrichpar_filter_DEGs <- renderUI({    # set of parameters
+  radioButtons(
+    'selectfilterDEGs',
+    'Select DEGs from your filtered DEA (for MA/Volcano) ?',
+    choices = c('yes','no'),
+    selected = 'no')
+})
 
 observeEvent(input$selectDEGs,{
   if (input$selectDEGs == 'yes'){
@@ -31,6 +38,25 @@ observeEvent(input$selectDEGs,{
   }
 })
 
+observeEvent(input$selectfilterDEGs,{
+if (input$selectfilterDEGs == "yes"){
+  data_selec <- as.vector(var$filter_genelist)
+  updateTextAreaInput(
+    session = getDefaultReactiveDomain(),
+    "list_ids", 
+    "Paste Gene List",
+    value = data_selec
+  )
+}else{
+  updateTextAreaInput(
+    session = getDefaultReactiveDomain(),
+    "list_ids",
+    "Paste Gene List",
+    placeholder = 'paste your gene set one per row'
+  )
+}
+})
+
 
 observeEvent(input$enrichmentgo,{  # when the button is clicked 
   progressSweetAlert(              # progress bar 
@@ -42,7 +68,7 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
   )
   
   
-  if(input$selectDEGs == 'yes'){
+  if(input$selectDEGs == 'yes' || input$selectfilterDEGs == 'yes'){
     geneset <-unlist(strsplit(input$list_ids, split = ',')) # takes the gene set
   }else{
     geneset <-unlist(strsplit(input$list_ids, split = '\n')) # takes the gene set
@@ -155,9 +181,14 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
 output$EnrichParams <- renderUI({
   if(AnalysisRun$AnalysisRunValue){    # if the calculation is done then show the params with DEGs
       uiOutput('enrichparDEGs')
-      }
+  }
 })
 
+output$EnrichfiltParams <- renderUI({
+if (FilterRun$FilterRunValue){
+  uiOutput('enrichpar_filter_DEGs')
+}
+})
 
 
 # result table render

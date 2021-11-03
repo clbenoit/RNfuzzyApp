@@ -10,6 +10,7 @@ fluidPage(fluidRow(column(
     status = "primary",
     tagList(
     uiOutput('EnrichParams'),
+    uiOutput("EnrichfiltParams"),
     textAreaInput(
       "list_ids",
       "Paste Gene List",
@@ -80,7 +81,7 @@ fluidPage(fluidRow(column(
     ), 
     selectInput(
       "chosenscope",
-      "Statistical domain scope",
+      "Background list",
       c("Only annotated genes" = "annotated",
         "All known genes" = "known")
     ),

@@ -1,9 +1,20 @@
-# RNFuzzyApp
+# RNfuzzyApp
 
 ---
 
 RNFuzzyApp is an application to analyse aligned RNA-seq data and do fuzzy clustering.</br>
 </br>
+
+- with RNfuzzyApp, you have chosen a user-friendly, web-based R shiny application to analyze your RNA-seq data. RNfuzzyApp allows you to perform:
+
+    data normalization
+    differential expression analysis
+    Mfuzz fuzzy clustering of time-series data
+    interactive visualization of your data
+    enrichment analysis
+    orthology assignments
+    ID conversion.
+
 
 - Detailed instructions on how to use RNfuzzyApp can be found in the user manual provided in this repository (RNfuzzApp_UserManual.pdf) Find below details on how to install and run RNfuzzyApp, as well as a very brief instruction on how to pre-process your data. </br>
 
@@ -48,7 +59,7 @@ If you are using a Mac OS, you might have to install XQuartz for Mfuzz to run: h
 
 ---
 
-**DATA PREPROCESSING **
+**DATA PREPROCESSING**
 
 RNfuzzyApp is an R shiny app that requires raw or normalized read counts as input. For getting read counts, you need to pre-process your sequencing data using a standard procedure that includes e.g. quality control (using a tool like fastQC (1), read mapping to the genome (using a tool like STAR read aligner (2) and finally, read counting (using a tool like FeatureCounts (3)). 
 
@@ -59,3 +70,5 @@ Sample data can be found at: https://gitlab.com/habermann_lab/rna-seq-analysis-a
 rnfuzzyapp_dea_test_data_tabula_muris.csv is a mouse dataset for testing the differential expression and simple hierarchical clustering functions of RNfuzzyApp and contains raw read counts of mouse skeletal muscle at 3 months, 12 months and 24 months of age from the Tabula muris senis project (https://tabula-muris-senis.ds.czbiohub.org/).  
 
 rnfuzzyapp_mfuzz_test_data_spletter_2019.csv is for testing the fuzzy clustering using mFuzz function of RNfuzzyApp and contains normalized mean read counts of the developing Drosophila leg (see GEO database entry GSE143430 https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE143430). 
+
+---

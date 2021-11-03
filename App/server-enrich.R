@@ -141,7 +141,7 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
   output$EnrichBarPlot <- renderPlotly({
     fig <- plot_ly(
       res_enrich,
-      x = ~p_value,
+      x = ~(-log(p_value)),
       y = ~term_name,
       type = "bar",
       color = ~factor(source)

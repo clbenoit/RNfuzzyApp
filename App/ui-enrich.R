@@ -68,7 +68,7 @@ fluidPage(fluidRow(column(
       "Multiple testing correction",
       c("gSCS threshold" = "gSCS",
         "Benjamini-Hochberg FDR" = "fdr", 
-        "Bonferroni correction", "bonferroni")
+        "Bonferroni correction" = "bonferroni")
     ),
     sliderInput(
       "userpval_cutoff",

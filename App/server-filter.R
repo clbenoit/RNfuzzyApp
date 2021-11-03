@@ -51,6 +51,7 @@ observeEvent(input$resetButton,{
   helpText(HTML("Choose the 2 groups you want to study for a two groups comparison : MA plot and Volcano plot"))
   )
   var$norData <- var$norDT
+  var$newData <- var$CountData
   
 })
 
@@ -62,7 +63,7 @@ observeEvent(input$filter_samples,{
   tmprem2 = match(as.character(var$sampleid2[which(!(var$cond_id2%in%selectedsamples))]),colnames(var$newData))
   tmpkeep2 = setdiff(1:ncol(var$newData),tmprem2)
   var$newData = var$newData[,tmpkeep2]
-  var$sampleid3 <- colnames(var$norData)
+  var$sampleid3 <- colnames(var$newData)
   var$actualgroups2 <- do.call(rbind,strsplit(var$sampleid3,"_",fixed=TRUE))
   var$actualgroups2 <- var$actualgroups2[,c(2,1)]
   var$group3 <- var$actualgroups2[,1]

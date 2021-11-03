@@ -2,7 +2,7 @@
 
 ---
 
-RNFuzzyApp is an application to analyse aligned RNA-seq data and do fuzzy clustering.</br>
+RNfuzzyApp is an application to analyse aligned RNA-seq data and do fuzzy clustering.</br>
 </br>
 
 With RNfuzzyApp, you have chosen a user-friendly, web-based R shiny application to analyze your RNA-seq data. RNfuzzyApp allows you to perform:
@@ -26,33 +26,33 @@ RNfuzzyApp was built under R version 4.0.0 and runs under  R 3.6 or higher. Inst
 
 First, you need to install the shiny library in R. For this, type in your R environment
 
-install.packages("shiny")
+**install.packages("shiny")**
 
 You might have to select a repository from which to download the library. 
 Then activate the library in R by typing
 
-library(shiny)
+**library(shiny)**
 
 Second, download the RNfuzzyApp software. You can do this either by using the git command, if you have it installed at your computer. Choose first the location (folder), where you want to install RNfuzzyApp. Then type:
 
-git clone https://gitlab.com/habermann_lab/rna-seq-analysis-app.git
+**git clone https://gitlab.com/habermann_lab/rna-seq-analysis-app.git**
 
 Alternatively, simply download the software using the download button from the gitlab repository https://gitlab.com/habermann_lab/rna-seq-analysis-app to download and save RNfuzzyApp at your chosen location. 
 
 Using the R command line, type the command:
 
-runApp(“/my_path_to_the_app/rna-seq-analysis-app-master-App/App”) 
+**runApp(“/my_path_to_the_app/rna-seq-analysis-app-master-App/App”)** 
 
 where my_path_to_the_app is the path on your computer to the folder to which you have downloaded RNfuzzyApp.
 
 In RStudio, 
 
-open global.R and click ‘Run App’.
+**open global.R and click ‘Run App’**
 
 All required packages will automatically install and RNfuzzyApp will be opened in the web-browser.
 
 To increase the maximum size of input data, you can run :
-options(shiny.maxRequestSize = n*1024^2)
+**options(shiny.maxRequestSize = n*1024^2)**
 with n, the wanted size in MB
 
 If you are using a Mac OS, you might have to install XQuartz for Mfuzz to run: https://www.xquartz.org/ , at least in the Big Sur environment. XQuartz will install an X11 environment, which is required to run parts of the RNfuzzyApp. 

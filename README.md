@@ -7,13 +7,14 @@ RNFuzzyApp is an application to analyse aligned RNA-seq data and do fuzzy cluste
 
 - with RNfuzzyApp, you have chosen a user-friendly, web-based R shiny application to analyze your RNA-seq data. RNfuzzyApp allows you to perform:
 
-    • data normalization</br>
-    • differential expression analysis</br>
-    • Mfuzz fuzzy clustering of time-series data</br>
-    • interactive visualization of your data</br>
-    • enrichment analysis</br>
-    • orthology assignments</br>
-    • ID conversion</br>
+-     • data normalization </br>
+-     • differential expression analysis </br>
+-     • Mfuzz fuzzy clustering of time-series data </br>
+-     • interactive visualization of your data </br>
+-     • enrichment analysis </br>
+-     • orthology assignments </br>
+-     • ID conversion </br>
+
 
 
 - Detailed instructions on how to use RNfuzzyApp can be found in the user manual provided in this repository (RNfuzzApp_UserManual.pdf) Find below details on how to install and run RNfuzzyApp, as well as a very brief instruction on how to pre-process your data. </br>

@@ -55,7 +55,7 @@ navbarPage(theme=shinytheme("sandstone"),"Data Visualization", # theme for navba
                   </tr>
                   <tr>
                   <th class="tg-031e"> <span class="label label-primary"> Column 2-n</span></th>
-                  <th class="tg-031e"> Other metadata (condition, timepoints) </th>
+                  <th class="tg-031e"> Other metadata (condition, covariates) </th>
                   </tr>
                   <tr>
                   </table>

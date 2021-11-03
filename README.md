@@ -5,81 +5,57 @@
 RNFuzzyApp is an application to analyse aligned RNA-seq data and do fuzzy clustering.</br>
 </br>
 
+- Detailed instructions on how to use RNfuzzyApp can be found in the user manual provided in this repository (RNfuzzApp_UserManual.pdf) Find below details on how to install and run RNfuzzyApp, as well as a very brief instruction on how to pre-process your data. </br>
 
-- First proceed to a quality control, an alignment and a count (FeatureCounts for example). Input table is geneIDS as rows and conditions/covariates as columns named as condition_replicate. </br>
-
-<b> Installation </b>
 ---
 
-- Installation requiere running <b> runApp('path/rna-seq-analysis-app-master-App/App') </b> in R and all requiered packages will automatically install. </br>
-- Upload a count csv or tsv table where the first column is composed of genes' names (can be Symbols, EnsembleIds, FlybaseIDs, ...). </br>
-- Example tables are available in test_data/.</br>
-- Mfuzz soft clustering asks for a  table of same above composition but mean only if you have replicates.
+**INSTALLATION**
 
+RNfuzzyApp was built under R version 4.0.0 and runs under  R 3.6 or higher. Installing RNfuzzyApp is easy and requires only a few commands to be executed within the R environment (R or RStudio). 
 
+First, you need to install the shiny library in R. For this, type in your R environment
 
-<b>PART Ia : Upload data and visualization</b>
+install.packages("shiny")
+
+You might have to select a repository from which to download the library. 
+Then activate the library in R by typing
+
+library(shiny)
+
+Second, download the RNfuzzyApp software. You can do this either by using the git command, if you have it installed at your computer. Choose first the location (folder), where you want to install RNfuzzyApp. Then type:
+
+git clone https://gitlab.com/habermann_lab/rna-seq-analysis-app.git
+
+Alternatively, simply download the software using the download button from the gitlab repository https://gitlab.com/habermann_lab/rna-seq-analysis-app to download and save RNfuzzyApp at your chosen location. 
+
+Using the R command line, type the command:
+
+runApp(“/my_path_to_the_app/rna-seq-analysis-app-master-App/App”) 
+
+where my_path_to_the_app is the path on your computer to the folder to which you have downloaded RNfuzzyApp.
+
+In RStudio, 
+
+open global.R and click ‘Run App’.
+
+All required packages will automatically install and RNfuzzyApp will be opened in the web-browser.
+
+To increase the maximum size of input data, you can run :
+options(shiny.maxRequestSize = n*1024^2)
+with n, the wanted size in MB
+
+If you are using a Mac OS, you might have to install XQuartz for Mfuzz to run: https://www.xquartz.org/ , at least in the Big Sur environment. XQuartz will install an X11 environment, which is required to run parts of the RNfuzzyApp. 
+
 ---
 
-- Upload your data as described above, choose your groups </br>
-- Visualize the data across :</br>
-    - result table</br>
-    - Count distribution (bar plot)</br>
-    - Hierarchical clustering (heatmap)</br>
-    - PCA ( 2D and 3D plots)</br>
+**DATA PREPROCESSING **
 
+RNfuzzyApp is an R shiny app that requires raw or normalized read counts as input. For getting read counts, you need to pre-process your sequencing data using a standard procedure that includes e.g. quality control (using a tool like fastQC (1), read mapping to the genome (using a tool like STAR read aligner (2) and finally, read counting (using a tool like FeatureCounts (3)). 
 
-<b>PART Ib : Upload data and visualization</b>
----
+As an input table, RNfuzzyApp requires a csv file, with geneIDs as rows and the  conditions, timepoints or covariates as columns. And it must be named as condition_replicate (whereby condition can be experimental condition or time-point).
 
-- Perform soft clustering on time series data using Mfuzz. </br>
-With help to choose the number of clusters.
-- clusters table automatically downloaded.
+Sample data can be found at: https://gitlab.com/habermann_lab/rna-seq-analysis-app/-/tree/master/App/test_files 
 
+rnfuzzyapp_dea_test_data_tabula_muris.csv is a mouse dataset for testing the differential expression and simple hierarchical clustering functions of RNfuzzyApp and contains raw read counts of mouse skeletal muscle at 3 months, 12 months and 24 months of age from the Tabula muris senis project (https://tabula-muris-senis.ds.czbiohub.org/).  
 
-<b>PART II : Analysis</b>
----
-3 analysis methods are proposed, TCC, DESeq2 or edgeR </br>
-
-<b>- Normalization</b> </br>
-
-The normalization is made by the TCC package.The package allows to compare tag count data with robust normalization strategies.</br>
-<i>https://bmcbioinformatics.biomedcentral.com/articles/10.1186/1471-2105-14-219</i></br>
-Or by DESeq2 or by TMM, RLE, upperquartile (with a edgeR analysis) </br>
-</br>
-- Choose your method and parameters</br>
-- Visualize the results</br>
-- Download contents</br>
-
-<b>- Analysis</b> </br>
-
-For each result, downloading png images and results is available.</br>
-
-- Heatmap and clustering </br>
-- PCA ( 2D and 3D plots)</br>
-- Filter part to choose two conditions to perform MA and Volcano plots
-- MA plot</br>
-- Volcano plot</br>
-
-<b> PART III : Mfuzz soft clustering </b>
----
-
-Given a csv table of mean counts per timepoints, Mfuzz generates fuzzy clustering regarding the chosen number of clusters.
-Methods are present to help the user choose the numer of clusters, and the time series plots will be generated.
-Also available : enrichment for a chosen cluster.
-
-
-<b> PART IV : Enrichment & Conversion </b>
----
-
-<b> - Enrichment : </b></br>
-
-Giving a set of ids, this section provides you a GO Term enrichment, Kegg and Wiki Pathways with an associated graph. </br>
-
-<b> - Orthology : </b></br>
-
-Giving a set of  ids, input and target organism, this section provides an orthologs search using gprofiler2 package. </br>
-
-<b> - Conversion : </b></br>
-
-Giving a set of  ids of choice, this section provides a translation to other ids using gprofiler2 package.
+rnfuzzyapp_mfuzz_test_data_spletter_2019.csv is for testing the fuzzy clustering using mFuzz function of RNfuzzyApp and contains normalized mean read counts of the developing Drosophila leg (see GEO database entry GSE143430 https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE143430). 

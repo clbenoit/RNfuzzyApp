@@ -61,7 +61,7 @@ If you are using a Mac OS, you might have to install XQuartz for Mfuzz to run: h
 
 **DATA PREPROCESSING**
 
-RNfuzzyApp is an R shiny app that requires raw or normalized read counts as input. For getting read counts, you need to pre-process your sequencing data using a standard procedure that includes e.g. quality control (using a tool like fastQC (1), read mapping to the genome (using a tool like STAR read aligner (2) and finally, read counting (using a tool like FeatureCounts (3)). 
+RNfuzzyApp is an R shiny app that requires raw or normalized read counts as input. For getting read counts, you need to pre-process your sequencing data using a standard procedure that includes e.g. quality control (using a tool like fastQC, read mapping to the genome (using a tool like STAR read aligner and finally, read counting (using a tool like FeatureCounts). 
 
 As an input table, RNfuzzyApp requires a csv file, with geneIDs as rows and the  conditions, timepoints or covariates as columns. And it must be named as condition_replicate (whereby condition can be experimental condition or time-point).
 

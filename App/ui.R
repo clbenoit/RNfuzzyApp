@@ -120,5 +120,8 @@ tagList(dashboardPage(                  #the global app
         encoding = "UTF-8"
       )$value)
     )
+  ),
+  tags$head(
+    tags$script(src = "ui.js")
   )
 ))

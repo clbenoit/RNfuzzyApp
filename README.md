@@ -73,8 +73,8 @@ Then, relaunch RNfuzzyApp by typing
 If you are using a Mac OS, you might have to install XQuartz for Mfuzz to run: https://www.xquartz.org/ , at least in the Big Sur environment. XQuartz will install an X11 environment, which is required to run parts of the RNfuzzyApp. 
 
 **Linux MINT related errors**
-In Linux Mint with a basic installation of R, we found issues related to curl/openssl, libssl, and libxml2. In our case, the required packages were missing from the Linux installation. To resolve these issues, you will have to install the required packages on the command line of your Linux system.
-On Ubuntu or Mint, or Debian, you can use the apt-get commands to do so; or just talk to your system administrator to help you with installing these packages on your machine.
+In Linux Mint with a basic installation of R, we found issues related to curl/openssl, libssl, and libxml2. In our case, the required packages were missing from the Linux installation. To resolve these issues, you will have to install the required packages on your Linux system.
+On Ubuntu or Mint, or Debian, you can use the apt-get commands in a terminal window to do so; or just talk to your system administrator to help you with installing these packages on your machine.
 
 Usually, you use a series of commands like this:
 

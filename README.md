@@ -55,7 +55,41 @@ To increase the maximum size of input data, you can run :
 **options(shiny.maxRequestSize = n*1024^2)**
 with n, the wanted size in MB
 
+---
+**TROUBLESHOOTING YOUR INSTALLATION**
+
+Depending on your system, you might encounter errors that we cannot forsee. We have collected a couple of systems-specific errors we have been confronted with here. 
+
+**R issues**
+markdown does not seem to be installed with versions of R 4 or higher. If you miss the markdown package, the RNfuzzyApp web-server will not start and you will get an error message in the browser that indicates that the markdown pacakge is not found or unknown. In this case, you will have to install the markdown package within the R environment. To do so, type:
+
+**install.packages("markdown")**
+
+Then, relaunch RNfuzzyApp by typing 
+
+**runApp(“/my_path_to_the_app/rna-seq-analysis-app-master-App/App”)**
+
+**Mac OS related problems**
 If you are using a Mac OS, you might have to install XQuartz for Mfuzz to run: https://www.xquartz.org/ , at least in the Big Sur environment. XQuartz will install an X11 environment, which is required to run parts of the RNfuzzyApp. 
+
+**Linux MINT related errors**
+In Linux Mint with a basic installation of R, we found issues related to curl/openssl, libssl, and libxml2. In our case, the required packages were missing from the Linux installation. To resolve these issues, you will have to install the required packages on the command line of your Linux system.
+On Ubuntu or Mint, or Debian, you can use the apt-get commands to do so; or just talk to your system administrator to help you with installing these packages on your machine.
+
+Usually, you use a series of commands like this:
+
+**sudo apt-get update**
+
+To install a missing curl software:
+**sudo apt-get install libcurl4-openssl-dev**
+
+To install the libssl-dev tools:
+**sudo apt-get install libssl-dev**
+
+To install the libxml2-dev tools:
+**sudo apt-get install libxml2-dev**
+
+Your errors might not be exactly the same depending on your system. The error messages are usually displayed in the R window (where you started RNfuzzyApp). If you see that the browser window which runs RNfuzzyApp gets grey, it means the App is stuck and you are missing one library. Check then your R window and look at your error. Typically, a web-search with the error will help you find the source of your install problem.
 
 ---
 

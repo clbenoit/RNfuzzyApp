@@ -80,13 +80,13 @@ Usually, you use a series of commands like this:
 
 **sudo apt-get update**
 
-To install a missing curl software:
+To install a missing curl software:</br>
 **sudo apt-get install libcurl4-openssl-dev**
 
-To install the libssl-dev tools:
+To install the libssl-dev tools:</br>
 **sudo apt-get install libssl-dev**
 
-To install the libxml2-dev tools:
+To install the libxml2-dev tools:</br>
 **sudo apt-get install libxml2-dev**
 
 Your errors might not be exactly the same depending on your system. The error messages are usually displayed in the R window (where you started RNfuzzyApp). If you see that the browser window which runs RNfuzzyApp gets grey, it means the App is stuck and you are missing one library. Check then your R window and look at your error. Typically, a web-search with the error will help you find the source of your install problem.

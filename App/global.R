@@ -22,6 +22,7 @@ BioCPackage <- function(p)
 
 #theme 
 
+usePackage("BiocManager")
 usePackage("shiny")
 usePackage("shinydashboard")
 usePackage("shinycssloaders")

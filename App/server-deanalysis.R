@@ -178,7 +178,7 @@ observeEvent(input$DEA, {           # when the run button is clicked
   var$genelist <- var$result_s[,1]
   var$DEAMETHOD <- 'tcc'
   }
-  
+
   
   ######################################### deseq2 method #################################################
   
@@ -209,16 +209,18 @@ observeEvent(input$DEA, {           # when the run button is clicked
     var$norData <- as.matrix(counts(dds, normalized = TRUE)) # normalization
     var$norDT <- var$norData
     var$resultz <- as.matrix(var$resultz)
-    var$result <- data.frame(var$resultz[,1], row.names = rownames(var$resultz))
+    var$result <- data.frame(row.names(var$resultz))
+    var$result['a.value'] <- var$resultz[,1]
     var$result['m.value'] <- var$resultz[,2]
     var$result['p.value'] <- var$resultz[,6]
     var$result['q.value'] <- p.adjust(var$resultz[,6], method = 'fdr')
-    names(var$result)[1] <- "a.value"
+    names(var$result)[1] <- "gene_id"
+    
 
     
     if (length(var$groupList2) != 2){
-      var$result <- var$result[,-1] # suppr basemean
-      var$result <- var$result[,-1] # supp log2fc
+      var$result <- var$result[,-2] # suppr basemean
+      var$result <- var$result[,-2] # supp log2fc
     }
 
     var$DESeq2DEGs <- var$result[which(var$result$q.value <= as.numeric(input$deseq2cutoff)),] 
@@ -232,10 +234,8 @@ observeEvent(input$DEA, {           # when the run button is clicked
       }
       
     }
-
-    gene_id <- row.names(var$DESeq2DEGs)
-    var$DESeq2DEGs <- cbind(var$DESeq2DEGs, gene_id = gene_id)
-    var$genelist <- rownames(var$DESeq2DEGs)
+   
+    var$genelist <- var$DESeq2DEGs[,1]
     var$DEAMETHOD <- 'deseq2'
     }
  
@@ -300,7 +300,7 @@ observeEvent(input$DEA, {           # when the run button is clicked
     var$DEAMETHOD <- 'edgeR'
 
   }
-
+################################
 
   output$normresultTable <- DT::renderDataTable({  # normaliszed data table
     data <- var$norData
@@ -336,16 +336,10 @@ observeEvent(input$DEA, {           # when the run button is clicked
       gene_id <- row.names(data)
       data <- cbind(data, gene_id = gene_id)
     resultTable <- merge(var$result_m, data, by = "gene_id")
-    }
-    if(input$DEAmethod == "edgeR"){
+    }else{
       data <- as.data.frame(data)
       data['gene_id'] <- row.names(data)
       resultTable <- merge(var$result, data, by = "gene_id")
-    }
-    if(input$DEAmethod == "DESeq2"){
-      data <- as.data.frame(data)
-      resultTable <- merge(var$result, data, by="row.names")
-      names(resultTable)[1] <-'gene_id'
     }
     
     DT::datatable(
@@ -394,7 +388,6 @@ observeEvent(input$DEA, {           # when the run button is clicked
       gene_id <- row.names(data)
       data <- cbind(data, gene_id = gene_id)
       resultTable <- merge(var$DESeq2DEGs,data, by = "gene_id")
-      names(resultTable[1]) <- 'gene_id'
     }
     if(input$DEAmethod == "edgeR"){
       gene_id <- row.names(data)

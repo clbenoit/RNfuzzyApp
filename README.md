@@ -109,3 +109,9 @@ rnfuzzyapp_dea_test_data_tabula_muris.csv is a mouse dataset for testing the dif
 rnfuzzyapp_mfuzz_test_data_spletter_2019.csv is for testing the fuzzy clustering using mFuzz function of RNfuzzyApp and contains normalized mean read counts of the developing Drosophila leg (see GEO database entry GSE143430 https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE143430). 
 
 ---
+
+**Citation**
+
+If you use RNfuzzyApp, please cite the following paper: https://f1000research.com/articles/10-654 
+
+---

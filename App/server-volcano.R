@@ -41,7 +41,7 @@ output$volcanoParams <- renderUI({   # parameters
       inputId = "Cutfdr",
       label = "FDR Cut-off",
       min = 0.00001,
-      value = 0.001,
+      value = 0.01,
       max = 0.01,
       step = 0.0001
     ),
@@ -55,7 +55,7 @@ output$volcanoParams <- renderUI({   # parameters
     ),
     spectrumInput(
       inputId = "downColor",
-      label = tagList("Down-regulated in G2" ,htmlOutput("downPreview")),
+      label = tagList("Down-regulated" ,htmlOutput("downPreview")),
       choices = list(
         list(
           "red",
@@ -73,7 +73,7 @@ output$volcanoParams <- renderUI({   # parameters
     ),
     spectrumInput(
       inputId = "upColor",
-      label = tagList("Up-regulated in G2" ,htmlOutput("upPreview")),
+      label = tagList("Up-regulated" ,htmlOutput("upPreview")),
       choices = list(
         list(
           "green",

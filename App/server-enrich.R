@@ -33,7 +33,7 @@ observeEvent(input$selectDEGs,{
       session = getDefaultReactiveDomain(),
       "list_ids",
       "Paste Gene List",
-      placeholder = 'paste your gene set one per row'
+      placeholder = 'paste your gene set separated by "," '
     )
   }
 })
@@ -43,7 +43,7 @@ if (input$selectfilterDEGs == "yes"){
   data_selec <- as.vector(var$filter_genelist)
   updateTextAreaInput(
     session = getDefaultReactiveDomain(),
-    "list_ids", 
+    "list_ids",
     "Paste Gene List",
     value = data_selec
   )
@@ -52,55 +52,53 @@ if (input$selectfilterDEGs == "yes"){
     session = getDefaultReactiveDomain(),
     "list_ids",
     "Paste Gene List",
-    placeholder = 'paste your gene set one per row'
+    placeholder = 'paste your gene set separated by "," '
   )
 }
 })
 
 
-observeEvent(input$enrichmentgo,{  # when the button is clicked 
-  progressSweetAlert(              # progress bar 
+observeEvent(input$enrichmentgo,{  # when the button is clicked
+  progressSweetAlert(              # progress bar
     session = session,
     id = "enrichProgress",
     title = "Work in progress",
     display_pct = TRUE,
     value = 0
   )
-  
-  
-  if(input$selectDEGs == 'yes' || input$selectfilterDEGs == 'yes'){
+
+
     geneset <-unlist(strsplit(input$list_ids, split = ',')) # takes the gene set
-  }else{
-    geneset <-unlist(strsplit(input$list_ids, split = '\n')) # takes the gene set
-  }
-  
-  updateProgressBar(              # update progress bar 
+
+
+
+  updateProgressBar(              # update progress bar
     session = session,
     id = "enrichProgress",
     title = "Enrichment in progress...",
     value = 50
   )
-  
+
   enrichement <- unlist(strsplit(input$chosenEnrich, split = '\n'))
-  res <- gost(geneset, 
+  res <- gost(geneset,
               organism = input$inputorg,
               ordered_query = T,
               user_threshold = input$userpval_cutoff,
               correction_method = input$correction,
-              domain_scope = input$chosenscope, 
+              domain_scope = input$chosenscope,
               sources = enrichement,
               significant = F)
-  
-  
-  
-  
-  updateProgressBar(           # updating the progress bar 
+
+
+
+
+  updateProgressBar(           # updating the progress bar
     session = session,
     id = "enrichProgress",
     title = "Enrichement in progress...",
     value = 75
   )
-  
+
   res_enrich <- as.data.frame(res$result)# result as data frame
   res_enrich <- res_enrich[,-1]
   res_enrich <- res_enrich[order(res_enrich[,2]),]
@@ -113,14 +111,14 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
   res_enrich <- res_enrich[,-2]
   res_enrich <- res_enrich[,-5]
   res_enrich <- res_enrich[,-5]
-  
-  
+
+
   output$EnrichResultTable <-  DT::renderDataTable({   # result table
     enrich_data <- res_enrich
     colnames(enrich_data) <- c("P Value","Term_id", "Enrichment","Term_name", "Parents")
     DT::datatable(
       enrich_data,
-      extensions = 'Buttons',    # download button 
+      extensions = 'Buttons',    # download button
       option = list(
         paging = TRUE,
         searching = TRUE,
@@ -135,35 +133,35 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
           text = 'Download')),
         scrollX = TRUE,
         pageLength = 10,
-        searchHighlight = TRUE,     # search bar 
+        searchHighlight = TRUE,     # search bar
         orderClasses = TRUE
-        
+
       ),
-      
+
       class = "display")
   }, server = FALSE)
-  
+
   EnrichRun$EnrichRunValue <- input$enrichmentgo   # precise the run button has been clicked
   updateNavbarPage(session, "entabs", "redirectres") # redirection to the result table after the enrichment is done
-  
-  closeSweetAlert(session = session)        # close alert that the enrichment is done 
+
+  closeSweetAlert(session = session)        # close alert that the enrichment is done
   sendSweetAlert(session = session,
                  title = "DONE",
                  text = "Enrichment was successfully performed.",
                  type = "success")
-  
+
   ##########
-  
+
   output$distribenrich <- renderPlotly({     # bar chart of results using plotly  : term with respect of -log(p-value)
-    p <- gostplot(res, 
-                  capped = T, 
+    p <- gostplot(res,
+                  capped = T,
                   interactive = TRUE
                   )
-    
+
     p
   })
-  
-  
+
+
   output$EnrichBarPlot <- renderPlotly({
     fig <- plot_ly(
       res_enrich,
@@ -171,11 +169,11 @@ observeEvent(input$enrichmentgo,{  # when the button is clicked
       y = ~term_name,
       type = "bar",
       color = ~factor(source)
-      
+
     )
     fig
   })
-  
+
 })
 
 output$EnrichParams <- renderUI({
@@ -200,7 +198,7 @@ output$EnrichResults <- renderUI({
         column(12, plotlyOutput("distribenrich") %>% withSpinner()),
         column(12, dataTableOutput('EnrichResultTable') %>% withSpinner())
       ))
-    } else {                 # if not message to do it 
+    } else {                 # if not message to do it
         helpText("Run Enrichment to obtain the Result Table.")
       }
 })
@@ -216,6 +214,3 @@ output$EnrichBar <- renderUI({
     helpText(("Run Enrichment to obtain the Result Table."))
   }
 })
-
-
-

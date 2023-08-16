@@ -92,7 +92,7 @@ observeEvent(input$data_samples,{
   var$select <- as.data.frame(group2$V2, row.names =  colnames(var$CountData))
   colnames(var$select) <- "group"
   group <- var$cond_id2
-  var$design <- formula(as.formula(paste("~", paste(colnames(as.data.frame(group)), collapse = "+"))))
+  var$design <- formula(as.formula(paste("~", paste(colnames(as.data.frame(rev(group))), collapse = "+"))))
   var$groupList2 <-  # set the groups
     lapply(unique(group2$V2), function(x) {
       group2[group2$V2 == x, ]$V1

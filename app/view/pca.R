@@ -2,8 +2,11 @@
 
 box::use(
   shiny[h3, moduleServer, NS, tagList, column, icon, uiOutput, 
-        navbarPage, tabPanel, reactiveValues, renderUI ],
+        navbarPage, tabPanel, reactiveValues, renderUI, helpText,
+        observeEvent],
   shinydashboard[box],
+  shinyWidgets[sendSweetAlert,],
+  plotly[renderPlotly]
 )
 
 ## Import shiny modules
@@ -45,14 +48,13 @@ ui <- function(id) {
 }
 
 #' @export
-server <- function(id, data, variables) {
+server <- function(id, data) {
   moduleServer(id, function(input, output, session) {
 
-    runPCA <- reactiveValues(runPCAValue = FALSE) # to precise the run button has not been clicked yet
-    
+    # runPCA <- reactiveValues(runPCAValue = FALSE) # to precise the run button has not been clicked yet
     
     output$CondPCAParams <- renderUI({              # if a DEA has not been performed error message to perform it
-      if (AnalysisRun$AnalysisRunValue){            # if DEA done, it shows the parameters
+      if (data$buttonsStates$AnalysisRun){            # if DEA done, it shows the parameters
         uiOutput(ns("PCAParams"))
       }else{
         sendSweetAlert(
@@ -106,7 +108,7 @@ server <- function(id, data, variables) {
     
     
     observeEvent(input$pcRun, {              # when the run button is clicked
-      runPCA$runPCAValue <- input$pcRun      # precise the button has been clicked
+      data$buttonsStates$runPCA <- input$pcRun      # precise the button has been clicked
       data <- var$norData                    # use normalized data
       data <- data[var$result$q.value <= input$pcFDR,]  # selection of genes with respect of the selected fdr cut-off
       data <- log1p(data)
@@ -195,7 +197,7 @@ server <- function(id, data, variables) {
     
     # Render 2D Plot UI 
     output$D2PlotUI <- renderUI({
-      if (runPCA$runPCAValue) {                    # if the pca run button has been clicked 
+      if (data$buttonsStates$runPCA) {                    # if the pca run button has been clicked 
         plotlyOutput(ns("D2pca"), width = 1200, height = 600) %>% withSpinner()    # it shows the 2D pca
       } else {                                     # if not, it just precise to run it 
         helpText("Click [Run PCA] first.")
@@ -204,7 +206,7 @@ server <- function(id, data, variables) {
     
     # Render 3D Plot UI 
     output$D3PlotUI <- renderUI({
-      if (runPCA$runPCAValue) {
+      if (data$buttonsStates$runPCA) {
         plotlyOutput(ns("D3pca"), width = 1200, height = 600) %>% withSpinner()
       } else {
         helpText("Click [Run PCA] first.")
@@ -212,7 +214,7 @@ server <- function(id, data, variables) {
     })
     
     output$normclust <- renderUI({
-      if(AnalysisRun$AnalysisRunValue) { # if data and no errors then run parameters and plot
+      if(data$buttonsStates$AnalysisRun) { # if data and no errors then run parameters and plot
         tagList(fluidRow(
           column( #parameter
             3,

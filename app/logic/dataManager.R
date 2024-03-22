@@ -9,7 +9,8 @@ DataManager <- R6::R6Class(
   classname = "DataManager",
   public = list(
     buttonsStates = reactiveValues(runPCA = FALSE,
-                                    AnalysisRun = FALSE),
+                                   AnalysisRun = FALSE, 
+                                   FilterRun =  FALSE),
     # reactive variables that are saved and can be use in another file than the original where it was created
     var = reactiveValues(
       count = NULL,                        #

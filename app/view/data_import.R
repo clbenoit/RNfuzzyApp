@@ -3,8 +3,8 @@
 box::use(
   shiny[h3, moduleServer, NS, tagList, column, icon, uiOutput, 
         navbarPage, tabPanel, reactiveValues, renderUI, 
-        observeEvent, reactive, fluidPage, fluidRow, tags, 
-        fileInput, HTML, sliderInput, selectizeInput, 
+        observeEvent, reactive, fluidPage, fluidRow, tags, req,
+        fileInput, HTML, sliderInput, selectizeInput, textInput, 
         updateSelectizeInput],
   shinydashboard[box, tabBox],
   shinythemes[shinytheme],
@@ -12,8 +12,10 @@ box::use(
   shinyBS[tipify],
   shinyWidgets[sendSweetAlert],
   data.table[fread],
-  stats[formula, as.formula]
-  #DT[DT]
+  stats[formula, as.formula],
+  DT[renderDataTable, dataTableOutput, datatable],
+  dplyr[`%>%`],
+  shinycssloaders[withSpinner]
 )
 
 ## Import shiny modules
@@ -308,9 +310,9 @@ server <- function(id, data) {
     })
     
     # Render a table of raw count data
-    output$table <- DT::renderDataTable({
+    output$table <- renderDataTable({
       df <- datasetInput()
-      DT::datatable(
+      datatable(
         df,
         colnames = c("Gene Name" = 1),
         extensions = c("Scroller", "RowReorder"),
@@ -333,14 +335,13 @@ server <- function(id, data) {
       if (nrow(datasetInput()) == 0) {  # if no uploaded table or empty, message
         tags$p("No data to show. Upload your dataset.")
       } else {    # if not, render the table
-        DT::dataTableOutput(ns('table'))
+        dataTableOutput(ns('table'))
       }
     })
     ###### input 
-    output$inputable <- DT::renderDataTable({
-      inputdf <- data$var$InputTable
-      DT::datatable(
-        inputdf,
+    output$inputable <- renderDataTable({
+      datatable(
+        data$var$InputTable,
         colnames = c("Gene Name" = 1),
         extensions = c("Scroller", "RowReorder"),
         option = list(
@@ -360,14 +361,13 @@ server <- function(id, data) {
       if (nrow(datasetInput()) == 0) {# if no uploaded table or empty, message
         tags$p("No data to show. Upload your dataset.")
       } else { # if not, render the table
-        DT::dataTableOutput(ns('inputable'))
+        dataTableOutput(ns('inputable'))
       }
     })
     
-    output$filtable <- DT::renderDataTable({
-      low <- data$var$LowCountGenes
-      DT::datatable(
-        low,
+    output$filtable <- renderDataTable({
+      datatable(
+        data$var$LowCountGenes,
         colnames = c("Gene Name" = 1),
         extensions = c("Scroller", "RowReorder"),
         option = list(
@@ -383,7 +383,7 @@ server <- function(id, data) {
       if (is.data.frame(data$var$LowCountGenes) == FALSE) {
         tags$p("No Filtered data.")
       } else { # if not, render the table
-        DT::dataTableOutput('filtable')
+        dataTableOutput(ns('filtable'))
       }
     })
     
@@ -422,6 +422,7 @@ server <- function(id, data) {
     })
     
     output$CountDistrib <- renderUI({
+      req(data$var$control)
       if (data$var$control) {  # if data where imported and everything is ok then it can provides to plots
         tagList(fluidRow(
           column(
@@ -473,7 +474,7 @@ server <- function(id, data) {
         tagList(fluidRow(
           column( #parameter
             3,
-            selectInput(
+            selectizeInput(
               inputId = ns("correlation"),
               label = "Distance Measure",
               choices = c("Spearman" = "spearman",

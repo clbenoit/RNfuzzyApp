@@ -3,9 +3,13 @@
 box::use(
   shiny[h3, moduleServer, NS, tagList, column, icon, uiOutput, 
         navbarPage, tabPanel, reactiveValues, renderUI, 
-        observeEvent, reactive, fluidRow, selectInput, conditionalPanel],
+        observeEvent, reactive, fluidRow, selectInput, conditionalPanel, 
+        ],
   shinydashboard[box],
-  shinyWidgets[actionBttn, progressSweetAlert],
+  shinyWidgets[actionBttn, progressSweetAlert, updateProgressBar],
+  methods[new], 
+  edgeR[calcNormFactors],
+  DESeq2[DESeqDataSetFromMatrix]
 )
 
 ## Import shiny modules
@@ -186,14 +190,14 @@ server <- function(id, data) {
         value = 0
       )
       
-      var$newData <- var$CountData
+      data$var$newData <- data$var$CountData
       
       if(input$DEAmethod == "tcc"){
         
         # Creation of a TCC Object 
         tcc <-                           
-          new("TCC", var$newData, var$selectedgroups)
-        var$tccObject <- tcc             # save the object
+          new("TCC", data$var$newData, data$var$selectedgroups)
+        data$var$tccObject <- tcc             # save the object
         
         
         updateProgressBar(               # updating progress bar
@@ -202,6 +206,8 @@ server <- function(id, data) {
           title = "DE Analysis in progress...",
           value = 50
         )
+        print("headtcc")
+        print(utils::head(tcc))
         tcc <- calcNormFactors(         # first calculation of the normalization and estimation of DEGs
           tcc,
           norm.method = input$normMethod,
@@ -210,6 +216,7 @@ server <- function(id, data) {
           floorPDEG = input$floorpdeg,
           iteration = 3                # iteration value set to 3 
         )
+        print("aaaaaaaa")
         
         updateProgressBar(             # updating progress bar 
           session = session,
@@ -222,27 +229,27 @@ server <- function(id, data) {
                           FDR = input$fdr)
         
         
-        var$tccObject <- tcc         # save the updated object 
-        var$result <- getResult(tcc, sort = FALSE) %>% mutate_if(is.factor, as.character) # get the result of the calculation
+        data$var$tccObject <- tcc         # save the updated object 
+        data$var$result <- getResult(tcc, sort = FALSE) %>% mutate_if(is.factor, as.character) # get the result of the calculation
         
-        if (length(var$groupList2) == 2){
-          var$result_m <- var$result
-          colnames(var$result_m) <- c("gene_id","BaseMean", "Log2FC","P-Value", "FDR", "Rank", "estimatedDEG")
-          var$result_e <- var$result[which(var$result_m$estimatedDEG >0),] # selection of the DEGs
-          var$result_s <- var$result_e[,-7]      # deleting the column showing which one is a DEG and which one is not
+        if (length(data$var$groupList2) == 2){
+          data$var$result_m <- data$var$result
+          colnames(data$var$result_m) <- c("gene_id","BaseMean", "Log2FC","P-Value", "FDR", "Rank", "estimatedDEG")
+          data$var$result_e <- data$var$result[which(data$var$result_m$estimatedDEG >0),] # selection of the DEGs
+          data$var$result_s <- data$var$result_e[,-7]      # deleting the column showing which one is a DEG and which one is not
         }
         else{
-          var$result_a <- var$result[,-2]        # deleting the a value (Basemean) of the results
-          var$result_m <- var$result_a[,-2]      # deleting the m value (Log2FC) of the results
-          colnames(var$result_m) <- c("gene_id", "P-Value", "FDR", "Rank", "estimatedDEG")
-          var$result_e <- var$result_m[which(var$result_m$estimatedDEG >0),] # selection of the DEGs
-          var$result_s <- var$result_e[,-5]      # deleting the column showing which one is a DEG and which one is not
+          data$var$result_a <- data$var$result[,-2]        # deleting the a value (Basemean) of the results
+          data$var$result_m <- data$var$result_a[,-2]      # deleting the m value (Log2FC) of the results
+          colnames(data$var$result_m) <- c("gene_id", "P-Value", "FDR", "Rank", "estimatedDEG")
+          data$var$result_e <- data$var$result_m[which(data$var$result_m$estimatedDEG >0),] # selection of the DEGs
+          data$var$result_s <- data$var$result_e[,-5]      # deleting the column showing which one is a DEG and which one is not
         }
         
-        var$norData <- tcc$getNormalizedData() # only the normalized data
-        var$norDT <- var$norData
-        var$genelist <- var$result_s[,1]
-        var$DEAMETHOD <- 'tcc'
+        data$var$norData <- tcc$getNormalizedData() # only the normalized data
+        data$var$norDT <- data$var$norData
+        data$var$genelist <- data$var$result_s[,1]
+        data$var$DEAMETHOD <- 'tcc'
       }
       
       
@@ -251,9 +258,9 @@ server <- function(id, data) {
       if(input$DEAmethod == "DESeq2"){
         
         tcc <-                           
-          new("TCC", var$newData, var$selectedgroups)
-        var$tccObject <- tcc             # just to get the groups for pca 
-        dds <- DESeqDataSetFromMatrix(countData=var$newData, colData=var$select, design=var$design)
+          new("TCC", data$var$newData, data$var$selectedgroups)
+        data$var$tccObject <- tcc             # just to get the groups for pca 
+        dds <- DESeqDataSetFromMatrix(countData=data$var$newData, colData=data$var$select, design=data$var$design)
         
         updateProgressBar(               # updating progress bar
           session = session,
@@ -270,38 +277,38 @@ server <- function(id, data) {
           title = "DE Analysis in progress...",
           value = 50
         )
-        var$resultz <- results(dds)
-        var$norData <- as.matrix(counts(dds, normalized = TRUE)) # normalization
-        var$norDT <- var$norData
-        var$resultz <- as.matrix(var$resultz)
-        var$result <- data.frame(row.names(var$resultz))
-        var$result['a.value'] <- var$resultz[,1]
-        var$result['m.value'] <- var$resultz[,2]
-        var$result['p.value'] <- var$resultz[,6]
-        var$result['q.value'] <- p.adjust(var$resultz[,6], method = 'fdr')
-        names(var$result)[1] <- "gene_id"
+        data$var$resultz <- results(dds)
+        data$var$norData <- as.matrix(counts(dds, normalized = TRUE)) # normalization
+        data$var$norDT <- data$var$norData
+        data$var$resultz <- as.matrix(data$var$resultz)
+        data$var$result <- data.frame(row.names(data$var$resultz))
+        data$var$result['a.value'] <- data$var$resultz[,1]
+        data$var$result['m.value'] <- data$var$resultz[,2]
+        data$var$result['p.value'] <- data$var$resultz[,6]
+        data$var$result['q.value'] <- p.adjust(data$var$resultz[,6], method = 'fdr')
+        names(data$var$result)[1] <- "gene_id"
         
         
         
-        if (length(var$groupList2) != 2){
-          var$result <- var$result[,-2] # suppr basemean
-          var$result <- var$result[,-2] # supp log2fc
+        if (length(data$var$groupList2) != 2){
+          data$var$result <- data$var$result[,-2] # suppr basemean
+          data$var$result <- data$var$result[,-2] # supp log2fc
         }
         
-        var$DESeq2DEGs <- var$result[which(var$result$q.value <= as.numeric(input$deseq2cutoff)),] 
-        var$result["estimatedDEG"] = "0"
-        var$result <- var$result[complete.cases(var$result), ]
-        for (row in 1:nrow(var$result)){
-          if(var$result[row,'q.value'] <= as.numeric(input$deseq2cutoff)){
-            var$result[row, 'estimatedDEG'] = "1"
+        data$var$DESeq2DEGs <- data$var$result[which(data$var$result$q.value <= as.numeric(input$deseq2cutoff)),] 
+        data$var$result["estimatedDEG"] = "0"
+        data$var$result <- data$var$result[complete.cases(data$var$result), ]
+        for (row in 1:nrow(data$var$result)){
+          if(data$var$result[row,'q.value'] <= as.numeric(input$deseq2cutoff)){
+            data$var$result[row, 'estimatedDEG'] = "1"
           }else{ 
-            var$result[row,'estimatedDEG'] = "0"
+            data$var$result[row,'estimatedDEG'] = "0"
           }
           
         }
         
-        var$genelist <- var$DESeq2DEGs[,1]
-        var$DEAMETHOD <- 'deseq2'
+        data$var$genelist <- data$var$DESeq2DEGs[,1]
+        data$var$DEAMETHOD <- 'deseq2'
       }
       
       ################################################ edgeR method ###############################################
@@ -309,10 +316,10 @@ server <- function(id, data) {
       
       if(input$DEAmethod == "edgeR"){     # formatting for edgeR'''
         tcc <-                           
-          new("TCC", var$newData, var$selectedgroups)
-        var$tccObject <- tcc             # just to get the groups for pca 
+          new("TCC", data$var$newData, data$var$selectedgroups)
+        data$var$tccObject <- tcc             # just to get the groups for pca 
         
-        dgList <- DGEList(counts=var$newData, group = var$selectedgroups)
+        dgList <- DGEList(counts=data$var$newData, group = data$var$selectedgroups)
         
         updateProgressBar(               # updating progress bar
           session = session,
@@ -333,40 +340,40 @@ server <- function(id, data) {
         dgList <- estimateGLMCommonDisp(dgList,
                                         method = "deviance", robust = TRUE,
                                         subset = NULL)
-        design <- model.matrix(~var$selectedgroups)
+        design <- model.matrix(~data$var$selectedgroups)
         fit <- glmFit(dgList, design)
         lrt <- glmLRT(fit) 
-        var$result <- data.frame(row.names(lrt$table))
-        var$result['a.value'] <- lrt$table$logCPM
-        var$result['m.value'] <- lrt$table$logFC
-        var$result['p.value'] <- lrt$table$PValue
-        var$result['q.value'] <- p.adjust(var$result$p.value, method = 'fdr')
-        names(var$result)[1] <- "gene_id"
+        data$var$result <- data.frame(row.names(lrt$table))
+        data$var$result['a.value'] <- lrt$table$logCPM
+        data$var$result['m.value'] <- lrt$table$logFC
+        data$var$result['p.value'] <- lrt$table$PValue
+        data$var$result['q.value'] <- p.adjust(data$var$result$p.value, method = 'fdr')
+        names(data$var$result)[1] <- "gene_id"
         
         
-        if (length(var$groupList2) != 2){
-          var$result <- var$result[,-2] # suppr log2fc
-          var$result <- var$result[,-2] # supp basemean
+        if (length(data$var$groupList2) != 2){
+          data$var$result <- data$var$result[,-2] # suppr log2fc
+          data$var$result <- data$var$result[,-2] # supp basemean
         }
-        var$norData <- lrt$fitted.values
-        var$norDT <- var$norData
-        var$result["estimatedDEG"] = "0"
-        for (row in 1:nrow(var$result)){
-          if(var$result[row,'q.value'] <= as.numeric(input$edgeRfdr)){
-            var$result[row, 'estimatedDEG'] = "1"
+        data$var$norData <- lrt$fitted.values
+        data$var$norDT <- data$var$norData
+        data$var$result["estimatedDEG"] = "0"
+        for (row in 1:nrow(data$var$result)){
+          if(data$var$result[row,'q.value'] <= as.numeric(input$edgeRfdr)){
+            data$var$result[row, 'estimatedDEG'] = "1"
           }else{ 
-            var$result[row,'estimatedDEG'] = "0"
+            data$var$result[row,'estimatedDEG'] = "0"
           }}
-        var$edgeRDEGs <- var$result[which(var$result$q.value <= as.numeric(input$edgeRfdr)),] 
-        var$edgeRDEGs <- var$edgeRDEGs[,-4]
-        var$genelist <- var$edgeRDEGs[,1]
-        var$DEAMETHOD <- 'edgeR'
+        data$var$edgeRDEGs <- data$var$result[which(data$var$result$q.value <= as.numeric(input$edgeRfdr)),] 
+        data$var$edgeRDEGs <- data$var$edgeRDEGs[,-4]
+        data$var$genelist <- data$var$edgeRDEGs[,1]
+        data$var$DEAMETHOD <- 'edgeR'
         
       }
       ################################
       
       output$normresultTable <- DT::renderDataTable({  # normaliszed data table
-        data <- var$norData
+        data <- data$var$norData
         DT::datatable(
           data,        
           extensions = 'Buttons',                      # download button 
@@ -393,16 +400,16 @@ server <- function(id, data) {
       }, server = FALSE)
       
       output$fullresultTable <- DT::renderDataTable({   # full results table where genes under the cut off are colored in red
-        data <- var$norData
+        data <- data$var$norData
         
         if(input$DEAmethod =="tcc"){
           gene_id <- row.names(data)
           data <- cbind(data, gene_id = gene_id)
-          resultTable <- merge(var$result_m, data, by = "gene_id")
+          resultTable <- merge(data$var$result_m, data, by = "gene_id")
         }else{
           data <- as.data.frame(data)
           data['gene_id'] <- row.names(data)
-          resultTable <- merge(var$result, data, by = "gene_id")
+          resultTable <- merge(data$var$result, data, by = "gene_id")
         }
         
         DT::datatable(
@@ -441,21 +448,21 @@ server <- function(id, data) {
       }, server = F)
       
       output$sortedresultTable <- DT::renderDataTable({            # only DEGs table 
-        data <- var$norData
+        data <- data$var$norData
         if(input$DEAmethod == 'tcc'){
           gene_id <- row.names(data)
           data <- cbind(data, gene_id = gene_id)
-          resultTable <- merge(var$result_s, data, by = "gene_id")
+          resultTable <- merge(data$var$result_s, data, by = "gene_id")
         }
         if(input$DEAmethod == "DESeq2"){
           gene_id <- row.names(data)
           data <- cbind(data, gene_id = gene_id)
-          resultTable <- merge(var$DESeq2DEGs,data, by = "gene_id")
+          resultTable <- merge(data$var$DESeq2DEGs,data, by = "gene_id")
         }
         if(input$DEAmethod == "edgeR"){
           gene_id <- row.names(data)
           data <- cbind(data, gene_id = gene_id)
-          resultTable <- merge(var$edgeRDEGs, data, by = "gene_id")
+          resultTable <- merge(data$var$edgeRDEGs, data, by = "gene_id")
         }
         
         DT::datatable(
@@ -495,7 +502,7 @@ server <- function(id, data) {
       
     })
     resultTable <- reactive({   # saving the updated results to plot furtherly 
-      var$result
+      data$var$result
     })
     
     
